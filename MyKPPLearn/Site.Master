@@ -1,0 +1,83 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.Master.cs" Inherits="MyKPPLearn.SiteMaster" %>
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><asp:ContentPlaceHolder ID="TitleContent" runat="server">MyKPP Learn | Malaysian Driving Theory Learning &amp; Practice</asp:ContentPlaceHolder></title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/Content/css/site.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/components.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/public.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/forms.css" runat="server" />
+
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <header class="site-header">
+            <div class="container site-header__inner">
+                <a class="site-logo" href="~/Default.aspx" runat="server">My<span>KPP</span> Learn</a>
+
+                <button type="button" id="navToggle" class="nav-toggle" aria-expanded="false" aria-controls="mainNav" aria-label="Toggle navigation menu">
+                    <span class="nav-toggle__bar"></span>
+                </button>
+
+                <nav id="mainNav" class="main-nav" aria-label="Primary">
+                    <ul class="main-nav__list">
+                        <li><asp:HyperLink ID="NavHome" runat="server" CssClass="main-nav__link">Home</asp:HyperLink></li>
+                        <li><asp:HyperLink ID="NavLearn" runat="server" CssClass="main-nav__link">Learn</asp:HyperLink></li>
+                        <li><asp:HyperLink ID="NavPractice" runat="server" CssClass="main-nav__link">Practice</asp:HyperLink></li>
+                        <li><asp:HyperLink ID="NavMockExam" runat="server" CssClass="main-nav__link">Mock Exam</asp:HyperLink></li>
+                        <li><asp:HyperLink ID="NavProgress" runat="server" CssClass="main-nav__link">Progress</asp:HyperLink></li>
+                    </ul>
+                </nav>
+
+                <div class="header-actions">
+                    <a class="btn btn-secondary btn-small" href="~/Login.aspx" runat="server">Login</a>
+                    <a class="btn btn-primary btn-small" href="~/Register.aspx" runat="server">Register</a>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+        </main>
+
+        <footer class="site-footer">
+            <div class="container">
+                <div class="site-footer__top">
+                    <div class="site-footer__brand">
+                        <div class="site-logo">My<span>KPP</span> Learn</div>
+                        <p>A structured learning platform to help Malaysian learner drivers study driving theory, practise by topic and prepare for mock examinations.</p>
+                    </div>
+
+                    <nav aria-label="Footer">
+                        <div class="site-footer__nav-title">Navigation</div>
+                        <ul class="site-footer__nav-list">
+                            <li><asp:HyperLink ID="FooterNavHome" runat="server">Home</asp:HyperLink></li>
+                            <li><asp:HyperLink ID="FooterNavLearn" runat="server">Learn</asp:HyperLink></li>
+                            <li><asp:HyperLink ID="FooterNavPractice" runat="server">Practice</asp:HyperLink></li>
+                            <li><asp:HyperLink ID="FooterNavMockExam" runat="server">Mock Exam</asp:HyperLink></li>
+                            <li><asp:HyperLink ID="FooterNavProgress" runat="server">Progress</asp:HyperLink></li>
+                            <li><a href="~/Login.aspx" runat="server">Login</a></li>
+                            <li><a href="~/Register.aspx" runat="server">Register</a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="site-footer__bottom">
+                    &copy; <%: DateTime.Now.Year %> MyKPP Learn. All rights reserved.
+                </div>
+            </div>
+        </footer>
+
+        <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />
+    </form>
+    <script src="<%= ResolveUrl("~/Scripts/site.js") %>"></script>
+</body>
+</html>

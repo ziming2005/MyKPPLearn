@@ -1,0 +1,73 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Learner.Master.cs" Inherits="MyKPPLearn.LearnerMaster" %>
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><asp:ContentPlaceHolder ID="TitleContent" runat="server">MyKPP Learn</asp:ContentPlaceHolder></title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/Content/css/site.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/components.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/app-shell.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/learner.css" runat="server" />
+
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div class="app-shell">
+            <div id="appDrawerBackdrop" class="app-drawer-backdrop"></div>
+
+            <aside id="appSidebar" class="app-sidebar">
+                <div class="app-sidebar__brand">
+                    <a class="site-logo" href="~/Learner/Dashboard.aspx" runat="server">My<span>KPP</span> Learn</a>
+                </div>
+
+                <nav class="app-sidebar__nav" aria-label="Learner">
+                    <ul class="app-nav-list">
+                        <li><a id="navDashboard" runat="server" class="app-nav-link" href="~/Learner/Dashboard.aspx">Dashboard</a></li>
+                        <li><a id="navLearn" runat="server" class="app-nav-link" href="~/Learner/Learn.aspx">Learn</a></li>
+                        <li><a id="navPractice" runat="server" class="app-nav-link" href="~/Learner/Practice.aspx">Practice</a></li>
+                        <li><a id="navMockExam" runat="server" class="app-nav-link" href="~/Learner/MockExam.aspx">Mock Exam</a></li>
+                        <li><a id="navProgress" runat="server" class="app-nav-link" href="~/Learner/Progress.aspx">Progress</a></li>
+                        <li><a id="navProfile" runat="server" class="app-nav-link" href="~/Learner/Profile.aspx">Profile</a></li>
+                    </ul>
+                </nav>
+
+                <div class="app-sidebar__footer">
+                    <a class="app-nav-link app-nav-link--logout" href="~/Logout.aspx" runat="server">Logout</a>
+                </div>
+            </aside>
+
+            <div class="app-main">
+                <header class="app-header">
+                    <div class="app-header__left">
+                        <button type="button" id="drawerToggle" class="drawer-toggle" aria-expanded="false" aria-controls="appSidebar" aria-label="Toggle navigation menu">
+                            <span class="drawer-toggle__bar"></span>
+                        </button>
+                        <h1 class="app-header__title"><asp:Literal ID="litPageTitle" runat="server">Dashboard</asp:Literal></h1>
+                    </div>
+
+                    <a class="app-user" href="~/Learner/Profile.aspx" runat="server">
+                        <span class="app-user__avatar"><asp:Literal ID="litAvatarInitials" runat="server" /></span>
+                        <span class="app-user__info">
+                            <span class="app-user__name"><asp:Literal ID="litFullName" runat="server" /></span>
+                            <span class="app-user__role"><asp:Literal ID="litRole" runat="server" /></span>
+                        </span>
+                    </a>
+                </header>
+
+                <main class="app-content">
+                    <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+                </main>
+            </div>
+        </div>
+    </form>
+    <script src="<%= ResolveUrl("~/Scripts/app-shell.js") %>"></script>
+    <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />
+</body>
+</html>

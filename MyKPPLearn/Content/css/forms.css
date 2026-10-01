@@ -1,0 +1,155 @@
+/* ==========================================================================
+   MyKPP Learn - forms.css
+   Authentication card, form groups, inputs, validation, alerts
+   ========================================================================== */
+
+.auth-section {
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
+.auth-card {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.auth-card__header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.auth-card__header h1 {
+  margin-bottom: 8px;
+}
+
+.auth-card__header p {
+  margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------
+   Form groups / fields
+   -------------------------------------------------------------------- */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--fs-small);
+  color: var(--color-navy);
+  margin-bottom: 6px;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  font-family: var(--font-family-base);
+  font-size: var(--fs-body);
+  color: var(--color-navy);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-input.input-invalid {
+  border-color: var(--color-error);
+}
+
+.form-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-small);
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------
+   Validation summary / alerts
+   -------------------------------------------------------------------- */
+.validation-summary {
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: var(--color-error);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: var(--fs-small);
+}
+
+.validation-summary ul {
+  margin: 0;
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.alert {
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.alert-error {
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: var(--color-error);
+}
+
+.alert-success {
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: var(--color-success);
+}
+
+/* --------------------------------------------------------------------
+   Auth footer links
+   -------------------------------------------------------------------- */
+.auth-card__footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.auth-card__footer a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.auth-card__footer a:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------
+   Protected dashboard shells (Phase 2 minimal placeholders)
+   -------------------------------------------------------------------- */
+.dashboard-shell {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.dashboard-shell .badge {
+  margin-bottom: 16px;
+}
+
+.dashboard-shell__actions {
+  margin-top: 24px;
+}

@@ -1,0 +1,86 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Admin.Master.cs" Inherits="MyKPPLearn.AdminMaster" %>
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><asp:ContentPlaceHolder ID="TitleContent" runat="server">MyKPP Learn</asp:ContentPlaceHolder></title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/Content/css/site.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/components.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/app-shell.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/admin.css" runat="server" />
+
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div class="app-shell">
+            <div id="appDrawerBackdrop" class="app-drawer-backdrop"></div>
+
+            <aside id="appSidebar" class="app-sidebar">
+                <div class="app-sidebar__brand">
+                    <a class="site-logo" href="~/Admin/Dashboard.aspx" runat="server">My<span>KPP</span> Learn</a>
+                </div>
+
+                <nav class="app-sidebar__nav" aria-label="Administrator">
+                    <ul class="app-nav-list">
+                        <li><a id="navDashboard" runat="server" class="app-nav-link" href="~/Admin/Dashboard.aspx">Dashboard</a></li>
+                        <li><a id="navLearnerRecords" runat="server" class="app-nav-link" href="~/Admin/LearnerRecords.aspx">Learner Records</a></li>
+                        <li><a id="navLearning" runat="server" class="app-nav-link" href="~/Admin/Learning.aspx">Learning</a></li>
+
+                        <li class="app-nav-item--parent">
+                            <button type="button" id="practiceManagementToggle" runat="server" class="app-nav-link app-nav-toggle" aria-expanded="false" aria-controls="practiceManagementSubmenu">
+                                <span>Practice Management</span>
+                                <svg class="app-nav-toggle__chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </button>
+                            <ul id="practiceManagementSubmenu" runat="server" class="app-submenu">
+                                <li><a id="navPracticeSets" runat="server" class="app-nav-link app-nav-link--sub" href="~/Admin/PracticeSets.aspx">Practice Sets</a></li>
+                                <li><a id="navHiddenRoadSign" runat="server" class="app-nav-link app-nav-link--sub" href="~/Admin/HiddenRoadSigns.aspx">Hidden Road Sign</a></li>
+                                <li><a id="navRoadSignAssets" runat="server" class="app-nav-link app-nav-link--sub" href="~/Admin/RoadSignAssets.aspx">Road Sign Assets</a></li>
+                            </ul>
+                        </li>
+
+                        <li><a id="navQuestionBank" runat="server" class="app-nav-link" href="~/Admin/QuestionBank.aspx">Question Bank</a></li>
+                        <li><a id="navMockExam" runat="server" class="app-nav-link" href="~/Admin/MockExam.aspx">Mock Exam</a></li>
+                        <li><a id="navProfile" runat="server" class="app-nav-link" href="~/Admin/Profile.aspx">Profile</a></li>
+                    </ul>
+                </nav>
+
+                <div class="app-sidebar__footer">
+                    <a class="app-nav-link app-nav-link--logout" href="~/Logout.aspx" runat="server">Logout</a>
+                </div>
+            </aside>
+
+            <div class="app-main">
+                <header class="app-header">
+                    <div class="app-header__left">
+                        <button type="button" id="drawerToggle" class="drawer-toggle" aria-expanded="false" aria-controls="appSidebar" aria-label="Toggle navigation menu">
+                            <span class="drawer-toggle__bar"></span>
+                        </button>
+                        <h1 class="app-header__title"><asp:Literal ID="litPageTitle" runat="server">Dashboard</asp:Literal></h1>
+                    </div>
+
+                    <a class="app-user" href="~/Admin/Profile.aspx" runat="server">
+                        <span class="app-user__avatar"><asp:Literal ID="litAvatarInitials" runat="server" /></span>
+                        <span class="app-user__info">
+                            <span class="app-user__name"><asp:Literal ID="litFullName" runat="server" /></span>
+                            <span class="app-user__role"><asp:Literal ID="litRole" runat="server" /></span>
+                        </span>
+                    </a>
+                </header>
+
+                <main class="app-content">
+                    <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+                </main>
+            </div>
+        </div>
+    </form>
+    <script src="<%= ResolveUrl("~/Scripts/app-shell.js") %>"></script>
+    <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />
+</body>
+</html>

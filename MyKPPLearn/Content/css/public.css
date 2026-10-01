@@ -1,0 +1,330 @@
+/* ==========================================================================
+   MyKPP Learn - public.css
+   Home page: hero, feature sections, learning/practice cards, mock exam,
+   progress preview, final CTA
+   ========================================================================== */
+
+/* --------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------- */
+.hero {
+  padding-top: 64px;
+  padding-bottom: 64px;
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-bg-page) 100%);
+}
+
+.hero__inner {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.hero__content h1 {
+  margin-bottom: 20px;
+}
+
+.hero__lede {
+  font-size: 1.125rem;
+  max-width: 520px;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.hero__media {
+  display: flex;
+  justify-content: center;
+}
+
+.hero__media svg {
+  width: 100%;
+  height: auto;
+  max-width: 520px;
+}
+
+@media (max-width: 1023px) {
+  .hero__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__media {
+    order: -1;
+  }
+
+  .hero__media svg {
+    max-width: 360px;
+  }
+
+  .hero__lede {
+    max-width: none;
+  }
+}
+
+/* --------------------------------------------------------------------
+   Learning categories
+   -------------------------------------------------------------------- */
+.category-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background-color: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.category-card__icon svg {
+  width: 26px;
+  height: 26px;
+  color: var(--color-primary);
+}
+
+/* --------------------------------------------------------------------
+   Practice section
+   -------------------------------------------------------------------- */
+.practice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1199px) {
+  .practice-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .practice-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.practice-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.practice-card__footer {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.practice-card--featured {
+  border-color: var(--color-accent-yellow);
+  background: linear-gradient(180deg, #FFFDF5 0%, #FFFFFF 100%);
+}
+
+.practice-card--featured .card-icon {
+  background-color: #FEF9C3;
+  color: #92400E;
+}
+
+/* --------------------------------------------------------------------
+   Mock exam section
+   -------------------------------------------------------------------- */
+.mock-exam {
+  background-color: var(--color-navy);
+  border-radius: 20px;
+  padding: 56px;
+  color: #E2E8F0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.mock-exam h2,
+.mock-exam h3 {
+  color: #FFFFFF;
+}
+
+.mock-exam p {
+  color: #94A3B8;
+}
+
+.mock-exam__stats {
+  display: flex;
+  gap: 32px;
+  margin: 24px 0;
+}
+
+.mock-exam__stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.mock-exam__stat-label {
+  font-size: var(--fs-small);
+  color: #94A3B8;
+}
+
+.mock-exam__preview {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.mock-exam__preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.mock-exam__timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(250, 204, 21, 0.12);
+  color: var(--color-accent-yellow);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 700;
+  font-size: var(--fs-small);
+}
+
+.mock-exam__question-card {
+  background-color: #FFFFFF;
+  color: var(--color-navy);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.mock-exam__question-card p {
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.mock-exam__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  font-size: var(--fs-small);
+  margin-bottom: 8px;
+}
+
+.mock-exam__option:last-child {
+  margin-bottom: 0;
+}
+
+.mock-exam__progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-small);
+  color: #94A3B8;
+  margin-bottom: 8px;
+}
+
+.mock-exam__progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.mock-exam__progress-fill {
+  height: 100%;
+  width: 42%;
+  background-color: var(--color-accent-yellow);
+  border-radius: 999px;
+}
+
+@media (max-width: 1023px) {
+  .mock-exam {
+    grid-template-columns: 1fr;
+    padding: 32px 24px;
+  }
+}
+
+/* --------------------------------------------------------------------
+   Progress tracking section
+   -------------------------------------------------------------------- */
+.progress-section__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.progress-list {
+  margin-bottom: 24px;
+}
+
+.progress-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  color: var(--color-text-secondary);
+}
+
+.progress-list li svg {
+  width: 18px;
+  height: 18px;
+  color: var(--color-success);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+@media (max-width: 1023px) {
+  .progress-section__inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------------------
+   Final CTA
+   -------------------------------------------------------------------- */
+.final-cta {
+  background-color: var(--color-primary-light);
+  border-radius: 20px;
+  padding: 64px 32px;
+  text-align: center;
+}
+
+.final-cta h2 {
+  margin-bottom: 12px;
+}
+
+.final-cta p {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 28px;
+}
+
+.final-cta__actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------
+   Placeholder shell pages (Login / Register)
+   -------------------------------------------------------------------- */
+.page-shell {
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+}
+
+.page-shell .card {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}

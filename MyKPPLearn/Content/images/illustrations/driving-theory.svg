@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 440" role="img" aria-labelledby="drivingTheoryTitle">
+  <title id="drivingTheoryTitle">Driving theory learning illustration with a car, road signs and study checklist.</title>
+
+  <!-- Sky / background -->
+  <rect x="0" y="0" width="560" height="440" rx="24" fill="#EFF6FF" />
+
+  <!-- Sun / soft circle accent -->
+  <circle cx="470" cy="80" r="46" fill="#FFFFFF" opacity="0.6" />
+
+  <!-- Road -->
+  <rect x="0" y="300" width="560" height="140" fill="#0F172A" />
+  <rect x="0" y="300" width="560" height="10" fill="#FFFFFF" opacity="0.15" />
+
+  <!-- Road center lines -->
+  <rect x="40" y="368" width="46" height="10" rx="4" fill="#FACC15" />
+  <rect x="140" y="368" width="46" height="10" rx="4" fill="#FACC15" />
+  <rect x="240" y="368" width="46" height="10" rx="4" fill="#FACC15" />
+  <rect x="340" y="368" width="46" height="10" rx="4" fill="#FACC15" />
+  <rect x="440" y="368" width="46" height="10" rx="4" fill="#FACC15" />
+
+  <!-- Traffic light pole -->
+  <rect x="60" y="200" width="8" height="110" fill="#0F172A" />
+  <rect x="40" y="150" width="48" height="90" rx="10" fill="#0F172A" />
+  <circle cx="64" cy="172" r="10" fill="#DC2626" />
+  <circle cx="64" cy="196" r="10" fill="#F59E0B" />
+  <circle cx="64" cy="220" r="10" fill="#16A34A" />
+
+  <!-- Road sign: triangle warning sign -->
+  <rect x="150" y="250" width="6" height="60" fill="#64748B" />
+  <path d="M153 190 L183 246 L123 246 Z" fill="#FFFFFF" stroke="#2563EB" stroke-width="6" stroke-linejoin="round" />
+  <rect x="149" y="210" width="8" height="22" rx="4" fill="#2563EB" />
+  <circle cx="153" cy="238" r="4" fill="#2563EB" />
+
+  <!-- Road sign: round speed sign -->
+  <rect x="480" y="250" width="6" height="60" fill="#64748B" />
+  <circle cx="483" cy="225" r="32" fill="#FFFFFF" stroke="#DC2626" stroke-width="6" />
+  <text x="483" y="235" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#0F172A" text-anchor="middle">90</text>
+
+  <!-- Car body -->
+  <g>
+    <rect x="230" y="248" width="150" height="46" rx="16" fill="#2563EB" />
+    <path d="M255 248 L275 214 L345 214 L365 248 Z" fill="#2563EB" />
+    <path d="M263 244 L279 220 L340 220 L354 244 Z" fill="#EFF6FF" />
+    <rect x="230" y="270" width="150" height="10" fill="#0F172A" opacity="0.12" />
+    <circle cx="265" cy="296" r="17" fill="#0F172A" />
+    <circle cx="265" cy="296" r="7" fill="#94A3B8" />
+    <circle cx="350" cy="296" r="17" fill="#0F172A" />
+    <circle cx="350" cy="296" r="7" fill="#94A3B8" />
+    <rect x="360" y="256" width="14" height="8" rx="2" fill="#FACC15" />
+  </g>
+
+  <!-- Study checklist card -->
+  <g>
+    <rect x="330" y="60" width="170" height="150" rx="14" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2" />
+    <rect x="352" y="86" width="126" height="12" rx="4" fill="#0F172A" />
+    <rect x="352" y="108" width="90" height="8" rx="4" fill="#64748B" />
+
+    <rect x="352" y="132" width="16" height="16" rx="4" fill="#16A34A" />
+    <path d="M356 140 L360 144 L367 135" stroke="#FFFFFF" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="378" y="135" width="100" height="8" rx="4" fill="#CBD5E1" />
+
+    <rect x="352" y="158" width="16" height="16" rx="4" fill="#16A34A" />
+    <path d="M356 166 L360 170 L367 161" stroke="#FFFFFF" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <rect x="378" y="161" width="80" height="8" rx="4" fill="#CBD5E1" />
+
+    <rect x="352" y="184" width="16" height="16" rx="4" fill="#EFF6FF" stroke="#2563EB" stroke-width="2" />
+    <rect x="378" y="187" width="70" height="8" rx="4" fill="#CBD5E1" />
+  </g>
+</svg>
