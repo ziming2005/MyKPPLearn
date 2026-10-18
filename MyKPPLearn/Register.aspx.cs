@@ -7,8 +7,27 @@ namespace MyKPPLearn
 {
     public partial class Register : System.Web.UI.Page
     {
+        protected void Page_Init(object sender, EventArgs e)
+        {
+            // The password rule has ONE definition (PasswordPolicy), shared with Profile > Change Password.
+            // The validator keeps giving instant feedback in the browser, using that same rule and message.
+            revPassword.ValidationExpression = PasswordPolicy.Pattern;
+            revPassword.ErrorMessage = "Password does not meet the requirements above.";
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
+            string dashboard = SessionHelper.DashboardUrl(Session);
+
+            if (dashboard != null)
+            {
+                Response.Redirect(dashboard, true);
+            }
+
+            if (!IsPostBack)
+            {
+                txtFullName.Focus();
+            }
         }
 
         protected void btnRegister_Click(object sender, EventArgs e)
@@ -24,6 +43,13 @@ namespace MyKPPLearn
             string fullName = txtFullName.Text.Trim();
             string email = txtEmail.Text.Trim().ToLowerInvariant();
             string password = txtPassword.Text;
+
+            // Authoritative server-side check, from the same policy as Profile > Change Password.
+            if (!PasswordPolicy.IsValid(password))
+            {
+                ShowError(PasswordPolicy.Message);
+                return;
+            }
 
             try
             {

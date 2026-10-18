@@ -12,5 +12,15 @@ namespace MyKPPLearn.Learner
     {
         protected global::System.Web.UI.WebControls.Panel pnlSuccess;
         protected global::System.Web.UI.WebControls.Literal litFullName;
+        protected global::System.Web.UI.WebControls.Literal litLessonsCompleted;
+        protected global::System.Web.UI.WebControls.Literal litLearningProgress;
+        protected global::System.Web.UI.WebControls.Panel pnlContinueLesson;
+        protected global::System.Web.UI.WebControls.Literal litContinueNumber;
+        protected global::System.Web.UI.WebControls.Literal litContinueTitle;
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkContinue;
+        protected global::System.Web.UI.WebControls.Panel pnlContinueAllDone;
+        protected global::System.Web.UI.WebControls.Panel pnlContinueNone;
+        protected global::System.Web.UI.WebControls.Panel pnlGameCount;
+        protected global::System.Web.UI.WebControls.Literal litGameCount;
     }
 }

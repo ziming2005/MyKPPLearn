@@ -59,6 +59,66 @@
   font-size: var(--fs-small);
 }
 
+/* Active / Inactive status: a toggle switch. Clicking it flips the state, so it is drawn as a
+   switch (track + knob) with the current state as its label, never as a badge. */
+.btn.btn-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 4px 6px 4px 2px;
+  border: 0;
+  border-radius: 999px;
+  background-color: transparent;
+  color: #64748B;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn.btn-status::before {
+  content: "";
+  flex: none;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background-color: #CBD5E1;
+  background-image: radial-gradient(circle, #FFFFFF 0 7px, transparent 8px);
+  background-repeat: no-repeat;
+  background-size: 18px 18px;
+  background-position: 2px center;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+  transition: background-color 0.15s ease, background-position 0.15s ease;
+}
+
+.btn.btn-status--active {
+  color: #15803D;
+}
+
+.btn.btn-status--active::before {
+  background-color: var(--color-success);
+  background-position: right 2px center;
+}
+
+.btn.btn-status:hover,
+.btn.btn-status:focus-visible {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-navy);
+}
+
+.btn.btn-status:hover::before {
+  background-color: #94A3B8;
+}
+
+.btn.btn-status--active:hover::before {
+  background-color: #15803D;
+}
+
+.btn.btn-status:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 /* --------------------------------------------------------------------
    Cards
    -------------------------------------------------------------------- */
@@ -222,4 +282,177 @@
   height: 18px;
   color: var(--color-success);
   flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------
+   Learning module: shared status badge, danger button, lesson content
+   -------------------------------------------------------------------- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.status-badge--active {
+  background-color: #F0FDF4;
+  color: var(--color-success);
+}
+
+.status-badge--inactive {
+  background-color: #F1F5F9;
+  color: var(--color-text-secondary);
+}
+
+.status-badge--error {
+  background-color: #FEF2F2;
+  color: var(--color-error);
+}
+
+/* --------------------------------------------------------------------
+   Modal overlay (Submit Practice confirmation, Admin delete confirmation)
+   -------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: rgba(15, 23, 42, 0.5);
+}
+
+.modal-overlay[hidden] {
+  display: none !important;
+}
+
+.modal-panel {
+  width: 100%;
+  max-width: 420px;
+}
+
+.modal-panel h3 {
+  margin-bottom: 8px;
+}
+
+.modal-panel p {
+  margin-bottom: 0;
+}
+
+.btn-danger {
+  color: var(--color-error);
+}
+
+.btn-danger:hover {
+  background-color: #FEF2F2;
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.lesson-content {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    max-width: 92ch;
+    overflow-wrap: anywhere;
+}
+
+/* Slightly darker than the default secondary text colour, for comfortable reading. */
+.lesson-content,
+.lesson-content p {
+  color: #334155;
+}
+
+.lesson-content p {
+  margin: 0 0 1.1em 0;
+}
+
+.lesson-content-image,
+.lesson-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+}
+
+/* ---- Road Sign Game banner (Dashboard and landing page) ---- */
+.hrs-promo {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  overflow: hidden;
+  border: 1px solid var(--color-accent-yellow);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #FFFDF5 0%, #FFFFFF 70%);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.hrs-promo__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 28px;
+}
+
+.hrs-promo__content h3 {
+  margin: 0;
+  color: var(--color-navy);
+  font-size: 1.5rem;
+}
+
+.hrs-promo__content p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.hrs-promo__scene {
+  position: relative;
+  min-height: 220px;
+}
+
+.hrs-promo__scene svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hrs-promo__scene-tag {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background-color: var(--color-navy);
+  color: #FFFFFF;
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+@media (max-width: 767px) {
+  .hrs-promo {
+    grid-template-columns: 1fr;
+  }
+
+  .hrs-promo__scene {
+    order: -1;
+    min-height: 160px;
+  }
+
+  .hrs-promo__content {
+    padding: 20px;
+  }
 }

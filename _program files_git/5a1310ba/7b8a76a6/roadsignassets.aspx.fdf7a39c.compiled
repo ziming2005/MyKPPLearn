@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/C:/Program Files/Git/Admin/RoadSignAssets.aspx" hash="fffffff58834ac70" filehash="36f070b9b3e6bdb3" flags="110000" assembly="App_Web_zdlo4psa" type="ASP.admin_roadsignassets_aspx">
+    <filedeps>
+        <filedep name="/C:/Program Files/Git/Admin.Master" />
+        <filedep name="/C:/Program Files/Git/Admin/RoadSignAssets.aspx" />
+    </filedeps>
+</preserve>

@@ -40,7 +40,7 @@
                 }
             });
 
-            var navLinks = sidebar.querySelectorAll(".app-nav-link:not(.app-nav-toggle)");
+            var navLinks = sidebar.querySelectorAll(".app-nav-link");
             for (var i = 0; i < navLinks.length; i++) {
                 navLinks[i].addEventListener("click", function () {
                     if (isDrawerBreakpoint()) {
@@ -48,23 +48,6 @@
                     }
                 });
             }
-        }
-
-        var submenuToggles = document.querySelectorAll(".app-nav-toggle");
-        for (var j = 0; j < submenuToggles.length; j++) {
-            (function (btn) {
-                btn.addEventListener("click", function () {
-                    var targetId = btn.getAttribute("aria-controls");
-                    var submenu = targetId ? document.getElementById(targetId) : null;
-                    var isOpen = btn.getAttribute("aria-expanded") === "true";
-
-                    btn.setAttribute("aria-expanded", isOpen ? "false" : "true");
-
-                    if (submenu) {
-                        submenu.classList.toggle("is-open", !isOpen);
-                    }
-                });
-            })(submenuToggles[j]);
         }
     });
 })();

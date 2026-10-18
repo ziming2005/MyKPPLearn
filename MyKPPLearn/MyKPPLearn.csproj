@@ -78,14 +78,25 @@
     <Content Include="Admin.Master" />
     <Content Include="Learner\Dashboard.aspx" />
     <Content Include="Learner\Learn.aspx" />
+    <Content Include="Learner\Chapter.aspx" />
+    <Content Include="Learner\Lesson.aspx" />
     <Content Include="Learner\Practice.aspx" />
+    <Content Include="Learner\PracticeSets.aspx" />
+    <Content Include="Learner\PracticeAttempt.aspx" />
     <Content Include="Learner\MockExam.aspx" />
+    <Content Include="Learner\MockExamSets.aspx" />
+    <Content Include="Learner\MockExamAttempt.aspx" />
+    <Content Include="Learner\Game.aspx" />
+    <Content Include="Learner\HiddenRoadSignSets.aspx" />
+    <Content Include="Learner\HiddenRoadSignGame.aspx" />
+    <Content Include="Learner\HiddenRoadSignResult.aspx" />
+    <Content Include="Learner\HiddenRoadSignReview.aspx" />
     <Content Include="Learner\Progress.aspx" />
     <Content Include="Learner\Profile.aspx" />
     <Content Include="Admin\Dashboard.aspx" />
     <Content Include="Admin\LearnerRecords.aspx" />
-    <Content Include="Admin\Learning.aspx" />
-    <Content Include="Admin\PracticeManagement.aspx" />
+    <Content Include="Admin\LearningChapters.aspx" />
+    <Content Include="Admin\Lessons.aspx" />
     <Content Include="Admin\PracticeSets.aspx" />
     <Content Include="Admin\HiddenRoadSigns.aspx" />
     <Content Include="Admin\RoadSignAssets.aspx" />
@@ -102,7 +113,33 @@
     <Content Include="Content\images\illustrations\driving-theory.svg" />
     <Content Include="Scripts\site.js" />
     <Content Include="Scripts\app-shell.js" />
+    <Content Include="Scripts\practice-demo.js" />
+    <Content Include="Scripts\confirm-modal.js" />
+    <Content Include="Scripts\table-labels.js" />
+    <Content Include="Scripts\practice-admin-demo.js" />
+    <Content Include="Scripts\mock-exam-demo.js" />
+    <Content Include="Scripts\mock-exam-admin-demo.js" />
+    <Content Include="Scripts\image-preview.js" />
+    <Content Include="Scripts\hidden-road-sign-editor.js" />
+    <Content Include="Scripts\hidden-road-sign-game.js" />
+    <Content Include="Scripts\road-sign-fit.js" />
+    <Content Include="Scripts\used-numbers.js" />
+    <Content Include="Scripts\learner-records-demo.js" />
+    <Content Include="Scripts\learner-records-admin.js" />
+    <Content Include="Admin\LearnerRecordDetails.aspx" />
+    <Content Include="Scripts\profile.js" />
+    <Content Include="Controls\ProfileEditor.ascx" />
+    <Content Include="Scripts\hidden-road-sign-view.js" />
     <Content Include="App_Data\DatabaseSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\ProfileEditor.ascx.cs">
+      <DependentUpon>ProfileEditor.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Controls\ProfileEditor.ascx.designer.cs">
+      <DependentUpon>ProfileEditor.ascx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -172,6 +209,20 @@
     <Compile Include="Learner\Learn.aspx.designer.cs">
       <DependentUpon>Learn.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Learner\Chapter.aspx.cs">
+      <DependentUpon>Chapter.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\Chapter.aspx.designer.cs">
+      <DependentUpon>Chapter.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Learner\Lesson.aspx.cs">
+      <DependentUpon>Lesson.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\Lesson.aspx.designer.cs">
+      <DependentUpon>Lesson.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Learner\Practice.aspx.cs">
       <DependentUpon>Practice.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -179,12 +230,40 @@
     <Compile Include="Learner\Practice.aspx.designer.cs">
       <DependentUpon>Practice.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Learner\PracticeSets.aspx.cs">
+      <DependentUpon>PracticeSets.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\PracticeSets.aspx.designer.cs">
+      <DependentUpon>PracticeSets.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Learner\PracticeAttempt.aspx.cs">
+      <DependentUpon>PracticeAttempt.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\PracticeAttempt.aspx.designer.cs">
+      <DependentUpon>PracticeAttempt.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Learner\MockExam.aspx.cs">
       <DependentUpon>MockExam.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Learner\MockExam.aspx.designer.cs">
       <DependentUpon>MockExam.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Learner\MockExamSets.aspx.cs">
+      <DependentUpon>MockExamSets.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\MockExamSets.aspx.designer.cs">
+      <DependentUpon>MockExamSets.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Learner\MockExamAttempt.aspx.cs">
+      <DependentUpon>MockExamAttempt.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\MockExamAttempt.aspx.designer.cs">
+      <DependentUpon>MockExamAttempt.aspx</DependentUpon>
     </Compile>
     <Compile Include="Learner\Progress.aspx.cs">
       <DependentUpon>Progress.aspx</DependentUpon>
@@ -211,22 +290,29 @@
       <DependentUpon>LearnerRecords.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="Admin\LearnerRecordDetails.aspx.cs">
+      <DependentUpon>LearnerRecordDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\LearnerRecordDetails.aspx.designer.cs">
+      <DependentUpon>LearnerRecordDetails.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Admin\LearnerRecords.aspx.designer.cs">
       <DependentUpon>LearnerRecords.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Learning.aspx.cs">
-      <DependentUpon>Learning.aspx</DependentUpon>
+    <Compile Include="Admin\LearningChapters.aspx.cs">
+      <DependentUpon>LearningChapters.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Learning.aspx.designer.cs">
-      <DependentUpon>Learning.aspx</DependentUpon>
+    <Compile Include="Admin\LearningChapters.aspx.designer.cs">
+      <DependentUpon>LearningChapters.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\PracticeManagement.aspx.cs">
-      <DependentUpon>PracticeManagement.aspx</DependentUpon>
+    <Compile Include="Admin\Lessons.aspx.cs">
+      <DependentUpon>Lessons.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\PracticeManagement.aspx.designer.cs">
-      <DependentUpon>PracticeManagement.aspx</DependentUpon>
+    <Compile Include="Admin\Lessons.aspx.designer.cs">
+      <DependentUpon>Lessons.aspx</DependentUpon>
     </Compile>
     <Compile Include="Admin\PracticeSets.aspx.cs">
       <DependentUpon>PracticeSets.aspx</DependentUpon>
@@ -272,11 +358,65 @@
     </Compile>
     <Compile Include="Security\PasswordHasher.cs" />
     <Compile Include="Security\SessionHelper.cs" />
+    <Compile Include="Security\PasswordPolicy.cs" />
     <Compile Include="Data\DatabaseHelper.cs" />
     <Compile Include="Data\AppUser.cs" />
     <Compile Include="Data\UserRepository.cs" />
+    <Compile Include="Data\AdminDashboardRepository.cs" />
     <Compile Include="Data\DatabaseInitializer.cs" />
+    <Compile Include="Data\LearningChapterRepository.cs" />
+    <Compile Include="Data\LessonRepository.cs" />
+    <Compile Include="Data\LearningProgressRepository.cs" />
     <Compile Include="Common\AvatarInitials.cs" />
+    <Compile Include="Common\FlashMessage.cs" />
+    <Compile Include="Common\LearningText.cs" />
+    <Compile Include="Common\LearningDisplay.cs" />
+    <Compile Include="Common\LessonImageStorage.cs" />
+    <Compile Include="Common\StatusToggle.cs" />
+    <Compile Include="Common\GameImageStorage.cs" />
+    <Compile Include="Common\UsedNumbers.cs" />
+    <Compile Include="Common\ProfileImageStorage.cs" />
+    <Compile Include="Common\ProfileAvatar.cs" />
+    <Compile Include="Common\HiddenRoadSignGameSession.cs" />
+    <Compile Include="Data\HiddenRoadSignAssetRepository.cs" />
+    <Compile Include="Data\HiddenRoadSignPracticeRepository.cs" />
+    <Compile Include="Data\HiddenRoadSignItemRepository.cs" />
+    <Compile Include="Data\HiddenRoadSignGameSetRepository.cs" />
+    <Compile Include="Data\UserProfile.cs" />
+    <Compile Include="Data\UserProfileRepository.cs" />
+    <Compile Include="Data\HiddenRoadSignAttemptRepository.cs" />
+    <Compile Include="Learner\Game.aspx.cs">
+      <DependentUpon>Game.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\Game.aspx.designer.cs">
+      <DependentUpon>Game.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Learner\HiddenRoadSignSets.aspx.cs">
+      <DependentUpon>HiddenRoadSignSets.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\HiddenRoadSignGame.aspx.cs">
+      <DependentUpon>HiddenRoadSignGame.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\HiddenRoadSignGame.aspx.designer.cs">
+      <DependentUpon>HiddenRoadSignGame.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Learner\HiddenRoadSignResult.aspx.cs">
+      <DependentUpon>HiddenRoadSignResult.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\HiddenRoadSignResult.aspx.designer.cs">
+      <DependentUpon>HiddenRoadSignResult.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Learner\HiddenRoadSignReview.aspx.cs">
+      <DependentUpon>HiddenRoadSignReview.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learner\HiddenRoadSignReview.aspx.designer.cs">
+      <DependentUpon>HiddenRoadSignReview.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

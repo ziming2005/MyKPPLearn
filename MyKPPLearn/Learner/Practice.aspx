@@ -3,9 +3,16 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">Practice | MyKPP Learn</asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <div class="card placeholder-panel">
-        <span class="badge">Coming Soon</span>
-        <h1>Practice</h1>
-        <p>This module will be implemented in a later phase.</p>
+
+    <div class="dashboard-greeting">
+        <h2>Practice</h2>
+        <p>Pick a topic and start a practice set. Go at your own pace.</p>
     </div>
+
+    <div id="practiceCategoryGrid" class="card-grid card-grid--2" aria-live="polite"></div>
+
+</asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
+    <script src="<%= ResolveUrl("~/Scripts/practice-demo.js") + "?v=20261018-sets2" %>"></script>
 </asp:Content>

@@ -17,7 +17,7 @@ namespace MyKPPLearn
 
             litFullName.Text = fullName;
             litRole.Text = SessionHelper.CurrentRole(Session);
-            litAvatarInitials.Text = AvatarInitials.From(fullName);
+            ProfileAvatar.Bind(Session, fullName, litAvatarInitials, imgAvatar);
 
             SetActiveNav();
         }
@@ -35,9 +35,10 @@ namespace MyKPPLearn
             string currentPage = System.IO.Path.GetFileName(Request.Path);
 
             ApplyActiveState(navDashboard, IsPage(currentPage, "Dashboard.aspx"));
-            ApplyActiveState(navLearn, IsPage(currentPage, "Learn.aspx"));
-            ApplyActiveState(navPractice, IsPage(currentPage, "Practice.aspx"));
-            ApplyActiveState(navMockExam, IsPage(currentPage, "MockExam.aspx"));
+            ApplyActiveState(navLearn, IsPage(currentPage, "Learn.aspx") || IsPage(currentPage, "Chapter.aspx") || IsPage(currentPage, "Lesson.aspx"));
+            ApplyActiveState(navPractice, IsPage(currentPage, "Practice.aspx") || IsPage(currentPage, "PracticeSets.aspx") || IsPage(currentPage, "PracticeAttempt.aspx"));
+            ApplyActiveState(navGame, IsPage(currentPage, "Game.aspx") || IsPage(currentPage, "HiddenRoadSignGame.aspx") || IsPage(currentPage, "HiddenRoadSignResult.aspx") || IsPage(currentPage, "HiddenRoadSignReview.aspx"));
+            ApplyActiveState(navMockExam, IsPage(currentPage, "MockExam.aspx") || IsPage(currentPage, "MockExamSets.aspx") || IsPage(currentPage, "MockExamAttempt.aspx"));
             ApplyActiveState(navProgress, IsPage(currentPage, "Progress.aspx"));
             ApplyActiveState(navProfile, IsPage(currentPage, "Profile.aspx"));
         }

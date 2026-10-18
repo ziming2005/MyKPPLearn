@@ -10,5 +10,15 @@ namespace MyKPPLearn.Learner
 {
     public partial class Learn
     {
+        protected global::System.Web.UI.WebControls.Label lblError;
+        protected global::System.Web.UI.WebControls.Panel pnlSummary;
+        protected global::System.Web.UI.WebControls.Literal litSummaryCompleted;
+        protected global::System.Web.UI.WebControls.Literal litSummaryTotal;
+        protected global::System.Web.UI.WebControls.Literal litSummaryPercent;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl summaryFill;
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkContinue;
+        protected global::System.Web.UI.WebControls.Panel pnlAllDone;
+        protected global::System.Web.UI.WebControls.Panel pnlEmpty;
+        protected global::System.Web.UI.WebControls.Repeater rptChapters;
     }
 }

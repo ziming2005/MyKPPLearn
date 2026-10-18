@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<preserve resultType="3" virtualPath="/C:/Program Files/Git/Learner/Profile.aspx" hash="fffffff58834ac70" filehash="d8a016e44782255c" flags="110000" assembly="App_Web_bizmezfr" type="ASP.learner_profile_aspx">
+    <filedeps>
+        <filedep name="/C:/Program Files/Git/Learner.Master" />
+        <filedep name="/C:/Program Files/Git/Learner/Profile.aspx" />
+    </filedeps>
+</preserve>

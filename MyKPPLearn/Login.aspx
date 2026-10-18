@@ -7,11 +7,10 @@
         <div class="container">
             <div class="card auth-card">
                 <div class="auth-card__header">
+                    <span class="auth-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></span>
                     <h1>Welcome Back</h1>
-                    <p>Login to continue your Malaysian driving theory preparation.</p>
+                    <p>Login to continue learning.</p>
                 </div>
-
-                <asp:ValidationSummary ID="valSummary" runat="server" CssClass="validation-summary" HeaderText="Please fix the following:" DisplayMode="BulletList" />
 
                 <asp:Label ID="lblFormError" runat="server" CssClass="alert alert-error" Visible="false" EnableViewState="false" />
 
@@ -33,7 +32,7 @@
                 </asp:Panel>
 
                 <div class="auth-card__footer">
-                    Don't have an account? <a href="Register.aspx">Create Learner Account</a>
+                    New here? <a href="Register.aspx">Create Account</a>
                 </div>
             </div>
         </div>

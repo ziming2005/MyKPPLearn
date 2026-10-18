@@ -4,16 +4,18 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="MyKPP Learn is a structured Malaysian driving theory learning platform: study lessons, practise by topic, play the Road Sign Game and sit timed mock examinations." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563EB'/%3E%3Cpath d='M9 22V10l7 8 7-8v12' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
     <title><asp:ContentPlaceHolder ID="TitleContent" runat="server">MyKPP Learn | Malaysian Driving Theory Learning &amp; Practice</asp:ContentPlaceHolder></title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="~/Content/css/site.css" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/components.css" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/public.css" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/forms.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/site.css?v=20261018-footer" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/components.css?v=20261017-promo" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/public.css?v=20261018-cta" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/forms.css?v=20261018-focus" runat="server" />
 
     <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
 </head>
@@ -30,16 +32,19 @@
                 <nav id="mainNav" class="main-nav" aria-label="Primary">
                     <ul class="main-nav__list">
                         <li><asp:HyperLink ID="NavHome" runat="server" CssClass="main-nav__link">Home</asp:HyperLink></li>
-                        <li><asp:HyperLink ID="NavLearn" runat="server" CssClass="main-nav__link">Learn</asp:HyperLink></li>
-                        <li><asp:HyperLink ID="NavPractice" runat="server" CssClass="main-nav__link">Practice</asp:HyperLink></li>
+                        <li><asp:HyperLink ID="NavLearn" runat="server" CssClass="main-nav__link">Topics</asp:HyperLink></li>
+                        <li><asp:HyperLink ID="NavGame" runat="server" CssClass="main-nav__link">Road Sign Game</asp:HyperLink></li>
                         <li><asp:HyperLink ID="NavMockExam" runat="server" CssClass="main-nav__link">Mock Exam</asp:HyperLink></li>
-                        <li><asp:HyperLink ID="NavProgress" runat="server" CssClass="main-nav__link">Progress</asp:HyperLink></li>
+                        <li><asp:HyperLink ID="NavFaq" runat="server" CssClass="main-nav__link">FAQ</asp:HyperLink></li>
                     </ul>
                 </nav>
 
                 <div class="header-actions">
-                    <a class="btn btn-secondary btn-small" href="~/Login.aspx" runat="server">Login</a>
-                    <a class="btn btn-primary btn-small" href="~/Register.aspx" runat="server">Register</a>
+                    <asp:PlaceHolder ID="phHeaderGuest" runat="server">
+                        <a id="lnkHeaderLogin" class="btn btn-secondary btn-small" href="~/Login.aspx" runat="server">Login</a>
+                        <a id="lnkHeaderRegister" class="btn btn-primary btn-small" href="~/Register.aspx" runat="server">Register</a>
+                    </asp:PlaceHolder>
+                    <a id="lnkHeaderDashboard" runat="server" class="btn btn-primary btn-small" visible="false">Go to Dashboard</a>
                 </div>
             </div>
         </header>
@@ -50,34 +55,46 @@
 
         <footer class="site-footer">
             <div class="container">
-                <div class="site-footer__top">
+                <div id="footerTop" runat="server" class="site-footer__top">
                     <div class="site-footer__brand">
                         <div class="site-logo">My<span>KPP</span> Learn</div>
-                        <p>A structured learning platform to help Malaysian learner drivers study driving theory, practise by topic and prepare for mock examinations.</p>
+                        <p>Study driving theory, practise by topic and prepare for your mock exams.</p>
                     </div>
 
-                    <nav aria-label="Footer">
-                        <div class="site-footer__nav-title">Navigation</div>
-                        <ul class="site-footer__nav-list">
-                            <li><asp:HyperLink ID="FooterNavHome" runat="server">Home</asp:HyperLink></li>
-                            <li><asp:HyperLink ID="FooterNavLearn" runat="server">Learn</asp:HyperLink></li>
-                            <li><asp:HyperLink ID="FooterNavPractice" runat="server">Practice</asp:HyperLink></li>
-                            <li><asp:HyperLink ID="FooterNavMockExam" runat="server">Mock Exam</asp:HyperLink></li>
-                            <li><asp:HyperLink ID="FooterNavProgress" runat="server">Progress</asp:HyperLink></li>
-                            <li><a href="~/Login.aspx" runat="server">Login</a></li>
-                            <li><a href="~/Register.aspx" runat="server">Register</a></li>
-                        </ul>
-                    </nav>
+                    <div class="site-footer__cols">
+                        <nav aria-label="Footer">
+                            <div class="site-footer__nav-title">Explore</div>
+                            <ul class="site-footer__nav-list">
+                                <li><asp:HyperLink ID="FooterNavHome" runat="server">Home</asp:HyperLink></li>
+                                <li><asp:HyperLink ID="FooterNavLearn" runat="server">Topics</asp:HyperLink></li>
+                                <li><asp:HyperLink ID="FooterNavGame" runat="server">Road Sign Game</asp:HyperLink></li>
+                                <li><asp:HyperLink ID="FooterNavMockExam" runat="server">Mock Exam</asp:HyperLink></li>
+                                <li><asp:HyperLink ID="FooterNavFaq" runat="server">FAQ</asp:HyperLink></li>
+                            </ul>
+                        </nav>
+
+                        <nav aria-label="Account">
+                            <div class="site-footer__nav-title">Account</div>
+                            <ul class="site-footer__nav-list">
+                                <asp:PlaceHolder ID="phFooterGuest" runat="server">
+                                    <li><a href="~/Login.aspx" runat="server">Login</a></li>
+                                    <li><a href="~/Register.aspx" runat="server">Register</a></li>
+                                </asp:PlaceHolder>
+                                <li id="liFooterDashboard" runat="server" visible="false"><a id="lnkFooterDashboard" runat="server">Go to Dashboard</a></li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
 
                 <div class="site-footer__bottom">
-                    &copy; <%: DateTime.Now.Year %> MyKPP Learn. All rights reserved.
+                    <p class="site-footer__note">MyKPP Learn is a study aid. Its lessons and practice questions are for learning only and are not official JPJ examination material.</p>
+                    <p class="site-footer__copy">&copy; <%: DateTime.Now.Year %> MyKPP Learn. All rights reserved.</p>
                 </div>
             </div>
         </footer>
 
         <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />
     </form>
-    <script src="<%= ResolveUrl("~/Scripts/site.js") %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/site.js") %>?v=20261018-auth"></script>
 </body>
 </html>

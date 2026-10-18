@@ -31,19 +31,14 @@ namespace MyKPPLearn
         protected global::System.Web.UI.HtmlControls.HtmlAnchor navLearnerRecords;
 
         /// <summary>
-        /// navLearning control.
+        /// navChapters control.
         /// </summary>
-        protected global::System.Web.UI.HtmlControls.HtmlAnchor navLearning;
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor navChapters;
 
         /// <summary>
-        /// practiceManagementToggle control.
+        /// navLessons control.
         /// </summary>
-        protected global::System.Web.UI.HtmlControls.HtmlButton practiceManagementToggle;
-
-        /// <summary>
-        /// practiceManagementSubmenu control.
-        /// </summary>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl practiceManagementSubmenu;
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor navLessons;
 
         /// <summary>
         /// navPracticeSets control.
@@ -79,6 +74,11 @@ namespace MyKPPLearn
         /// litPageTitle control.
         /// </summary>
         protected global::System.Web.UI.WebControls.Literal litPageTitle;
+
+        /// <summary>
+        /// imgAvatar control.
+        /// </summary>
+        protected global::System.Web.UI.HtmlControls.HtmlImage imgAvatar;
 
         /// <summary>
         /// litAvatarInitials control.

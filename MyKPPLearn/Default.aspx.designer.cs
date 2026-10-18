@@ -12,5 +12,52 @@ namespace MyKPPLearn
 {
     public partial class Default
     {
+        /// <summary>
+        /// phHeroGuest control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phHeroGuest;
+
+        /// <summary>
+        /// lnkHeroDashboard control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkHeroDashboard;
+
+        /// <summary>
+        /// phCtaGuest control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phCtaGuest;
+
+        /// <summary>
+        /// lnkCtaDashboard control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkCtaDashboard;
+
+        /// <summary>ctaHeading control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl ctaHeading;
+
+        /// <summary>ctaText control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl ctaText;
+
+        /// <summary>lnkMockExam control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkMockExam;
+
+        /// <summary>lnkProgress control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkProgress;
     }
 }

@@ -16,24 +16,6 @@
   margin: 0;
 }
 
-.quick-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 1199px) {
-  .quick-actions-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 767px) {
-  .quick-actions-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .management-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -52,18 +34,6 @@
   }
 }
 
-.content-overview-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-@media (max-width: 991px) {
-  .content-overview-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .learner-activity-panel {
   display: flex;
   flex-direction: column;
@@ -72,20 +42,1921 @@
   text-align: center;
   gap: 8px;
   padding: 40px 24px;
-  border: 1px dashed var(--color-border);
+  border: 1px dashed #CBD5E1;
   border-radius: var(--radius-card);
-  background-color: var(--color-bg-page);
+  background-color: var(--color-surface);
   min-height: 180px;
-}
-
-.learner-activity-panel svg {
-  width: 40px;
-  height: 40px;
-  color: var(--color-text-secondary);
 }
 
 .learner-activity-panel p {
   max-width: 420px;
   margin: 0;
   color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------
+   Learning management (chapters / lessons)
+   -------------------------------------------------------------------- */
+.page-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.page-toolbar h2 {
+  margin: 0 0 4px 0;
+}
+
+.page-toolbar p {
+  margin: 0;
+}
+
+.page-toolbar p a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filter-bar .form-label {
+  margin-bottom: 0;
+}
+
+.form-input--auto {
+  width: auto;
+  min-width: 220px;
+  max-width: 100%;
+}
+
+.form-input--short {
+  max-width: 160px;
+}
+
+textarea.form-input {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+}
+
+/* Learning Chapters table only: fixed column widths (via colgroup) so a long
+   Description can't squeeze the Actions column and wrap View / Edit / Delete.
+   Scoped to this table so the Lessons table keeps its normal auto layout. */
+.chapters-table {
+  table-layout: fixed;
+}
+
+.data-table th,
+.data-table td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table th {
+  background-color: var(--color-bg-page);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.data-table__nowrap {
+  white-space: nowrap;
+}
+
+.data-table__muted {
+  color: var(--color-text-secondary);
+  min-width: 200px;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.form-card {
+  max-width: 820px;
+}
+
+/* Chapters list: inactive chapters are dimmed (the Status and Actions cells stay at full strength). */
+.row--inactive td:not(:nth-last-child(-n+2)) {
+  opacity: 0.6;
+}
+
+/* Practice Sets: category colour dot (same colours as the learner Practice cards), question-count link, form preview. */
+.ps-cat__dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+}
+
+.ps-cat__dot--red { background-color: #DC2626; }
+.ps-cat__dot--blue { background-color: #2563EB; }
+.ps-cat__dot--green { background-color: #15803D; }
+.ps-cat__dot--purple { background-color: #7C3AED; }
+
+.ps-count-link {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.ps-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 280px;
+  margin-top: 8px;
+}
+
+.ps-preview__category {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.ps-preview__title,
+.ps-preview__count {
+  margin: 0;
+}
+
+.ps-preview__count {
+  color: var(--color-text-secondary);
+}
+
+/* Question Bank: option rows with an inline "Correct" radio, image tools, "Image" badge, learner-style preview. */
+.qb-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.qb-option .form-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.qb-option__letter {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.qb-option__correct {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-navy);
+  cursor: pointer;
+}
+
+.qb-image-tools {
+  margin-top: 10px;
+}
+
+.qb-badge-image {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.qb-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+  margin-top: 8px;
+}
+
+.qb-preview__image img {
+  display: block;
+  max-width: 100%;
+  max-height: 260px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.qb-preview__question {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.qb-preview__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qb-preview__option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background-color: var(--color-surface);
+}
+
+.qb-preview__option--correct {
+  border-color: var(--color-success);
+  background-color: #F0FDF4;
+}
+
+.qb-preview__letter {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.qb-preview__option-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.qb-preview__mark {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.qb-preview__explanation {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background-color: var(--color-bg-page);
+}
+
+.qb-preview__explanation-label {
+  margin: 0 0 4px;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.qb-preview__explanation-label span {
+  font-weight: 500;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.qb-preview__explanation-text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 479px) {
+  .qb-option {
+    flex-wrap: wrap;
+  }
+
+  .qb-option__correct {
+    margin-left: 44px;
+  }
+}
+
+/* Road Sign Game: View page questions table, and the Save error shown beside the Save button. */
+.hrs-view-questions-title {
+  margin-top: 28px;
+}
+
+.lesson-article .hrs-view-scene {
+  max-width: 720px;
+  margin-bottom: 4px;
+}
+
+/* Dashboard: summary cards that open the page managing them. */
+a.stat-card--link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+a.stat-card--link:hover,
+a.stat-card--link:focus-visible {
+  border-color: var(--dash-color, var(--color-primary));
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+/* Lessons: "Remove the current image" under the upload. */
+.remove-image {
+  margin-top: 8px;
+}
+
+.remove-image__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-small);
+  color: var(--color-navy);
+  cursor: pointer;
+}
+
+/* Lesson preview and the admin View page: the same look as the learner's lesson card. */
+.image-position-preview__head {
+  order: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.image-position-preview__title {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.lesson-article {
+  max-width: 940px;
+  margin-bottom: 24px;
+}
+
+.lesson-article__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.lesson-article h2 {
+  margin-bottom: 8px;
+}
+
+.lesson-article__chapter {
+  margin: 0 0 20px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.lesson-article__image {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+/* A Delete that is not allowed (the chapter still has lessons). */
+.row-actions .aspNetDisabled,
+.row-actions [aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.char-counter {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: right;
+}
+
+.char-counter--over {
+  color: var(--color-error, #B91C1C);
+  font-weight: 700;
+}
+
+/* Add / Edit Chapter preview: same look as the learner's chapter card. */
+.chapter-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 360px;
+  margin-top: 8px;
+  border-top: 3px solid var(--dash-color, var(--color-primary));
+}
+
+.chapter-preview__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chapter-preview__title,
+.chapter-preview__text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.chapter-preview .progress-track__fill {
+  background-color: var(--dash-color, var(--color-primary));
+}
+
+@media (min-width: 992px) {
+  .lesson-form-card {
+    max-width: 960px;
+  }
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.lesson-preview {
+  margin-top: 8px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.lesson-preview strong {
+  color: var(--color-primary-dark);
+}
+
+/* --------------------------------------------------------------------
+   Lesson content formatting (Ctrl+B / Cmd+B bolds the selection inside the
+   Content textarea; rendered live inside the combined Lesson Preview below)
+   -------------------------------------------------------------------- */
+.content-preview__empty {
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------
+   Combined Lesson Preview: image + formatted Content, ordered by
+   Image Position (Admin Add/Edit Lesson)
+   -------------------------------------------------------------------- */
+.image-position-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background-color: var(--color-bg-page);
+}
+
+.image-position-preview__image-slot {
+  order: 1;
+}
+
+.image-position-preview__content-slot {
+  order: 2;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+}
+
+.image-position-preview--below .image-position-preview__image-slot {
+  order: 2;
+}
+
+.image-position-preview--below .image-position-preview__content-slot {
+  order: 1;
+}
+
+.image-position-preview__image-slot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.radio-list td {
+  padding: 4px 0;
+  border-bottom: none;
+}
+
+.radio-list label {
+  margin-left: 6px;
+  font-size: var(--fs-small);
+  color: var(--color-navy);
+}
+
+.radio-list--inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.radio-list--inline label {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0;
+}
+
+.radio-list--inline input {
+  margin-right: 6px;
+}
+
+.detail-list {
+  margin: 0 0 20px 0;
+}
+
+.detail-list dt {
+  margin-top: 16px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.detail-list dt:first-child {
+  margin-top: 0;
+}
+
+.detail-list dd {
+  margin: 4px 0 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* ====================================================================
+   Phase 6: Admin Mock Exam Sets (frontend prototype)
+   ==================================================================== */
+.mx-rules {
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background-color: var(--color-bg-page);
+}
+
+.mx-questions {
+  max-width: 960px;
+}
+
+.mx-questions__subtitle {
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mx-qgroup {
+  margin-bottom: 20px;
+}
+
+.mx-qgroup__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.mx-qgroup__head h3 {
+  margin: 0;
+}
+
+.mx-qcount {
+  padding: 2px 12px;
+  border-radius: 999px;
+  background-color: #FEF3C7;
+  color: #92400E;
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.mx-qcount--ok {
+  background-color: #DCFCE7;
+  color: #166534;
+}
+
+.mx-qcount--over {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.mx-qlist {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background-color: var(--color-surface);
+}
+
+.mx-qitem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+
+.mx-qitem:last-child {
+  border-bottom: none;
+}
+
+.mx-qitem:hover {
+  background-color: var(--color-bg-page);
+}
+
+.mx-qitem__id {
+  flex-shrink: 0;
+  min-width: 52px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.mx-qitem__text {
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+}
+
+.mx-qitem__thumb {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  object-fit: contain;
+}
+
+.mx-qitem__answer {
+  flex: 0 0 auto;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.mx-qitem--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mx-qgroup__tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Mock Exam Set form: preview of the learner's set card. */
+.mx-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 320px;
+  margin-top: 8px;
+}
+
+.mx-preview__type {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mx-preview__title,
+.mx-preview__meta {
+  margin: 0;
+}
+
+.mx-preview__meta {
+  color: var(--color-text-secondary);
+}
+
+/* ====================================================================
+   Hidden Road Sign Game (Admin): assets, game sets and hotspot editor
+   ==================================================================== */
+.asset-thumb {
+  display: block;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: #FFFFFF;
+}
+
+.image-preview-box {
+  display: inline-block;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background-color: #FFFFFF;
+}
+
+.image-preview-box img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+}
+
+.image-preview-box--wide img {
+  max-height: 360px;
+}
+
+/* ---- Road Sign Scene editor (Admin > Hidden Road Sign Game > Manage Road Signs) ---- */
+.hrs-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hrs-editor__top {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(240px, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.hrs-editor__scene,
+.hrs-library {
+  min-width: 0;
+}
+
+/* Desktop: the library is exactly as tall as the scene card. Its content is taken out of the flow
+   (absolute) so a long list scrolls inside the library instead of making the row taller. */
+.hrs-library {
+  position: relative;
+  padding: 0;
+  min-height: 320px;
+}
+
+.hrs-library__inner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.hrs-library__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media (max-width: 1100px) {
+  .hrs-editor__top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hrs-library {
+    min-height: 0;
+  }
+
+  .hrs-library__inner {
+    position: static;
+    overflow: visible;
+  }
+
+  .hrs-library__grid {
+    flex: none;
+    max-height: 420px;
+  }
+}
+
+.hrs-toolbar__hint {
+  margin: 0 0 12px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.hrs-stage {
+  position: relative;
+  line-height: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hrs-stage > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.hrs-stage.is-drop-target > img {
+  outline: 3px dashed var(--color-primary);
+  outline-offset: -3px;
+}
+
+/* A placed road sign: its image is what the learner sees and what they click. */
+.hrs-sign {
+  position: absolute;
+  box-sizing: border-box;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.hrs-sign:hover {
+  outline: 2px dashed rgba(37, 99, 235, 0.6);
+  outline-offset: 1px;
+}
+
+.hrs-sign.is-selected {
+  z-index: 2;
+  cursor: move;
+  outline: 2px solid var(--color-warning);
+  outline-offset: 1px;
+}
+
+.hrs-sign.is-draft {
+  outline-style: dashed;
+}
+
+.hrs-sign:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.hrs-sign__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.hrs-sign__label {
+  position: absolute;
+  top: -9px;
+  left: -9px;
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+}
+
+.hrs-sign.is-incomplete .hrs-sign__label {
+  background-color: #6B7280;
+}
+
+.hrs-sign.is-selected .hrs-sign__label {
+  background-color: var(--color-warning);
+  color: var(--color-navy);
+}
+
+.hrs-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-warning);
+  border-radius: 3px;
+  background-color: #FFFFFF;
+  touch-action: none;
+}
+
+.hrs-handle--nw { top: -8px; left: -8px; cursor: nwse-resize; }
+.hrs-handle--ne { top: -8px; right: -8px; cursor: nesw-resize; }
+.hrs-handle--sw { bottom: -8px; left: -8px; cursor: nesw-resize; }
+.hrs-handle--se { bottom: -8px; right: -8px; cursor: nwse-resize; }
+
+.hrs-empty {
+  margin-top: 16px;
+}
+
+.hrs-empty[hidden] {
+  display: none;
+}
+
+/* ---- Road Sign Library ---- */
+.hrs-library h3,
+.hrs-form h3 {
+  margin: 0 0 8px;
+}
+
+.hrs-library #hrsSearch {
+  padding: 8px 12px;
+  font-size: var(--fs-small);
+  line-height: 1.35;
+}
+
+.hrs-library__tip {
+    margin: 8px 0 12px;
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.hrs-library__empty p {
+  margin: 0 0 6px;
+}
+
+.hrs-library__nomatch {
+  margin: 12px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-small);
+}
+
+.hrs-library__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: start;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.hrs-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hrs-card:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.hrs-card:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.hrs-card__img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 72px;
+}
+
+.hrs-card__img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.hrs-card__name {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-navy);
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+}
+
+/* The sign being carried from the library to the scene. */
+.hrs-ghost {
+  position: fixed;
+  z-index: 1000;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+  opacity: 0.85;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+body.hrs-dragging {
+  cursor: grabbing;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---- Edit Road Sign (full width, below the scene and library) ---- */
+.hrs-form__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 20px;
+}
+
+.hrs-form__wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 800px) {
+  .hrs-form__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.hrs-selected {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.hrs-selected__thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+}
+
+.hrs-selected__thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.hrs-selected__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hrs-selected__name {
+  font-weight: 600;
+  color: var(--color-navy);
+  overflow-wrap: anywhere;
+}
+
+/* Configured / Incomplete: describes whether a placed road sign has a complete question. It is not
+   the Active/Inactive status of the Road Sign Asset. */
+.hrs-status {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.hrs-status--ok {
+  background-color: #DCFCE7;
+  color: #166534;
+}
+
+.hrs-status--pending {
+  background-color: #F3F4F6;
+  color: #4B5563;
+}
+
+.hrs-status[hidden] {
+  display: none;
+}
+
+/* ---- Bottom panel: Edit Road Sign (left) + Scene Road Signs (right), full width ---- */
+.hrs-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(240px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.hrs-form,
+.hrs-scenelist {
+  min-width: 0;
+}
+
+.hrs-scenelist h3 {
+  margin: 0 0 8px;
+}
+
+.hrs-scenelist__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  max-height: 520px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.hrs-scenelist__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+}
+
+.hrs-scenelist__row.is-selected {
+  border-color: var(--color-warning);
+  background-color: #FFFBEB;
+}
+
+.hrs-scenelist__pick {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  color: var(--color-navy);
+  cursor: pointer;
+}
+
+.hrs-scenelist__thumb {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.hrs-scenelist__thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.hrs-scenelist__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hrs-scenelist__name {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.hrs-scenelist__trash {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.hrs-scenelist__trash:hover {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+}
+
+@media (max-width: 1100px) {
+  .hrs-bottom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.hrs-form [hidden] {
+  display: none !important;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.breadcrumb a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+#hrsNotice[hidden] {
+  display: none;
+}
+
+/* .form-hint sets display:block, which would otherwise override the hidden attribute here */
+.hrs-bottom [hidden] {
+  display: none !important;
+}
+
+/* ---- Add/Edit Game Set: sections around the Scene Editor ---- */
+.hrs-section-title {
+  margin: 0 0 12px;
+  font-size: var(--fs-h3, 1.125rem);
+  color: var(--color-navy);
+}
+
+.hrs-manage {
+  margin-top: 28px;
+}
+
+.hrs-manage__head p {
+  margin: 0 0 16px;
+  color: var(--color-text-secondary);
+}
+
+.hrs-manage__locked p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* ---- View Game Set: read-only learner preview (scene + configured road signs only) ---- */
+.hrs-view-scene {
+  position: relative;
+  max-width: 900px;
+  line-height: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hrs-view-scene > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.hrs-view-signs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hrs-view-sign {
+  position: absolute;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* ---- single-save editor additions ---- */
+.hrs-incomplete-count {
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background-color: #FEF3C7;
+  color: #92400E;
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.hrs-incomplete-count[hidden],
+.hrs-editor [hidden],
+.hrs-selected [hidden] {
+  display: none !important;
+}
+
+.hrs-manage__locked {
+  margin: 0;
+}
+
+/* Incomplete road signs must be easy to spot, in the list and in the form. */
+.hrs-status--pending {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.hrs-scenelist__row.is-incomplete {
+  border-color: #FCD34D;
+}
+
+.hrs-selected__remove {
+  margin-left: auto;
+}
+
+.hrs-final-actions {
+  margin-top: 24px;
+}
+
+.hrs-editor .radio-list--inline {
+  display: flex;
+  gap: 20px;
+}
+
+.hrs-editor .radio-list--inline span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The editor body wraps the scene/library row and the question/list row; it needs the same 20px gap .hrs-editor used to provide. */
+.hrs-editor__body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* No extra space under the last field (Scene Image) of the Game Set Details card. */
+.hrs-details > .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- "Incomplete road sign questions" dialog ---- */
+body.hrs-modal-open {
+  overflow: hidden;
+}
+
+.hrs-modal {
+  max-width: 460px;
+}
+
+.hrs-modal__list {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+  color: var(--color-navy);
+  font-weight: 600;
+}
+
+/* "Used Numbers: 1, 2, 4" under the Admin number fields: muted helper text, informational only. */
+.used-numbers {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.used-numbers[hidden] {
+  display: none;
+}
+
+/* ====================================================================
+   Admin Learner Records (UI prototype)
+   ==================================================================== */
+.lr-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.lr-search {
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+
+.lr-learner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lr-avatar {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.lr-avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: 0.75rem;
+}
+
+.lr-avatar--lg {
+  width: 64px;
+  height: 64px;
+  font-size: 1.35rem;
+}
+
+.lr-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.lr-footer[hidden],
+.lr-pager {
+  display: flex;
+}
+
+.lr-footer[hidden] {
+  display: none;
+}
+
+.lr-footer__summary {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.lr-pager {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lr-pager__btn {
+  min-width: 36px;
+  padding: 7px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-navy);
+  cursor: pointer;
+}
+
+.lr-pager__btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.lr-pager__btn.is-active {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+}
+
+.lr-pager__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- detail page ---- */
+.lr-first-section {
+  margin-top: 0;
+}
+
+.lr-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.lr-info__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px 28px;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.lr-info__list dt {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.lr-info__list dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  color: var(--color-navy);
+  overflow-wrap: anywhere;
+}
+
+.lr-progress-block + .lr-progress-block {
+  margin-top: 22px;
+}
+
+.lr-progress-block--chapter {
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.lr-progress-block__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.lr-progress-block__title {
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.lr-progress-block__percent {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.lr-progress-block__meta {
+  margin-bottom: 8px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.lr-note {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.lr-history {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lr-history__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.lr-history__item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.lr-history__item:last-child {
+  padding-bottom: 0;
+}
+
+.lr-history__title {
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.lr-history__line {
+  color: var(--color-navy);
+}
+
+.lr-history__date {
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.lr-history__score {
+  flex: 0 0 auto;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-navy);
+}
+
+.lr-back {
+  margin-top: 32px;
+}
+
+/* Same as the learner Progress page: Overview label leaves room for the corner icon. */
+.lr-stats .stat-card__label {
+  display: block;
+  padding-right: 48px;
+}
+
+.lr-progress-block__link {
+  color: inherit;
+}
+
+.lr-progress-block--done .progress-track__fill {
+  background-color: var(--color-success);
+}
+
+.lr-progress-block--done .lr-progress-block__percent {
+  color: var(--color-success);
+}
+
+.lr-note:not(:last-child) {
+  margin-bottom: 16px;
+}
+
+.lr-history-summary {
+  margin-bottom: 14px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.lr-history:not(.is-expanded) .lr-history__item--extra {
+  display: none;
+}
+
+.lr-history-more {
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 479px) {
+  .lr-history__item {
+    flex-wrap: wrap;
+  }
+}
+
+.lr-topback {
+  margin-bottom: 16px;
+}
+
+#lrDetail[hidden],
+#lrNotFound[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 599px) {
+  .lr-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+#lrList [hidden] {
+  display: none !important;
+}
+
+/* Learner Records table: four columns, sharing the width (names and emails get the room). */
+.lr-col-learner { width: 25%; }
+.lr-col-email { width: 28%; }
+.lr-col-status { width: 13%; }
+.lr-col-joined { width: 13%; }
+.lr-col-actions { width: 21%; }
+
+/* Learner Records row actions (prototype): View / Edit / Disable-Enable / Delete in one wrapping row. */
+.lr-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+}
+
+
+.lr-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+#lrToast[hidden],
+.modal-overlay[hidden] {
+  display: none !important;
+}
+
+#lrToast {
+  margin-bottom: 16px;
+}
+
+/* Learner Records Status: the same toggle switch (.btn-status); Disabled is the off state. */
+.btn.lr-status--disabled {
+  color: #64748B;
+}
+
+/* Learner Records table only: predictable columns on desktop so View / Edit / Delete stay on one row;
+   a long email is cut with an ellipsis (its full value is in the cell's title) instead of widening the table. */
+@media (min-width: 1100px) {
+  .lr-table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .lr-table .lr-email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* On narrower screens the buttons may wrap, but only when there is genuinely not enough room. */
+@media (max-width: 1099px) {
+  .lr-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* View (a link), Edit / Delete and the Status control (buttons) get identical box metrics: a <button> otherwise has
+   a different default line-height than an <a>, which made them different heights. Scoped to the Learner Records table. */
+.lr-table .btn {
+  box-sizing: border-box;
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------
+   Phones: every table row becomes a stacked card (labels come from the column headings via
+   data-label, set by Scripts/table-labels.js). Status switch and buttons sit together at the bottom.
+   -------------------------------------------------------------------- */
+@media (max-width: 700px) {
+  .data-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .data-table colgroup {
+    display: none;
+  }
+
+  .data-table,
+  .data-table tbody,
+  .data-table tr,
+  .data-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table.chapters-table,
+  .lr-table {
+    table-layout: auto;
+  }
+
+  .data-table tbody tr {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .data-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .data-table td,
+  .data-table tbody tr:last-child td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 0;
+    border: 0;
+    text-align: right;
+    white-space: normal;
+    min-width: 0;
+  }
+
+  .data-table td::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .data-table td[data-label="Actions"] {
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+
+  .data-table td[data-label="Actions"]::before {
+    display: none;
+  }
+
+  .data-table .row-actions,
+  .data-table .lr-actions {
+    justify-content: flex-start;
+  }
+
+  .data-table .lr-email {
+    overflow-wrap: anywhere;
+  }
+
+  .page-toolbar > .btn,
+  .page-toolbar > input[type="submit"] {
+    width: 100%;
+  }
+
+  .filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .filter-bar .form-input--auto {
+    width: 100%;
+  }
+
+  .lr-filters .lr-search,
+  .lr-filters .form-input--auto {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* Road Sign Scene editor on a phone: ask for landscape in portrait, and use the width when rotated. */
+.hrs-rotate-hint {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-card);
+  background-color: #FFFBEB;
+  color: #92400E;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.hrs-rotate-hint svg {
+  flex: none;
+  transform: rotate(90deg);
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .hrs-rotate-hint {
+    display: flex;
+  }
+}
+
+/* A phone held sideways: scene on the left, library beside it (like desktop), form below. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .hrs-editor__top {
+    grid-template-columns: minmax(0, 3fr) minmax(150px, 1fr);
+    gap: 12px;
+  }
+
+  .hrs-library {
+    min-height: 180px;
+  }
+
+  .hrs-library__inner {
+    position: absolute;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .hrs-library__grid {
+    flex: 1 1 auto;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .hrs-editor {
+    gap: 8px;
+  }
 }

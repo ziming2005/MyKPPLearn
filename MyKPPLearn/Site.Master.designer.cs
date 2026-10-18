@@ -60,13 +60,13 @@ namespace MyKPPLearn
         protected global::System.Web.UI.WebControls.HyperLink NavLearn;
 
         /// <summary>
-        /// NavPractice control.
+        /// NavGame control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink NavPractice;
+        protected global::System.Web.UI.WebControls.HyperLink NavGame;
 
         /// <summary>
         /// NavMockExam control.
@@ -78,13 +78,13 @@ namespace MyKPPLearn
         protected global::System.Web.UI.WebControls.HyperLink NavMockExam;
 
         /// <summary>
-        /// NavProgress control.
+        /// NavFaq control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink NavProgress;
+        protected global::System.Web.UI.WebControls.HyperLink NavFaq;
 
         /// <summary>
         /// MainContent control.
@@ -114,13 +114,13 @@ namespace MyKPPLearn
         protected global::System.Web.UI.WebControls.HyperLink FooterNavLearn;
 
         /// <summary>
-        /// FooterNavPractice control.
+        /// FooterNavGame control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink FooterNavPractice;
+        protected global::System.Web.UI.WebControls.HyperLink FooterNavGame;
 
         /// <summary>
         /// FooterNavMockExam control.
@@ -132,13 +132,31 @@ namespace MyKPPLearn
         protected global::System.Web.UI.WebControls.HyperLink FooterNavMockExam;
 
         /// <summary>
-        /// FooterNavProgress control.
+        /// FooterNavFaq control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink FooterNavProgress;
+        protected global::System.Web.UI.WebControls.HyperLink FooterNavFaq;
+
+        /// <summary>phFooterGuest control.</summary>
+        protected global::System.Web.UI.WebControls.PlaceHolder phFooterGuest;
+
+        /// <summary>lnkHeaderLogin control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkHeaderLogin;
+
+        /// <summary>lnkHeaderRegister control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkHeaderRegister;
+
+        /// <summary>footerTop control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl footerTop;
+
+        /// <summary>liFooterDashboard control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl liFooterDashboard;
+
+        /// <summary>lnkFooterDashboard control.</summary>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkFooterDashboard;
 
         /// <summary>
         /// ScriptsContent control.
@@ -148,5 +166,22 @@ namespace MyKPPLearn
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.ContentPlaceHolder ScriptsContent;
+        /// <summary>
+        /// phHeaderGuest control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phHeaderGuest;
+
+        /// <summary>
+        /// lnkHeaderDashboard control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkHeaderDashboard;
     }
 }

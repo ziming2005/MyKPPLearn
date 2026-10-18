@@ -34,6 +34,147 @@
   }
 }
 
+/* ---- dashboard redesign ---- */
+.practice-card--red    { --dash-color: #DC2626; --dash-tint: #FEF2F2; }
+.practice-card--blue   { --dash-color: #2563EB; --dash-tint: #EFF6FF; }
+.practice-card--green  { --dash-color: #15803D; --dash-tint: #F0FDF4; }
+.practice-card--purple { --dash-color: #7C3AED; --dash-tint: #F5F3FF; }
+
+.practice-card--red .card-icon,
+.practice-card--blue .card-icon,
+.practice-card--green .card-icon,
+.practice-card--purple .card-icon {
+  background-color: var(--dash-tint);
+  color: var(--dash-color);
+}
+
+.practice-card--red:hover,
+.practice-card--blue:hover,
+.practice-card--green:hover,
+.practice-card--purple:hover {
+  border-color: var(--dash-color);
+}
+
+.continue-cta {
+  border-left: 4px solid var(--color-primary);
+  justify-content: flex-start;
+}
+
+.continue-cta .mock-exam-cta__text { flex: 1; }
+.continue-cta__btn { margin-left: auto; }
+
+.progress-overview-card { border-top: 3px solid var(--dash-color, var(--color-primary)); }
+
+.progress-overview-card .progress-track__fill { background-color: var(--dash-color, var(--color-primary)); }
+
+/* Road Sign Game and Mock Exam sit side by side on wide screens, stacked on narrow ones. */
+.dash-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.dash-pair > .panel-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+}
+
+.dash-pair .hrs-promo,
+.dash-pair .exam-banner {
+  flex: 1;
+}
+
+.dash-pair .hrs-promo {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+.dash-pair .hrs-promo__scene {
+  order: -1;
+  min-height: 160px;
+}
+
+.dash-pair .hrs-promo__content {
+  height: 100%;
+}
+
+.dash-pair .exam-banner {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.dash-pair .exam-banner__text {
+  max-width: none;
+}
+
+@media (max-width: 1023px) {
+  .dash-pair {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .dash-pair > .panel-section {
+    margin-top: 32px;
+  }
+}
+
+.exam-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 28px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
+  color: #FFFFFF;
+}
+
+.exam-banner__text { max-width: 560px; }
+.exam-banner h3 { margin: 0 0 6px; color: #FFFFFF; font-size: 1.5rem; }
+.exam-banner p { margin: 0; color: #CBD5E1; }
+
+.exam-banner__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.exam-banner__chip {
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.exam-banner__btn {
+  background-color: var(--color-accent-yellow);
+  color: var(--color-navy);
+  font-weight: 700;
+}
+
+.empty-state--activity {
+  align-items: center;
+  text-align: center;
+}
+
+.empty-state--activity p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-small);
+}
+
+@media (max-width: 767px) {
+  .continue-cta__btn { margin-left: 0; }
+  .exam-banner { padding: 20px; }
+}
+
 .progress-overview-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -50,7 +191,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   padding: 20px;
-  background-color: var(--color-bg-page);
+  background-color: var(--color-surface);
 }
 
 .progress-overview-card__label {
@@ -82,4 +223,2474 @@
 
 .mock-exam-cta__text p {
   margin: 0;
+}
+
+/* --------------------------------------------------------------------
+   Learning module (chapter list, chapter details, lesson page)
+   -------------------------------------------------------------------- */
+.chapter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1199px) {
+  .chapter-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .chapter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chapter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.chapter-card h3,
+.chapter-card p {
+  margin: 0;
+}
+
+.chapter-card__meta {
+  width: 100%;
+  margin-top: auto;
+}
+
+.chapter-card .btn {
+  width: 100%;
+}
+
+.learn-summary {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.learn-summary__main { flex: 1; min-width: 0; }
+
+.learn-summary__label {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.learn-summary__value {
+  margin: 2px 0 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.learn-summary__done {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+@media (max-width: 599px) {
+  .learn-summary {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+}
+
+.chapter-card {
+  position: relative;
+}
+
+/* The whole card is the link: the button stretches over it. */
+.chapter-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.chapter-card:has(.chapter-card__link):hover {
+  border-color: var(--dash-color, var(--color-primary));
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.chapter-card__done {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.chapter-card--done .progress-track__fill {
+  background-color: var(--color-success);
+}
+
+.chapter-card__soon {
+  width: 100%;
+  opacity: 0.6;
+  cursor: not-allowed;
+  justify-content: center;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.breadcrumb a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.chapter-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.chapter-header h2,
+.chapter-header p {
+  margin: 0;
+}
+
+.lesson-list {
+  display: grid;
+  gap: 12px;
+}
+
+.lesson-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+/* The lesson card itself is the link (there is no separate Open Lesson button). */
+a.lesson-row--link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.lesson-row--link:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 1px 6px rgba(37, 99, 235, 0.08);
+}
+
+a.lesson-row--link:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.lesson-row__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lesson-row__number {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.lesson-row__title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 599px) {
+  .lesson-row {
+    flex-wrap: wrap;
+  }
+
+  .lesson-row__main {
+    flex-basis: 100%;
+  }
+}
+
+/* A slightly narrower reading column for a lesson (card and the navigation under it share the same width). */
+.lesson-article,
+.lesson-nav {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lesson-article {
+  margin-bottom: 24px;
+}
+
+.lesson-article__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.lesson-article h2 {
+  margin-bottom: 20px;
+}
+
+.lesson-article__image {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.lesson-nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.lesson-nav__center {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.lesson-nav__side--end {
+  text-align: right;
+}
+
+.lesson-nav .btn {
+  white-space: normal;
+  /* Complete Lesson, Previous and Next share one size. */
+  min-width: 200px;
+  min-height: 46px;
+  line-height: 1.2;
+}
+
+@media (max-width: 767px) {
+  .lesson-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-nav__center {
+    order: -1;
+  }
+
+  .lesson-nav__side,
+  .lesson-nav__side--end {
+    text-align: center;
+  }
+
+  .lesson-nav__side .btn,
+  .lesson-nav__center .btn {
+    width: 100%;
+  }
+}
+
+.continue-label {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+/* ==========================================================================
+   Phase 5 — Standard Practice (frontend-only UI prototype)
+   Category grid, Practice Sets, Instructions, Attempt, Result, Review.
+   ========================================================================== */
+
+.practice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.practice-card h3 {
+  margin-bottom: 4px;
+}
+
+.practice-card__count {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 4px 0 16px 0;
+}
+
+.practice-card__footer {
+  width: 100%;
+  margin-top: auto;
+}
+
+.practice-card .btn {
+  width: 100%;
+}
+
+.practice-set-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.practice-set-card h3 {
+  margin-bottom: 0;
+}
+
+.practice-set-card__count {
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+/* --------------------------------------------------------------------
+   Practice Instructions
+   -------------------------------------------------------------------- */
+.practice-instructions {
+  max-width: 620px;
+  margin: 0 auto;
+  padding-top: 20px;   /* same top spacing as the Mock Exam instructions */
+}
+
+.practice-instructions h2 {
+  margin: 0;
+}
+
+/* Same subtitle treatment as the Mock Exam instructions ("Mock Exam Set 1"). */
+.practice-instructions__set {
+  margin: 2px 0 0;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+/* Two classes so it beats `.card p { margin-bottom: 0 }` from components.css. */
+.practice-instructions .practice-instructions__count {
+  margin: 4px 0 10px;   /* space between "N Questions" and the divider line below */
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+/* The Instructions list uses the same block, heading, green tick icons and spacing as "Before You Start"
+   on the Mock Exam instructions (the tick list itself is the shared .mx-intro__tips / .mx-intro__check). */
+.practice-instructions__block {
+  padding: 10px 0;
+  margin-bottom: 4px;
+  border-top: 1px solid var(--color-border);
+}
+
+.practice-instructions h3 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+/* --------------------------------------------------------------------
+   Attempt: meta row + progress bar
+   -------------------------------------------------------------------- */
+.practice-attempt {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.practice-attempt__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.practice-attempt__category {
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.practice-attempt__answered {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.practice-attempt .progress-track {
+  margin-bottom: 24px;
+}
+
+/* Gap between the question card and Previous/Next (or Submit Practice).
+   Scoped to .practice-attempt only — Learner/Lesson.aspx's own .lesson-nav
+   is untouched. */
+.practice-attempt > .lesson-nav {
+  margin-top: 16px;
+}
+
+/* --------------------------------------------------------------------
+   Question card
+   -------------------------------------------------------------------- */
+.question-card__head {
+  margin-bottom: 16px;
+}
+
+.question-card__image {
+  margin-bottom: 20px;
+}
+
+.question-card__text {
+  margin-bottom: 20px;
+}
+
+.question-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background-color: var(--color-surface);
+  font-family: inherit;
+  font-size: var(--fs-body);
+  color: var(--color-navy);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.option-row:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.option-row:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.option-row:disabled {
+  cursor: default;
+}
+
+.option-row__letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--color-bg-page);
+  font-weight: 700;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.option-row__text {
+  flex: 1 1 auto;
+}
+
+/* ✓ / ✕ at the end of an answered Practice option row. */
+.option-row__mark {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 12px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.option-row--correct .option-row__mark {
+  color: var(--color-success);
+}
+
+.option-row--incorrect .option-row__mark {
+  color: var(--color-error);
+}
+
+.option-row--correct {
+  border-color: var(--color-success);
+  background-color: #F0FDF4;
+}
+
+.option-row--correct .option-row__letter {
+  background-color: var(--color-success);
+  color: #FFFFFF;
+}
+
+.option-row--incorrect {
+  border-color: var(--color-error);
+  background-color: #FEF2F2;
+}
+
+.option-row--incorrect .option-row__letter {
+  background-color: var(--color-error);
+  color: #FFFFFF;
+}
+
+.option-row--muted {
+  opacity: 0.6;
+}
+
+/* --------------------------------------------------------------------
+   Answer feedback (incorrect answers only; a correct answer shows no
+   feedback panel — the green selected option is enough on its own)
+   -------------------------------------------------------------------- */
+.question-feedback {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.question-feedback--incorrect {
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+}
+
+.question-feedback__title {
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.question-feedback--incorrect .question-feedback__title {
+  color: var(--color-error);
+}
+
+.question-feedback__explanation-label {
+  margin-top: 4px;
+  margin-bottom: 2px;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.question-feedback__explanation {
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------
+   Result
+   -------------------------------------------------------------------- */
+/* No bottom margin on the heading, so the gap above the meta line is the same 4px as on the Mock Exam result. */
+.practice-result .practice-result__heading {
+  margin: 0;
+}
+
+/* "Category · Practice Set N" under the heading, styled like the Mock Exam result's .mx-result__exam. */
+.practice-result .practice-result__meta {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.practice-result {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* The score sits inside a circle badge (like the Mock Exam overall result, but neutral: practice has no pass/fail). */
+.practice-result__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 130px;
+  height: 130px;
+  margin: 20px auto 28px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+}
+
+.practice-result__score-value {
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  line-height: 1.4;
+  color: #FFFFFF;
+}
+
+.practice-result__score-pct {
+    font-size: var(--fs-body);
+    font-weight: 600;
+    line-height: 1.2;
+    color: #E6F0FF;
+}
+
+/* Same button row as the Mock Exam result (.mx-result .form-actions): centred, wrapping, 10px gap. */
+.practice-result .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.mx-result .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* --------------------------------------------------------------------
+   Review
+   -------------------------------------------------------------------- */
+.practice-review__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.practice-review__item h3 {
+  margin-bottom: 12px;
+}
+
+.practice-review__item .lesson-image {
+  margin-bottom: 16px;
+}
+
+.practice-review__question-text {
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.practice-review__label {
+  margin-top: 14px;
+  margin-bottom: 2px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.practice-review__answer {
+  margin-bottom: 0;
+  color: var(--color-navy);
+}
+
+.practice-review__answer--correct {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.practice-review__explanation {
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+}
+
+/* ====================================================================
+   Phase 6: Mock Examination (frontend prototype)
+   ==================================================================== */
+.mx-subtitle {
+  margin: 0 0 12px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.mx-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- landing cards ---- */
+.mx-type-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mx-type-card h3 {
+  margin-bottom: 0;
+}
+
+.mx-type-card p {
+  margin: 0;
+}
+
+.mx-type-card__subtitle {
+  color: var(--color-text-secondary);
+}
+
+.mx-type-card .btn {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.mx-type-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.mx-type-card__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.mx-type-card__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
+}
+
+.mx-type-card__row--time .mx-type-card__icon {
+  color: #B45309;
+}
+
+.mx-type-card__row--sections .mx-type-card__icon {
+  color: #15803D;
+}
+
+/* ---- attempt layout ---- */
+.mx-attempt {
+  max-width: 920px;
+  margin: -8px auto 0;
+}
+
+.mx-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 14px;
+}
+
+.mx-header__title {
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.mx-header__position {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mx-header__progress {
+  grid-column: 1 / -1;
+}
+
+.mx-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background-color: var(--color-navy);
+  color: #FFFFFF;
+}
+
+.mx-timer__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+.mx-timer__value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mx-timer--warning {
+  background-color: #B45309;
+}
+
+.mx-timer--critical {
+  background-color: var(--color-error);
+}
+
+.mx-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 16px;
+  align-items: start;
+}
+
+.mx-question-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mx-section-badge--theory {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.mx-flag--on {
+  background-color: #FEF9C3;
+  border-color: var(--color-warning);
+  color: #92400E;
+}
+
+.mx-question-nav {
+  margin-top: 12px;
+}
+
+/* Selected (not correct/incorrect) option: exam mode never reveals correctness. */
+.option-row--selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.option-row--selected .option-row__letter {
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+}
+
+/* ---- navigator ---- */
+.mx-nav {
+  padding: 12px;
+  position: sticky;
+  top: 16px;
+}
+
+.mx-nav__toggle {
+  display: none;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--color-navy);
+  cursor: pointer;
+}
+
+.mx-nav__summary {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mx-nav__heading {
+    margin: 2px 0 10px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-navy);
+}
+
+.mx-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--color-text-secondary);
+}
+
+.mx-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mx-legend__swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  flex: 0 0 auto;
+}
+
+.mx-legend__swatch--current { background-color: var(--color-primary); border-color: var(--color-primary); }
+.mx-legend__swatch--answered { background-color: var(--color-success); border-color: var(--color-success); }
+.mx-legend__swatch--unanswered { background-color: #E2E8F0; }
+.mx-legend__swatch--flagged { background-color: var(--color-accent-yellow); border-color: #CA8A04; }
+
+.mx-nav__scroll {
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+}
+
+.mx-nav__group {
+    margin: 15px 0 10px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+    color: var(--color-text-secondary);
+}
+
+.mx-nav__group:first-child {
+  margin-top: 0;
+}
+
+.mx-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.mx-q {
+  position: relative;
+  min-height: 30px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: #E2E8F0;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-navy);
+  cursor: pointer;
+}
+
+.mx-q:hover {
+  border-color: var(--color-primary);
+}
+
+.mx-q:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.mx-q--answered {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: #FFFFFF;
+}
+
+.mx-q--flagged {
+  background-color: var(--color-accent-yellow);
+  border-color: #CA8A04;
+  color: var(--color-navy);
+}
+
+.mx-q--current {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #FFFFFF;
+}
+
+/* Current + flagged: keep current dominant while retaining the flag cue. */
+.mx-q--current.mx-q--flagged {
+  background-color: var(--color-primary);
+  border-color: #CA8A04;
+  box-shadow: inset 0 0 0 2px var(--color-accent-yellow);
+  color: #FFFFFF;
+}
+
+.mx-nav__submit {
+  width: 100%;
+  margin-top: 14px;
+}
+
+/* ---- result ---- */
+.mx-result {
+  max-width: 680px;
+}
+
+    .mx-result .mx-result__heading {
+        margin: 0;
+        font-size: 1.8125rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+.mx-result__exam {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mx-result .alert {
+  margin: 16px 0 0;
+  text-align: left;
+}
+
+.mx-result__overall-label {
+  margin-top: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mx-result__overall {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 112px;
+  height: 112px;
+  margin: 10px auto 24px;
+  border-radius: 50%;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.mx-result__overall--pass {
+  background-color: #DCFCE7;
+  color: #166534;
+}
+
+.mx-result__overall--fail {
+    background-color: #DC2626;
+    color: #FFF;
+}
+
+.mx-result__sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.mx-result__sections .stat-card {
+  position: relative;
+  padding-right: 108px;
+}
+
+.mx-result__req {
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.mx-pass-badge {
+  display: inline-block;
+  margin: 6px 0 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.mx-result__sections .mx-pass-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  margin: 0;
+}
+
+.mx-pass-badge--pass { background-color: #DCFCE7; color: #166534; }
+.mx-pass-badge--fail { background-color: #FEE2E2; color: #991B1B; }
+
+/* ---- review ---- */
+.mx-review {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.mx-review-item__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-bottom: 14px;
+}
+
+.mx-review-item__head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.mx-review-item__head .badge {
+  padding: 2px 8px;
+  font-size: 0.8rem;
+}
+
+.mx-outcome {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: var(--fs-small);
+}
+
+.mx-outcome--correct { color: #166534; }
+.mx-outcome--incorrect { color: #991B1B; }
+.mx-outcome--unanswered {
+    color: #D98B00;
+}
+
+.mx-review-item--correct {
+    border-left: 4px solid var(--color-success);
+}
+
+.mx-review-item--incorrect {
+    border-left: 4px solid var(--color-error);
+}
+
+.mx-review-item--unanswered {
+    border-left: 4px solid var(--color-warning);
+}
+
+/* Compact review cards (Mock Exam Review Answers only; Practice review is untouched) */
+.mx-review .practice-review__list {
+  gap: 12px;
+}
+
+.mx-review .mx-review-item {
+  padding: 16px 18px;
+}
+
+.mx-review .mx-review-item .lesson-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, 240px);
+  max-height: 170px;
+  margin: 0 auto 10px;
+  object-fit: contain;
+}
+
+.mx-review .mx-review-item .practice-review__question-text {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.mx-review .mx-review-item .practice-review__label {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 0.8125rem;
+}
+
+.mx-review .mx-review-item .practice-review__explanation {
+  font-weight: 500;
+}
+
+    .mx-review .mx-review-item .practice-review__answer {
+        margin: 0;
+        line-height: 1.45;
+        font-size: 0.85rem;
+    }
+
+@media (max-width: 991px) {
+  .mx-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .mx-nav {
+    position: static;
+    order: -1;
+  }
+
+  .mx-nav__toggle {
+    display: flex;
+  }
+
+  .mx-nav__panel {
+    display: none;
+    margin-top: 12px;
+  }
+
+  .mx-nav__panel.is-open {
+    display: block;
+  }
+
+  .mx-nav__heading {
+    display: none;
+  }
+
+  .mx-grid {
+    grid-template-columns: repeat(auto-fill, minmax(32px, 36px));
+    justify-content: start;
+  }
+
+  .mx-nav__scroll {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 599px) {
+  .mx-result__sections {
+    grid-template-columns: 1fr;
+  }
+
+  .mx-timer__value {
+    font-size: 1.4rem;
+  }
+}
+
+/* Mock Exam + Practice attempt: shared compact question image and question text */
+.mx-attempt .question-card__image,
+.practice-attempt .question-card__image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.mx-attempt .question-card__image[hidden],
+.practice-attempt .question-card__image[hidden] {
+  display: none;
+}
+
+.mx-attempt .question-card__image .lesson-image,
+.practice-attempt .question-card__image .lesson-image {
+  width: auto;
+  height: auto;
+  max-width: min(100%, 280px);
+  max-height: 200px;
+  object-fit: contain;
+}
+
+.mx-attempt .question-card__head,
+.practice-attempt .question-card__head {
+  margin-bottom: 12px;
+}
+
+.mx-attempt .question-card__text,
+.practice-attempt .question-card__text {
+  font-size: clamp(1.05rem, 0.98rem + 0.3vw, 1.35rem);
+  margin-top: 26px;
+  margin-bottom: 24px;
+}
+
+/* Mock Exam attempt only: tighter gap between options */
+.mx-attempt .question-options {
+  gap: 8px;
+}
+
+/* ---- Mock Exam Sets page: compact set cards, 3 / 2 / 1 per row ---- */
+.mx-sets-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.mx-set-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.mx-set-card h3 {
+  margin: 0;
+}
+
+.mx-set-card .btn {
+  align-self: flex-start;
+}
+
+.mx-sets-actions {
+  margin-top: 24px;
+}
+
+@media (max-width: 1199px) {
+  .mx-sets-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .mx-sets-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- Mock Exam instructions / start screen: one flat card, divider-separated blocks ---- */
+.mx-intro {
+  max-width: 700px;
+  margin: 0 auto;
+  padding-top: 8px;
+  padding-bottom: 20px;
+}
+
+.mx-intro[hidden] {
+  display: none;
+}
+
+.mx-intro__block {
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.mx-intro__header {
+  padding-top: 12px;
+  border-top: 0;
+}
+
+.mx-intro h2 {
+  margin: 0;
+}
+
+.mx-intro h3 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.mx-intro__set {
+  margin: 2px 0 0;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.mx-intro__stats {
+  display: grid;
+  grid-template-columns: 0.9fr 0.9fr 1.6fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.mx-intro__stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--stat-border);
+  border-radius: 10px;
+  background-color: var(--stat-bg);
+}
+
+.mx-intro__stat--questions { --stat-bg: #EFF6FF; --stat-border: #DBEAFE; --stat-fg: #1D4ED8; }
+.mx-intro__stat--minutes { --stat-bg: #FFFBEB; --stat-border: #FDE68A; --stat-fg: #B45309; }
+.mx-intro__stat--pass { --stat-bg: #F0FDF4; --stat-border: #BBF7D0; --stat-fg: #15803D; }
+
+.mx-intro__stat-value {
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: var(--stat-fg);
+}
+
+.mx-intro__stat-label {
+  margin-top: 2px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.mx-intro .mx-intro__stat-title {
+  margin: 0 0 6px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.mx-intro__sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mx-intro__section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background-color: var(--color-surface);
+}
+
+.mx-intro__section-no {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.mx-intro__section-text {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.mx-intro__section-text strong {
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.mx-intro__section-text span {
+  margin-left: auto;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.mx-intro__reqs {
+  margin: 0;
+}
+
+.mx-intro__req {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0;
+}
+
+.mx-intro__req dt {
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.mx-intro__req dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--stat-fg, #15803D);
+  white-space: nowrap;
+}
+
+.mx-intro__tips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mx-intro__tips li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+  color: var(--color-navy);
+}
+
+.mx-intro__check {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: var(--color-success);
+}
+
+.mx-intro__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 0;
+}
+
+@media (max-width: 599px) {
+  .mx-intro__stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mx-intro__section-text {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mx-intro__section-text span {
+    margin-left: 0;
+  }
+
+  .mx-intro__actions .btn {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
+
+/* ---- Mock Exam result: Section Scores ---- */
+.mx-result__scores {
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background-color: var(--color-surface);
+  text-align: left;
+}
+
+.mx-result__scores h3 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.mx-result__score-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mx-result__score-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.mx-result__score-name {
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.mx-result__score-head strong {
+  color: var(--color-navy);
+  white-space: nowrap;
+}
+
+.mx-review__top {
+  margin-bottom: 12px;
+}
+
+/* ====================================================================
+   Hidden Road Sign Game (Learner)
+   ==================================================================== */
+.hrs-hub-card p {
+  margin-bottom: 14px;
+}
+
+/* ---- game screen ---- */
+.hrs-game {
+  max-width: 1100px;
+}
+
+.hrs-game__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 6px;
+}
+
+.hrs-game__bar h2 {
+  margin: 0;
+}
+
+/* Found progress is the most prominent element above the scene. */
+.hrs-progress {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1px solid #BBF7D0;
+  border-radius: 999px;
+  background-color: #F0FDF4;
+  color: #166534;
+}
+
+.hrs-progress__count {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hrs-progress__label {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hrs-game__hint {
+  margin: 0 0 14px;
+  color: var(--color-text-secondary);
+}
+
+/* The scene is responsive and uncropped, so the percentage-positioned road signs stay aligned at
+   any width. Nothing here (cursor, hover, outline) singles out a road sign from the scene. */
+.hrs-scene {
+  position: relative;
+  line-height: 0;
+  cursor: default;
+  touch-action: manipulation;   /* no double-tap zoom or tap delay while searching the scene */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hrs-scene > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  -webkit-user-drag: none;
+}
+
+/* The road sign images laid over the scene. Purely visual: the scene script handles the clicks. */
+.hrs-signs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hrs-sign {
+  position: absolute;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* A road sign that has been found AND answered: a thin ring round the sign and a small check badge.
+   The sign itself is not tinted or covered. */
+.hrs-found {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid var(--color-success);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.hrs-found__tag {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* ---- attempt modal ---- */
+body.hrs-modal-open {
+  overflow: hidden;
+}
+
+.hrs-modal {
+  max-width: 520px;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);   /* phones: the visible height, not the height under the browser bar */
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.hrs-modal__tag {
+  margin: 0 0 10px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-success);
+}
+
+.hrs-modal__sign {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 140px;
+  max-height: 120px;
+  margin: 0 auto 14px;
+  object-fit: contain;
+}
+
+.hrs-modal__sign[hidden] {
+  display: none;
+}
+
+.hrs-modal__question {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+.hrs-options {
+  gap: 8px;
+}
+
+.hrs-option__mark {
+  margin-left: auto;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.option-row--correct .hrs-option__mark {
+  color: var(--color-success);
+}
+
+.option-row--incorrect .hrs-option__mark {
+  color: var(--color-error);
+}
+
+.hrs-feedback {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  background-color: #FEF2F2;
+}
+
+.hrs-feedback[hidden],
+#hrsExplanationBlock[hidden],
+.hrs-modal__error[hidden] {
+  display: none;
+}
+
+.hrs-feedback__title {
+  margin: 0;
+  font-weight: 800;
+  color: #991B1B;
+}
+
+.hrs-feedback__label {
+  margin: 10px 0 2px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.hrs-feedback__text {
+  margin: 0;
+  color: var(--color-navy);
+  white-space: pre-line;
+}
+
+.hrs-modal__error {
+  margin: 12px 0 0;
+}
+
+.hrs-modal__actions {
+  position: sticky;
+  bottom: -24px;               /* stays in view while a long question scrolls */
+  display: flex;
+  justify-content: flex-end;
+  margin: 18px -24px -24px;
+  padding: 12px 24px 24px;
+  background-color: var(--color-surface);
+}
+
+/* ---- result ---- */
+.hrs-result {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hrs-result__heading {
+  margin: 0 0 4px;
+  font-size: 1.75rem;
+}
+
+.hrs-result__set {
+  margin: 0 0 24px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.hrs-result__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  max-width: 520px;
+  margin: 0 auto 28px;
+  text-align: left;
+}
+
+.hrs-result .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+@media (max-width: 479px) {
+  .hrs-result__stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- review ---- */
+.hrs-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.hrs-result .hrs-result__set {
+  margin-bottom: 28px;
+}
+
+.hrs-modal__actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ====================================================================
+   Progress (Learner)
+   ==================================================================== */
+.progress-card .progress-block + .progress-block {
+  margin-top: 22px;
+}
+
+.progress-block--chapter {
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.progress-block__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.progress-block__title {
+  font-weight: 700;
+  color: var(--color-navy);
+  overflow-wrap: anywhere;
+}
+
+.progress-block__percent {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.progress-block__meta {
+  margin-bottom: 8px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.progress-card .progress-note {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.progress-card .progress-note:not(:last-child) {
+  margin-bottom: 16px;
+}
+
+.history-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Older games stay hidden until the list is expanded. */
+.history-list:not(.is-expanded) .history-item--extra {
+  display: none;
+}
+
+.history-item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.history-item__title {
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.history-item__score {
+  margin-top: 0;
+  color: var(--color-navy);
+}
+
+.history-item__date {
+  margin-top: 0;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.history-more {
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 479px) {
+  .history-item {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---- Progress page icons ---- */
+.progress-stats .stat-card__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.heading-icon {
+  display: inline-flex;
+  margin-right: 8px;
+  vertical-align: -3px;
+  color: var(--color-primary);
+}
+
+/* "View Result" in the game history: green background, border and text. */
+.history-item .btn-result {
+  background-color: #F0FDF4;
+  border-color: var(--color-success);
+  color: #166534;
+}
+
+.history-item .btn-result:hover {
+  background-color: #DCFCE7;
+  border-color: #15803D;
+  color: #14532D;
+}
+
+/* Practice category card: the icon and the title sit side by side. */
+.practice-card__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.practice-card__head .card-icon {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+}
+
+.practice-card__head h3 {
+  margin: 0;
+}
+
+/* "< Back to Chapter" text link under the breadcrumb of a lesson. */
+.lesson-back-link {
+  display: block;
+  width: fit-content;
+  margin: 0 0 16px;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lesson-back-link:hover {
+  text-decoration: underline;
+}
+
+/* Previous / Next lesson buttons: allow the text to wrap on very narrow screens. */
+.lesson-nav-btn {
+  max-width: 100%;
+  white-space: normal;
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.lesson-nav-btn:hover {
+  background-color: #DBEAFE;
+  border-color: var(--color-primary-dark);
+  color: var(--color-primary-dark);
+}
+
+/* ---- cross-page consistency (learning, mock exam, game) ---- */
+.chapter-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.chapter-card {
+  border-top: 3px solid var(--dash-color, var(--color-primary));
+}
+
+.chapter-card .progress-track__fill {
+  background-color: var(--dash-color, var(--color-primary));
+}
+
+.chapter-grid > .chapter-card:nth-child(4n+2) { --dash-color: #15803D; --dash-tint: #F0FDF4; }
+.chapter-grid > .chapter-card:nth-child(4n+3) { --dash-color: #B45309; --dash-tint: #FFFBEB; }
+.chapter-grid > .chapter-card:nth-child(4n+4) { --dash-color: #7C3AED; --dash-tint: #F5F3FF; }
+
+.mx-type-card {
+  border-top: 3px solid var(--dash-color, var(--color-primary));
+}
+
+.mx-type-card .dash-icon {
+  margin-bottom: 10px;
+}
+
+.hrs-game__title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hrs-game__title .dash-icon {
+  --dash-color: #92400E;
+  --dash-tint: #FEF9C3;
+}
+
+.progress-stats .stat-card__label {
+  display: block;
+  padding-right: 48px;
+}
+
+/* ---- Hidden Road Sign game on a phone ---- */
+.hrs-rotate-hint {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-card);
+  background-color: #FFFBEB;
+  color: #92400E;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.hrs-rotate-hint svg {
+  flex: none;
+  transform: rotate(90deg);
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .hrs-rotate-hint {
+    display: flex;
+  }
+
+  .hrs-game__bar h2 {
+    font-size: 1.25rem;
+  }
+
+  .hrs-modal {
+    padding: 18px;
+  }
+
+  .hrs-modal__actions {
+    bottom: -18px;
+    margin: 14px -18px -18px;
+    padding: 12px 18px 18px;
+  }
+
+  .hrs-modal__actions .btn {
+    width: 100%;
+  }
+}
+
+/* Sideways phone: keep the dialog short enough to fit and the scene as large as possible. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .hrs-game__bar {
+    margin-bottom: 2px;
+  }
+
+  .hrs-game__hint {
+    margin-bottom: 8px;
+  }
+
+  .hrs-modal__sign {
+    max-height: 70px;
+    margin-bottom: 8px;
+  }
+
+  .hrs-modal__question {
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+}
+
+/* ---- Mock Exam + Practice attempt on a phone ----
+   Keep the timer / progress in view, put Previous and Next side by side, and pin them to the bottom
+   of the screen so the learner never has to scroll past the options to move on. */
+@media (max-width: 767px) {
+  .mx-header {
+    position: sticky;
+    top: 64px;                   /* just under the sticky app header */
+    z-index: 10;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  }
+
+  .mx-header__title {
+    font-size: var(--fs-small);
+  }
+
+  .mx-timer {
+    padding: 4px 10px;
+  }
+
+  .mx-timer__label {
+    font-size: 0.65rem;
+  }
+
+  .mx-timer__value {
+    font-size: 1.25rem;
+  }
+
+  .mx-flag {
+    min-height: 40px;
+    padding: 8px 16px;
+  }
+
+  .mx-question-nav.lesson-nav,
+  .practice-attempt > .lesson-nav {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 12px -4px 0;
+    padding: 10px 4px calc(10px + env(safe-area-inset-bottom, 0px));
+    background-color: var(--color-bg-page);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .mx-question-nav .lesson-nav__center,
+  .practice-attempt > .lesson-nav .lesson-nav__center {
+    display: none;
+  }
+
+  .mx-question-nav .lesson-nav__side .btn,
+  .practice-attempt > .lesson-nav .lesson-nav__side .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mx-question-nav .lesson-nav__side--end,
+  .practice-attempt > .lesson-nav .lesson-nav__side--end {
+    text-align: right;
+  }
+
+  .mx-attempt .question-card,
+  .practice-attempt .question-card {
+    padding: 16px;
+  }
+
+  .question-card__text {
+    font-size: 1.05rem;
+    margin-bottom: 14px;
+  }
+}
+
+/* Dialogs on a phone: use the visible height, not the height under the browser bar. */
+.modal-panel {
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+
+.lesson-actions {
+  scroll-margin-top: 90px;   /* clear the sticky header when the page jumps here */
+}
+
+.lesson-actions > [role="status"] {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lesson-actions > .alert {
+  display: block;
+  margin-bottom: 16px;
+}
+
+/* Practice page: one start button per set on each category card */
+.practice-card__sets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.practice-card__sets .btn {
+  flex: 1 1 96px;
+  justify-content: center;
+}
+
+.practice-card__all {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--color-primary);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.practice-card__all:hover {
+  text-decoration: underline;
+}
+
+.practice-card__soon {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- Practice: instructions chips, result breakdown, review filter ---- */
+.practice-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 16px;
+}
+
+.practice-chip {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.practice-result .practice-result__message {
+  margin: 0 0 16px;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.practice-result__breakdown {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.practice-result__stat {
+  flex: 1 1 0;
+  max-width: 120px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  background-color: var(--color-bg-page);
+  border: 1px solid var(--color-border);
+}
+
+.practice-result__stat strong {
+  display: block;
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+.practice-result__stat span {
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.practice-result__stat--correct strong { color: var(--color-success); }
+.practice-result__stat--incorrect strong { color: var(--color-error); }
+.practice-result__stat--unanswered strong { color: var(--color-text-secondary); }
+
+.practice-review__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-navy);
+  cursor: pointer;
+}
+
+/* ---- Mock Exam: result summary line, review flag marker ---- */
+.mx-result__weak {
+  margin: 0 0 16px;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.mx-review-flag {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--color-warning, #B45309);
+}
+
+/* ---- Progress page: chapter links, done state, game summary, actions ---- */
+.progress-block__link {
+  color: inherit;
+}
+
+.progress-block__link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.progress-block--done .progress-track__fill {
+  background-color: var(--color-success);
+}
+
+.progress-block--done .progress-block__percent {
+  color: var(--color-success);
+}
+
+.progress-card__continue {
+  margin-top: 20px;
+}
+
+.progress-note__action {
+  margin-top: 12px;
+}
+
+.history-summary {
+  margin-bottom: 14px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Road Sign Game: how-it-works strip, best score, tap ripple, review filter ---- */
+.game-howto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.game-howto li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-howto__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.game-best {
+  margin: 0;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.hrs-result .hrs-result__best {
+  margin: 0 0 20px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.hrs-miss {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.35);
+  pointer-events: none;
+  animation: hrs-miss 0.55s ease-out forwards;
+}
+
+@keyframes hrs-miss {
+  from { opacity: 0.9; transform: scale(0.4); }
+  to { opacity: 0; transform: scale(1.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hrs-miss { animation: none; opacity: 0; }
+}
+
+.hrs-review .practice-review__filter {
+  display: inline-flex;
+  margin-bottom: 14px;
+}
+
+.practice-review__list.is-mistakes-only .mx-review-item--correct {
+  display: none;
+}
+
+/* ---- Review Answers: one layout for Practice, Mock Exam and Road Sign Game ---- */
+.mx-review .page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 4px;
+}
+
+.mx-review .page-toolbar h2 {
+  margin: 0;
+}
+
+.mx-review__sub {
+  margin: 0 0 18px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.hrs-review .practice-review__filter {
+  margin-bottom: 0;
 }

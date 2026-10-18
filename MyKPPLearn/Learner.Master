@@ -11,9 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
 
     <link rel="stylesheet" href="~/Content/css/site.css" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/components.css" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/app-shell.css" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/learner.css" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/components.css?v=20261017-promo" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/forms.css?v=20261018-focus" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/app-shell.css?v=20261018-admindash" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/learner.css?v=20261018-review" runat="server" />
 
     <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
 </head>
@@ -29,17 +30,18 @@
 
                 <nav class="app-sidebar__nav" aria-label="Learner">
                     <ul class="app-nav-list">
-                        <li><a id="navDashboard" runat="server" class="app-nav-link" href="~/Learner/Dashboard.aspx">Dashboard</a></li>
-                        <li><a id="navLearn" runat="server" class="app-nav-link" href="~/Learner/Learn.aspx">Learn</a></li>
-                        <li><a id="navPractice" runat="server" class="app-nav-link" href="~/Learner/Practice.aspx">Practice</a></li>
-                        <li><a id="navMockExam" runat="server" class="app-nav-link" href="~/Learner/MockExam.aspx">Mock Exam</a></li>
-                        <li><a id="navProgress" runat="server" class="app-nav-link" href="~/Learner/Progress.aspx">Progress</a></li>
-                        <li><a id="navProfile" runat="server" class="app-nav-link" href="~/Learner/Profile.aspx">Profile</a></li>
+                        <li><a id="navDashboard" runat="server" class="app-nav-link" href="~/Learner/Dashboard.aspx"><svg class="app-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a></li>
+                        <li><a id="navLearn" runat="server" class="app-nav-link" href="~/Learner/Learn.aspx"><svg class="app-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M20 17v4H6.5A2.5 2.5 0 0 1 4 19.5"/></svg>Learning</a></li>
+                        <li><a id="navPractice" runat="server" class="app-nav-link" href="~/Learner/Practice.aspx"><svg class="app-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14l2 2 4-4"/></svg>Practice</a></li>
+                        <li><a id="navGame" runat="server" class="app-nav-link" href="~/Learner/Game.aspx"><svg class="app-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 12h4M8 10v4"/><path d="M15 13h.01M18 11h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.2l-1.5 7A3 3 0 0 0 4.2 19a3 3 0 0 0 2.4-1.2l1.4-2h8l1.4 2a3 3 0 0 0 2.4 1.2 3 3 0 0 0 2.9-3.8l-1.5-7A4 4 0 0 0 17.3 5z"/></svg>Road Sign Game</a></li>
+                        <li><a id="navMockExam" runat="server" class="app-nav-link" href="~/Learner/MockExam.aspx"><svg class="app-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg>Mock Exam</a></li>
+                        <li><a id="navProgress" runat="server" class="app-nav-link" href="~/Learner/Progress.aspx"><svg class="app-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></svg>Progress</a></li>
+                        <li><a id="navProfile" runat="server" class="app-nav-link" href="~/Learner/Profile.aspx"><svg class="app-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a></li>
                     </ul>
                 </nav>
 
                 <div class="app-sidebar__footer">
-                    <a class="app-nav-link app-nav-link--logout" href="~/Logout.aspx" runat="server">Logout</a>
+                    <a class="app-nav-link app-nav-link--logout" href="~/Logout.aspx" runat="server"><svg class="app-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Logout</a>
                 </div>
             </aside>
 
@@ -53,7 +55,7 @@
                     </div>
 
                     <a class="app-user" href="~/Learner/Profile.aspx" runat="server">
-                        <span class="app-user__avatar"><asp:Literal ID="litAvatarInitials" runat="server" /></span>
+                        <span class="app-user__avatar"><img id="imgAvatar" runat="server" class="app-user__avatar-img" alt="" visible="false" /><asp:Literal ID="litAvatarInitials" runat="server" /></span>
                         <span class="app-user__info">
                             <span class="app-user__name"><asp:Literal ID="litFullName" runat="server" /></span>
                             <span class="app-user__role"><asp:Literal ID="litRole" runat="server" /></span>
@@ -67,7 +69,8 @@
             </div>
         </div>
     </form>
-    <script src="<%= ResolveUrl("~/Scripts/app-shell.js") %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/app-shell.js") + "?v=20261011-nav" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/confirm-modal.js") + "?v=20261019" %>"></script>
     <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />
 </body>
 </html>

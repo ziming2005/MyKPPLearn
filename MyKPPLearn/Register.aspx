@@ -7,11 +7,10 @@
         <div class="container">
             <div class="card auth-card">
                 <div class="auth-card__header">
+                    <span class="auth-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="4" /><path d="M2 21a8 8 0 0 1 16 0M19 8v6M16 11h6" /></svg></span>
                     <h1>Create Account</h1>
-                    <p>Start learning Malaysian driving theory, practise by topic, and prepare for mock exams.</p>
+                    <p>Create your learner account.</p>
                 </div>
-
-                <asp:ValidationSummary ID="valSummary" runat="server" CssClass="validation-summary" HeaderText="Please fix the following:" DisplayMode="BulletList" />
 
                 <asp:Label ID="lblFormError" runat="server" CssClass="alert alert-error" Visible="false" EnableViewState="false" />
 
@@ -34,7 +33,7 @@
                         <asp:TextBox ID="txtPassword" runat="server" CssClass="form-input" TextMode="Password" autocomplete="new-password" MaxLength="100" />
                         <small class="form-hint">At least 8 characters, including an uppercase letter, a lowercase letter, and a number.</small>
                         <asp:RequiredFieldValidator ID="rfvPassword" runat="server" ControlToValidate="txtPassword" CssClass="field-error" Display="Dynamic" ErrorMessage="Password is required." SetFocusOnError="true" />
-                        <asp:RegularExpressionValidator ID="revPassword" runat="server" ControlToValidate="txtPassword" CssClass="field-error" Display="Dynamic" ErrorMessage="Password must be at least 8 characters and include an uppercase letter, lowercase letter, and number." ValidationExpression="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$" />
+                        <asp:RegularExpressionValidator ID="revPassword" runat="server" ControlToValidate="txtPassword" CssClass="field-error" Display="Dynamic" /> <%-- rule and message come from Security/PasswordPolicy.cs (set in Register.aspx.cs) --%>
                     </div>
 
                     <div class="form-group">
@@ -48,7 +47,7 @@
                 </asp:Panel>
 
                 <div class="auth-card__footer">
-                    Already have an account? <a href="Login.aspx">Login</a>
+                    Already registered? <a href="Login.aspx">Login</a>
                 </div>
             </div>
         </div>

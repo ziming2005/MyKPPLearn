@@ -36,6 +36,11 @@ namespace MyKPPLearn
         protected global::System.Web.UI.HtmlControls.HtmlAnchor navPractice;
 
         /// <summary>
+        /// navGame control.
+        /// </summary>
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor navGame;
+
+        /// <summary>
         /// navMockExam control.
         /// </summary>
         protected global::System.Web.UI.HtmlControls.HtmlAnchor navMockExam;
@@ -54,6 +59,11 @@ namespace MyKPPLearn
         /// litPageTitle control.
         /// </summary>
         protected global::System.Web.UI.WebControls.Literal litPageTitle;
+
+        /// <summary>
+        /// imgAvatar control.
+        /// </summary>
+        protected global::System.Web.UI.HtmlControls.HtmlImage imgAvatar;
 
         /// <summary>
         /// litAvatarInitials control.

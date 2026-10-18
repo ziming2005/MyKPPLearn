@@ -4,13 +4,46 @@
    ========================================================================== */
 
 .auth-section {
-  padding-top: 64px;
-  padding-bottom: 64px;
+  padding-top: 56px;
+  padding-bottom: 56px;
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-bg-page) 60%);
+}
+
+@media (max-width: 767px) {
+  .auth-section {
+    padding-top: 32px;
+    padding-bottom: 40px;
+  }
 }
 
 .auth-card {
   max-width: 500px;
   margin: 0 auto;
+  padding: 36px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
+}
+
+@media (max-width: 599px) {
+  .auth-card {
+    padding: 24px 20px;
+  }
+}
+
+.auth-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.auth-card__icon svg {
+  width: 26px;
+  height: 26px;
 }
 
 .auth-card__header {
@@ -19,7 +52,8 @@
 }
 
 .auth-card__header h1 {
-  margin-bottom: 8px;
+  font-size: 1.75rem;
+  margin-bottom: 6px;
 }
 
 .auth-card__header p {
@@ -57,11 +91,43 @@
 .form-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .form-input.input-invalid {
   border-color: var(--color-error);
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field .form-input {
+  padding-right: 64px;
+}
+
+.password-field__toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.password-field__toggle:hover {
+  background-color: var(--color-primary-light);
+}
+
+.password-field__toggle:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 1px;
 }
 
 .form-hint {
@@ -118,6 +184,12 @@
   color: var(--color-success);
 }
 
+.alert-warning {
+  background-color: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+}
+
 /* --------------------------------------------------------------------
    Auth footer links
    -------------------------------------------------------------------- */
@@ -130,7 +202,11 @@
 
 .auth-card__footer a {
   color: var(--color-primary);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.auth-card .btn-block {
+  margin-top: 8px;
 }
 
 .auth-card__footer a:hover {

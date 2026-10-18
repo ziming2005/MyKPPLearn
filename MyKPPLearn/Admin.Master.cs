@@ -17,7 +17,7 @@ namespace MyKPPLearn
 
             litFullName.Text = fullName;
             litRole.Text = SessionHelper.CurrentRole(Session);
-            litAvatarInitials.Text = AvatarInitials.From(fullName);
+            ProfileAvatar.Bind(Session, fullName, litAvatarInitials, imgAvatar);
 
             SetActiveNav();
         }
@@ -34,33 +34,20 @@ namespace MyKPPLearn
         {
             string currentPage = System.IO.Path.GetFileName(Request.Path);
 
-            bool isPracticeSets = IsPage(currentPage, "PracticeSets.aspx");
-            bool isHiddenRoadSign = IsPage(currentPage, "HiddenRoadSigns.aspx");
-            bool isRoadSignAssets = IsPage(currentPage, "RoadSignAssets.aspx");
-            bool isPracticeManagementOverview = IsPage(currentPage, "PracticeManagement.aspx");
-            bool isPracticeManagementChild = isPracticeSets || isHiddenRoadSign || isRoadSignAssets || isPracticeManagementOverview;
-
             ApplyActiveState(navDashboard, IsPage(currentPage, "Dashboard.aspx"));
-            ApplyActiveState(navLearnerRecords, IsPage(currentPage, "LearnerRecords.aspx"));
-            ApplyActiveState(navLearning, IsPage(currentPage, "Learning.aspx"));
-            ApplyActiveState(navQuestionBank, IsPage(currentPage, "QuestionBank.aspx"));
-            ApplyActiveState(navMockExam, IsPage(currentPage, "MockExam.aspx"));
+            ApplyActiveState(navLearnerRecords, IsPage(currentPage, "LearnerRecords.aspx") || IsPage(currentPage, "LearnerRecordDetails.aspx"));
             ApplyActiveState(navProfile, IsPage(currentPage, "Profile.aspx"));
 
-            ApplySubActiveState(navPracticeSets, isPracticeSets);
-            ApplySubActiveState(navHiddenRoadSign, isHiddenRoadSign);
-            ApplySubActiveState(navRoadSignAssets, isRoadSignAssets);
+            // Learning / Assessment / Game are plain labels: only the page link itself is highlighted.
+            ApplySubActiveState(navChapters, IsPage(currentPage, "LearningChapters.aspx"));
+            ApplySubActiveState(navLessons, IsPage(currentPage, "Lessons.aspx"));
 
-            string toggleClass = isPracticeManagementChild
-                ? "app-nav-link app-nav-toggle is-active"
-                : "app-nav-link app-nav-toggle";
+            ApplySubActiveState(navPracticeSets, IsPage(currentPage, "PracticeSets.aspx"));
+            ApplySubActiveState(navQuestionBank, IsPage(currentPage, "QuestionBank.aspx"));
+            ApplySubActiveState(navMockExam, IsPage(currentPage, "MockExam.aspx"));
 
-            practiceManagementToggle.Attributes["class"] = toggleClass;
-            practiceManagementToggle.Attributes["aria-expanded"] = isPracticeManagementChild ? "true" : "false";
-
-            practiceManagementSubmenu.Attributes["class"] = isPracticeManagementChild
-                ? "app-submenu is-open"
-                : "app-submenu";
+            ApplySubActiveState(navHiddenRoadSign, IsPage(currentPage, "HiddenRoadSigns.aspx"));
+            ApplySubActiveState(navRoadSignAssets, IsPage(currentPage, "RoadSignAssets.aspx"));
         }
 
         private static bool IsPage(string currentPage, string pageName)

@@ -1,4 +1,5 @@
 using System;
+using MyKPPLearn.Security;
 
 namespace MyKPPLearn
 {
@@ -14,15 +15,33 @@ namespace MyKPPLearn
 
             NavHome.NavigateUrl = homeUrl;
             SetSectionLink(NavLearn, homeBaseUrl, "learn");
-            SetSectionLink(NavPractice, homeBaseUrl, "practice");
+            SetSectionLink(NavGame, homeBaseUrl, "road-sign-game");
             SetSectionLink(NavMockExam, homeBaseUrl, "mock-exam");
-            SetSectionLink(NavProgress, homeBaseUrl, "progress");
+            SetSectionLink(NavFaq, homeBaseUrl, "faq");
 
             FooterNavHome.NavigateUrl = homeUrl;
             SetSectionLink(FooterNavLearn, homeBaseUrl, "learn");
-            SetSectionLink(FooterNavPractice, homeBaseUrl, "practice");
+            SetSectionLink(FooterNavGame, homeBaseUrl, "road-sign-game");
             SetSectionLink(FooterNavMockExam, homeBaseUrl, "mock-exam");
-            SetSectionLink(FooterNavProgress, homeBaseUrl, "progress");
+            SetSectionLink(FooterNavFaq, homeBaseUrl, "faq");
+
+            // On the sign-in pages the footer shrinks to the note.
+            bool isLogin = string.Equals(currentPage, "Login.aspx", StringComparison.OrdinalIgnoreCase);
+            bool isRegister = string.Equals(currentPage, "Register.aspx", StringComparison.OrdinalIgnoreCase);
+
+            footerTop.Visible = !(isLogin || isRegister);
+
+            string dashboard = SessionHelper.DashboardUrl(Session);
+
+            if (dashboard != null)
+            {
+                phHeaderGuest.Visible = false;
+                lnkHeaderDashboard.Visible = true;
+                lnkHeaderDashboard.HRef = ResolveUrl(dashboard);
+                phFooterGuest.Visible = false;
+                liFooterDashboard.Visible = true;
+                lnkFooterDashboard.HRef = ResolveUrl(dashboard);
+            }
 
             if (isHomePage)
             {

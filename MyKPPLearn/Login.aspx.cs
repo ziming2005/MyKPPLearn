@@ -9,6 +9,17 @@ namespace MyKPPLearn
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            string dashboard = SessionHelper.DashboardUrl(Session);
+
+            if (dashboard != null)
+            {
+                Response.Redirect(dashboard, true);
+            }
+
+            if (!IsPostBack)
+            {
+                txtEmail.Focus();
+            }
         }
 
         protected void btnLogin_Click(object sender, EventArgs e)
@@ -34,7 +45,7 @@ namespace MyKPPLearn
                     return;
                 }
 
-                SessionHelper.SignIn(Session, user.UserId, user.FullName, user.Role);
+                SessionHelper.SignIn(Session, user.UserId, user.FullName, user.Role, user.ProfileImagePath);
 
                 if (string.Equals(user.Role, SessionHelper.RoleAdministrator, StringComparison.Ordinal))
                 {

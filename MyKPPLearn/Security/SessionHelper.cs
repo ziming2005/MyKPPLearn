@@ -35,6 +35,16 @@ namespace MyKPPLearn.Security
             return session == null ? null : session["FullName"] as string;
         }
 
+        /// <summary>The signed-in user's own dashboard (app-relative), or null when nobody is signed in.</summary>
+        public static string DashboardUrl(HttpSessionState session)
+        {
+            if (!IsAuthenticated(session)) { return null; }
+
+            return string.Equals(CurrentRole(session), RoleAdministrator, StringComparison.Ordinal)
+                ? "~/Admin/Dashboard.aspx"
+                : "~/Learner/Dashboard.aspx";
+        }
+
         public static string CurrentRole(HttpSessionState session)
         {
             return session == null ? null : session["Role"] as string;
@@ -42,9 +52,35 @@ namespace MyKPPLearn.Security
 
         public static void SignIn(HttpSessionState session, int userId, string fullName, string role)
         {
+            SignIn(session, userId, fullName, role, null);
+        }
+
+        public static void SignIn(HttpSessionState session, int userId, string fullName, string role, string profileImagePath)
+        {
             session["UserId"] = userId;
             session["FullName"] = fullName;
             session["Role"] = role;
+            SetProfileImagePath(session, profileImagePath);
+        }
+
+        /// <summary>Called after a successful profile save so the header shows the new name straight away.</summary>
+        public static void SetFullName(HttpSessionState session, string fullName)
+        {
+            session["FullName"] = fullName;
+        }
+
+        /// <summary>
+        /// The signed-in user's profile picture path (a small relative path string, never image data):
+        /// null when it has not been loaded into this session yet, "" when the user has no picture.
+        /// </summary>
+        public static string CurrentProfileImagePath(HttpSessionState session)
+        {
+            return session == null ? null : session["ProfileImagePath"] as string;
+        }
+
+        public static void SetProfileImagePath(HttpSessionState session, string profileImagePath)
+        {
+            session["ProfileImagePath"] = profileImagePath ?? string.Empty;
         }
 
         public static void SignOut(HttpSessionState session)

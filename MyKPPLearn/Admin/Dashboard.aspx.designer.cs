@@ -11,6 +11,16 @@ namespace MyKPPLearn.Admin
     public partial class Dashboard
     {
         protected global::System.Web.UI.WebControls.Literal litFullName;
+        protected global::System.Web.UI.WebControls.Panel pnlPartial;
         protected global::System.Web.UI.WebControls.Literal litTotalLearners;
+        protected global::System.Web.UI.WebControls.Literal litTotalLessons;
+        protected global::System.Web.UI.WebControls.Literal litOverviewHiddenRoadSigns;
+        protected global::System.Web.UI.WebControls.Literal litNewLearners;
+        protected global::System.Web.UI.WebControls.Literal litLearnersMeta;
+        protected global::System.Web.UI.WebControls.Literal litLearningMeta;
+        protected global::System.Web.UI.WebControls.Literal litGamesMeta;
+        protected global::System.Web.UI.WebControls.Panel pnlNoActivity;
+        protected global::System.Web.UI.WebControls.Panel pnlActivity;
+        protected global::System.Web.UI.WebControls.Repeater rptActivity;
     }
 }

@@ -42,20 +42,15 @@
   gap: 4px;
 }
 
-.app-nav-item--parent {
-  display: flex;
-  flex-direction: column;
-}
-
 .app-nav-link {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 10px 14px;
+  padding: 10px 12px;
   border-radius: 10px;
   font-family: inherit;
-  font-size: var(--fs-small);
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--color-text-secondary);
   background: none;
@@ -79,37 +74,36 @@
   outline-offset: 2px;
 }
 
-.app-nav-toggle {
-  justify-content: space-between;
-}
-
-.app-nav-toggle__chevron {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  transition: transform 0.15s ease;
-}
-
-.app-nav-toggle[aria-expanded="true"] .app-nav-toggle__chevron {
-  transform: rotate(180deg);
-}
-
-.app-submenu {
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-  margin: 4px 0 6px 16px;
-  padding-left: 12px;
-  border-left: 2px solid var(--color-border);
-}
-
-.app-submenu.is-open {
+/* Section labels (Learning / Assessment / Game): plain text, not links or buttons. Their links below are always visible. */
+.app-nav-group {
   display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.app-nav-group__label {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94A3B8;
+  cursor: default;
+  user-select: none;
+}
+
+.app-nav-group__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .app-nav-link--sub {
-  padding: 8px 12px;
-  font-size: var(--fs-small);
+    padding: 8px 12px;
+    font-size: 14.5px;
 }
 
 .app-sidebar__footer {
@@ -327,9 +321,9 @@
   align-items: flex-start;
   gap: 6px;
   padding: 28px 24px;
-  border: 1px dashed var(--color-border);
+  border: 1px dashed #CBD5E1;
   border-radius: var(--radius-card);
-  background-color: var(--color-bg-page);
+  background-color: var(--color-surface);
 }
 
 .empty-state__title {
@@ -441,10 +435,465 @@
 @media (prefers-reduced-motion: reduce) {
   .app-sidebar,
   .app-drawer-backdrop,
-  .app-nav-toggle__chevron,
   .drawer-toggle__bar,
   .drawer-toggle__bar::before,
   .drawer-toggle__bar::after {
     transition: none;
+  }
+}
+
+/* ---- header avatar picture (falls back to the initials) ---- */
+.app-user__avatar {
+  position: relative;
+  overflow: hidden;
+}
+
+.app-user__avatar-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ---- Profile (Learner and Admin) ---- */
+.profile-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.profile-card h2 {
+  margin: 0 0 18px;
+  font-size: 1.25rem;
+}
+
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+/* The avatar is the upload trigger (a label for the hidden file input) with a small camera badge at its bottom-right. */
+.profile-avatar {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.profile-avatar:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.profile-avatar__circle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.profile-avatar:hover .profile-avatar__circle {
+    background-color: var(--color-primary-dark);
+}
+
+.profile-avatar__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-avatar__badge {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 2px solid var(--color-surface);
+    border-radius: 50%;
+    background-color: #E2E8F0;
+    color: var(--color-navy);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.profile-avatar__img[hidden],
+.profile-avatar__initials[hidden],
+.profile-photo-error[hidden] {
+  display: none;
+}
+
+.profile-identity__name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  overflow-wrap: anywhere;
+}
+
+.profile-identity__role {
+  color: var(--color-text-secondary);
+}
+
+.profile-photo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The real file input stays in the page (so the avatar label can open it) but is visually hidden. */
+.profile-photo-controls {
+  position: relative;
+}
+
+.profile-photo-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  white-space: nowrap;
+}
+
+.profile-readonly {
+  padding: 0;
+  color: var(--color-navy);
+  overflow-wrap: anywhere;
+}
+
+.profile-photo-error {
+  display: block;
+}
+
+.profile-upload-trigger {
+  display: none;
+}
+
+.profile-photo-status {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.profile-photo-status[hidden] {
+  display: none;
+}
+
+.profile-avatar.is-uploading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* ---- Change Password modal (opened from the Personal Information card) ---- */
+.profile-modal {
+  max-width: 440px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.profile-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.profile-modal__head h3 {
+  margin: 0;
+}
+
+.profile-modal__close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.profile-modal__close:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-navy);
+}
+
+.profile-modal .alert {
+  margin-bottom: 16px;
+}
+
+.profile-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+body.profile-modal-open {
+  overflow: hidden;
+}
+
+/* Bolder field labels on the Profile card (Full Name, Email, Account Created). */
+.profile-card .form-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+/* Admin sidebar: slightly darker link text (Dashboard, Learner Records, Chapters, ...). Hover, active and Logout keep their own colours. */
+.app-sidebar--admin .app-nav-link:not(.is-active):not(:hover):not(.app-nav-link--logout) {
+  color: #475569;
+}
+
+/* Admin sidebar link icons (section labels have none). */
+.app-nav-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.app-nav-link--sub {
+  gap: 10px;
+}
+
+.app-nav-link--sub .app-nav-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---- shared dashboard components (learner + admin) ---- */
+.dash-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background-color: var(--dash-tint, var(--color-primary-light));
+  color: var(--dash-color, var(--color-primary));
+}
+
+.dash-icon svg { width: 20px; height: 20px; }
+.dash-icon--sm { width: 26px; height: 26px; border-radius: 8px; margin-right: 8px; vertical-align: middle; }
+.dash-icon--sm svg { width: 15px; height: 15px; }
+.dash-icon--lg { width: 48px; height: 48px; border-radius: 12px; }
+.dash-icon--lg svg { width: 24px; height: 24px; }
+
+.stat-card--blue   { --dash-color: #2563EB; --dash-tint: #EFF6FF; }
+.stat-card--green  { --dash-color: #15803D; --dash-tint: #F0FDF4; }
+.stat-card--amber  { --dash-color: #B45309; --dash-tint: #FFFBEB; }
+.stat-card--purple { --dash-color: #7C3AED; --dash-tint: #F5F3FF; }
+.stat-card {
+  position: relative;
+  border-top: 3px solid var(--dash-color, var(--color-primary));
+}
+
+.stat-card .dash-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.stat-card__value { font-size: 2rem; }
+
+.management-card {
+  border-top: 3px solid var(--dash-color, var(--color-primary));
+}
+
+.management-card .dash-icon {
+  margin-bottom: 14px;
+}
+
+.management-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.management-card__footer {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+/* ---- Profile: role badge, photo hint / remove, security text, activity ---- */
+.profile-identity__role .badge {
+  margin-top: 4px;
+}
+
+.profile-photo-hint {
+  margin: 8px 0 0;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.profile-photo-remove {
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-error);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profile-photo-remove:hover {
+  text-decoration: underline;
+}
+
+.profile-card__text {
+  margin: 0 0 16px;
+  color: var(--color-text-secondary);
+}
+
+.profile-editor .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-activity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.profile-activity__item {
+  flex: 1 1 160px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background-color: var(--color-bg-page);
+}
+
+.profile-activity__item strong {
+  display: block;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--color-navy);
+}
+
+.profile-activity__item span {
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+/* ---- Admin dashboard: card counts / links and the recent activity feed ---- */
+.management-card__meta {
+  margin: 0;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--dash-color, var(--color-primary));
+}
+
+.management-card__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.management-card__links a {
+  color: var(--color-primary);
+}
+
+.management-card__links a:hover {
+  text-decoration: underline;
+}
+
+.activity-card {
+  padding: 8px 20px;
+}
+
+.activity-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.activity-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.activity-item:last-child {
+  border-bottom: 0;
+}
+
+.activity-item__dot {
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  transform: translateY(1px);
+}
+
+.activity-item--lesson .activity-item__dot { background-color: #15803D; }
+.activity-item--game .activity-item__dot { background-color: #B45309; }
+
+.activity-item__text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.activity-item__text em {
+  font-style: normal;
+  color: var(--color-text-secondary);
+}
+
+.activity-item__time {
+  flex: 0 0 auto;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+@media (max-width: 599px) {
+  .activity-item {
+    flex-wrap: wrap;
+  }
+
+  .activity-item__time {
+    margin-left: 22px;
+    flex-basis: 100%;
   }
 }
