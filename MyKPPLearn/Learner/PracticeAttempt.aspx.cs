@@ -10,14 +10,14 @@ namespace MyKPPLearn.Learner
     /// <summary>
     /// Phase 5 UI prototype. The actual attempt — questions, options, progress, scoring,
     /// result and review — is entirely frontend state driven by the mock data in
-    /// Scripts/practice-demo.js. Nothing here touches a database, Session or
+    /// Scripts/practice.js. Nothing here touches a database, Session or
     /// LearningProgress; a page refresh resets the in-progress attempt, which is expected
     /// for this prototype. This code-behind only validates the "category"/"set" query
     /// string, the same validate-and-redirect pattern used by the Learning module.
     /// </summary>
     public partial class PracticeAttempt : System.Web.UI.Page
     {
-        // Mirrors the four category ids defined in Scripts/practice-demo.js, for
+        // Mirrors the four category ids defined in Scripts/practice.js, for
         // query-string validation only.
         private static readonly Dictionary<string, string> KnownCategories = new Dictionary<string, string>
         {
@@ -34,7 +34,7 @@ namespace MyKPPLearn.Learner
         {
             get
             {
-                string scriptPath = Server.MapPath("~/Scripts/practice-demo.js");
+                string scriptPath = Server.MapPath("~/Scripts/practice.js");
                 return File.GetLastWriteTimeUtc(scriptPath).Ticks.ToString(CultureInfo.InvariantCulture);
             }
         }

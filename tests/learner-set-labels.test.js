@@ -61,7 +61,7 @@ function renderSetCards(scriptRelativePath, containerId, attributes) {
 
 assert.deepEqual(
     renderSetCards(
-        "MyKPPLearn/Scripts/practice-demo.js",
+        "MyKPPLearn/Scripts/practice.js",
         "practiceSetsContainer",
         { "data-category": "road-signs" }
     ),
@@ -71,7 +71,7 @@ assert.deepEqual(
 
 assert.deepEqual(
     renderSetCards(
-        "MyKPPLearn/Scripts/mock-exam-demo.js",
+        "MyKPPLearn/Scripts/mock-exam.js",
         "mockExamSetsContainer",
         { "data-type": "combined", "data-app-root": "/" }
     ),

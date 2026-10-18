@@ -48,7 +48,7 @@ namespace MyKPPLearn.Data
         public static AppUser GetUserByEmail(string normalizedEmail)
         {
             DataTable table = DatabaseHelper.ExecuteQuery(
-                "SELECT UserId, FullName, Email, PasswordHash, Role, ProfileImagePath FROM Users WHERE Email = @Email",
+                "SELECT UserId, FullName, Email, PasswordHash, Role, ProfileImagePath, Status FROM Users WHERE Email = @Email",
                 new SqlParameter("@Email", normalizedEmail));
 
             if (table.Rows.Count == 0)
@@ -64,7 +64,8 @@ namespace MyKPPLearn.Data
                 Email = row["Email"].ToString(),
                 PasswordHash = row["PasswordHash"].ToString(),
                 Role = row["Role"].ToString(),
-                ProfileImagePath = row["ProfileImagePath"] == DBNull.Value ? null : row["ProfileImagePath"].ToString()
+                ProfileImagePath = row["ProfileImagePath"] == DBNull.Value ? null : row["ProfileImagePath"].ToString(),
+                Status = row["Status"].ToString()
             };
         }
     }

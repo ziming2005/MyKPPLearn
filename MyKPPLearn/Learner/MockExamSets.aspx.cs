@@ -9,7 +9,7 @@ namespace MyKPPLearn.Learner
 {
     /// <summary>
     /// Phase 6 UI prototype. The Mock Exam Sets listed here come from the frontend-only mock
-    /// data in Scripts/mock-exam-demo.js (only Active sets are rendered). Nothing here touches
+    /// data in Scripts/mock-exam.js (only Active sets are rendered). Nothing here touches
     /// a database. This code-behind only validates the "type" query string and fills the
     /// heading, the same validate-and-redirect pattern used by PracticeSets.aspx.
     /// </summary>
@@ -21,7 +21,7 @@ namespace MyKPPLearn.Learner
             public string Description;
         }
 
-        // Mirrors the exam type ids defined in Scripts/mock-exam-demo.js, for
+        // Mirrors the exam type ids defined in Scripts/mock-exam.js, for
         // query-string validation and headings only.
         private static readonly Dictionary<string, ExamTypeInfo> KnownTypes = new Dictionary<string, ExamTypeInfo>
         {
@@ -35,7 +35,7 @@ namespace MyKPPLearn.Learner
         {
             get
             {
-                string scriptPath = Server.MapPath("~/Scripts/mock-exam-demo.js");
+                string scriptPath = Server.MapPath("~/Scripts/mock-exam.js");
                 return File.GetLastWriteTimeUtc(scriptPath).Ticks.ToString(CultureInfo.InvariantCulture);
             }
         }

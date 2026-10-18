@@ -6,31 +6,454 @@ using MyKPPLearn.Security;
 namespace MyKPPLearn.Data
 {
     /// <summary>
-    /// Ensures the LocalDB database file, Users table, and the single development
-    /// Administrator account exist. Safe to run on every application start:
+    /// Ensures the LocalDB database file and its tables exist. No account is created here: the Administrator
+    /// row lives only in the Users table of the database. Safe to run on every application start:
     /// every step here is idempotent and never wipes existing data.
     /// </summary>
     public static class DatabaseInitializer
     {
-        private const string SeedAdminEmail = "admin@gmail.com";
-        private const string SeedAdminFullName = "Administrator";
-
-        // PBKDF2-SHA256 hash of the project owner's development Administrator password.
-        // Generated once with a throwaway console tool using PasswordHasher's exact
-        // algorithm/parameters; the plaintext password itself is never stored here
-        // or anywhere else in the application.
-        private const string SeedAdminPasswordHash =
-            "PBKDF2-SHA256$100000$L5CrWM0iDmfTRb6PmhilbA==$2bc4As/yNJ8uTqtFJmmIMUMoNLL7Z9szzlc3k+ZzFos=";
-
         public static void Initialize(string appDataPhysicalPath)
         {
             EnsureDatabaseFileExists(appDataPhysicalPath);
             EnsureUsersTableExists();
             EnsureProfileImagePathColumnExists();
-            EnsureAdministratorSeed();
+            EnsureUserStatusColumnExists();
+            EnsureLegacyUserIsActiveColumnRemoved();
             EnsureLearningTablesExist();
             EnsureLessonImagePositionColumnExists();
             EnsureHiddenRoadSignTablesExist();
+            EnsureQuestionBankAndExamTablesExist();
+        }
+
+        // Shared Question Bank, Standard Practice and Mock Exam schema (SCHEMA ONLY: no repositories or pages use these
+        // tables yet). Creation order respects foreign keys:
+        //   QuestionCategories -> PracticeSets -> Questions -> QuestionOptions
+        //   -> PracticeAttempts -> PracticeAttemptQuestions
+        //   -> MockExamSets -> MockExamSetQuestions -> MockExamAttempts -> MockExamAttemptQuestions
+        // Every statement is guarded by an existence check, never drops or alters existing data, and nothing is seeded
+        // except the four fixed QuestionCategories (system configuration, not demo content). A table that already exists is
+        // left exactly as it is. No foreign key cascades: attempt history can never be removed by deleting a question, option
+        // or set. Attempt-question rows carry snapshots of the question content so history stays accurate after later edits.
+        private static void EnsureQuestionBankAndExamTablesExist()
+        {
+            // The four shared categories. "Colour Blind Test" (a Mock Exam section label) uses colour-recognition.
+            const string categoriesSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'QuestionCategories')
+                BEGIN
+                    CREATE TABLE QuestionCategories
+                    (
+                        QuestionCategoryId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        Code NVARCHAR(40) NOT NULL,
+                        Title NVARCHAR(100) NOT NULL,
+                        Description NVARCHAR(300) NULL,
+                        DisplayOrder INT NOT NULL,
+                        IsActive BIT NOT NULL CONSTRAINT DF_QuestionCategories_IsActive DEFAULT 1,
+                        CreatedAt DATETIME2 NOT NULL,
+                        UpdatedAt DATETIME2 NOT NULL,
+                        CONSTRAINT UQ_QuestionCategories_Code UNIQUE (Code),
+                        CONSTRAINT UQ_QuestionCategories_DisplayOrder UNIQUE (DisplayOrder),
+                        CONSTRAINT CK_QuestionCategories_DisplayOrder CHECK (DisplayOrder > 0)
+                    );
+                END";
+
+            // Inserts only the categories that are missing (matched by Code). Existing rows, including any edited
+            // Title/Description/IsActive, are never updated, and no other row is touched.
+            const string categorySeedSql = @"
+                INSERT INTO QuestionCategories (Code, Title, Description, DisplayOrder, IsActive, CreatedAt, UpdatedAt)
+                SELECT v.Code, v.Title, v.Description, v.DisplayOrder, 1, SYSUTCDATETIME(), SYSUTCDATETIME()
+                FROM (VALUES
+                    (N'colour-recognition', N'Colour Recognition', N'Practice identifying the meaning of key road and signal colours.', 1),
+                    (N'road-signs', N'Road Signs', N'Test your knowledge of warning, regulatory and information signs.', 2),
+                    (N'rules-of-the-road', N'Rules of the Road', N'Review common driving scenarios and correct road behaviour.', 3),
+                    (N'kejara-safety', N'KEJARA & Safety', N'Practice questions on the demerit points system and road safety.', 4)
+                ) AS v (Code, Title, Description, DisplayOrder)
+                WHERE NOT EXISTS (SELECT 1 FROM QuestionCategories c WHERE c.Code = v.Code);";
+
+            // Practice Set N is generated from SetNumber (no title column). Different categories may reuse a number.
+            // UQ_PracticeSets_Id_Category exists only so Questions can reference (set, category) together.
+            const string practiceSetsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'PracticeSets')
+                BEGIN
+                    CREATE TABLE PracticeSets
+                    (
+                        PracticeSetId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        QuestionCategoryId INT NOT NULL,
+                        SetNumber INT NOT NULL,
+                        IsActive BIT NOT NULL CONSTRAINT DF_PracticeSets_IsActive DEFAULT 1,
+                        CreatedAt DATETIME2 NOT NULL,
+                        UpdatedAt DATETIME2 NOT NULL,
+                        CONSTRAINT FK_PracticeSets_QuestionCategories FOREIGN KEY (QuestionCategoryId) REFERENCES QuestionCategories (QuestionCategoryId),
+                        CONSTRAINT UQ_PracticeSets_Category_SetNumber UNIQUE (QuestionCategoryId, SetNumber),
+                        CONSTRAINT UQ_PracticeSets_Id_Category UNIQUE (PracticeSetId, QuestionCategoryId),
+                        CONSTRAINT CK_PracticeSets_SetNumber CHECK (SetNumber > 0)
+                    );
+                END";
+
+            // One shared Question Bank. PracticeSetId NULL = available to Mock Exams only. The composite foreign key
+            // (PracticeSetId, QuestionCategoryId) makes the database reject a question whose category differs from its
+            // Practice Set's category; it is not checked while PracticeSetId is NULL.
+            const string questionsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Questions')
+                BEGIN
+                    CREATE TABLE Questions
+                    (
+                        QuestionId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        QuestionCategoryId INT NOT NULL,
+                        PracticeSetId INT NULL,
+                        QuestionText NVARCHAR(500) NOT NULL,
+                        Explanation NVARCHAR(500) NOT NULL,
+                        ImagePath NVARCHAR(500) NULL,
+                        ImageAltText NVARCHAR(200) NULL,
+                        IsActive BIT NOT NULL CONSTRAINT DF_Questions_IsActive DEFAULT 1,
+                        CreatedAt DATETIME2 NOT NULL,
+                        UpdatedAt DATETIME2 NOT NULL,
+                        CONSTRAINT FK_Questions_QuestionCategories FOREIGN KEY (QuestionCategoryId) REFERENCES QuestionCategories (QuestionCategoryId),
+                        CONSTRAINT FK_Questions_PracticeSets FOREIGN KEY (PracticeSetId, QuestionCategoryId) REFERENCES PracticeSets (PracticeSetId, QuestionCategoryId),
+                        CONSTRAINT CK_Questions_Text CHECK (LEN(LTRIM(RTRIM(QuestionText))) > 0),
+                        CONSTRAINT CK_Questions_Explanation CHECK (LEN(LTRIM(RTRIM(Explanation))) > 0),
+                        CONSTRAINT CK_Questions_ImageAlt CHECK (ImagePath IS NULL OR (ImageAltText IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltText))) > 0))
+                    );
+                END";
+
+            // Final design: every question has exactly A, B and C (1-3). The database prevents duplicate positions and a second
+            // correct option; 'exactly three rows' and 'exactly one correct' are validated by the future Question Bank save.
+            const string optionsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'QuestionOptions')
+                BEGIN
+                    CREATE TABLE QuestionOptions
+                    (
+                        QuestionOptionId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        QuestionId INT NOT NULL,
+                        OptionText NVARCHAR(200) NOT NULL,
+                        OptionOrder INT NOT NULL,
+                        IsCorrect BIT NOT NULL,
+                        CONSTRAINT FK_QuestionOptions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
+                        CONSTRAINT UQ_QuestionOptions_Question_OptionOrder UNIQUE (QuestionId, OptionOrder),
+                        CONSTRAINT CK_QuestionOptions_OptionOrder CHECK (OptionOrder BETWEEN 1 AND 3),
+                        CONSTRAINT CK_QuestionOptions_Text CHECK (LEN(LTRIM(RTRIM(OptionText))) > 0)
+                    );
+                END";
+
+            // Standard Practice has no pass/fail. UnansweredCount is stored because the result screen shows it.
+            const string practiceAttemptsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'PracticeAttempts')
+                BEGIN
+                    CREATE TABLE PracticeAttempts
+                    (
+                        PracticeAttemptId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        UserId INT NOT NULL,
+                        PracticeSetId INT NOT NULL,
+                        StartedAt DATETIME2 NOT NULL,
+                        CompletedAt DATETIME2 NOT NULL,
+                        TotalQuestions INT NOT NULL,
+                        CorrectCount INT NOT NULL,
+                        UnansweredCount INT NOT NULL,
+                        CONSTRAINT FK_PracticeAttempts_Users FOREIGN KEY (UserId) REFERENCES Users (UserId),
+                        CONSTRAINT FK_PracticeAttempts_PracticeSets FOREIGN KEY (PracticeSetId) REFERENCES PracticeSets (PracticeSetId),
+                        CONSTRAINT CK_PracticeAttempts_Counts CHECK (TotalQuestions > 0 AND CorrectCount >= 0 AND UnansweredCount >= 0 AND CorrectCount + UnansweredCount <= TotalQuestions),
+                        CONSTRAINT CK_PracticeAttempts_Times CHECK (CompletedAt >= StartedAt)
+                    );
+                END";
+
+            // History rows carry snapshots of the question as the learner saw it, so a later edit to the Question Bank never
+            // changes an old review. Unanswered = no selected option, no selected snapshot, IsCorrect 0.
+            // ImagePathSnapshot is only a path: future image management must keep files that history still references.
+            const string practiceAttemptQuestionsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'PracticeAttemptQuestions')
+                BEGIN
+                    CREATE TABLE PracticeAttemptQuestions
+                    (
+                        PracticeAttemptQuestionId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        PracticeAttemptId INT NOT NULL,
+                        QuestionId INT NOT NULL,
+                        QuestionNumber INT NOT NULL,
+                        SelectedOptionId INT NULL,
+                        IsCorrect BIT NOT NULL,
+                        QuestionTextSnapshot NVARCHAR(500) NOT NULL,
+                        ExplanationSnapshot NVARCHAR(500) NOT NULL,
+                        OptionATextSnapshot NVARCHAR(200) NOT NULL,
+                        OptionBTextSnapshot NVARCHAR(200) NOT NULL,
+                        OptionCTextSnapshot NVARCHAR(200) NOT NULL,
+                        CorrectOptionSnapshot CHAR(1) NOT NULL,
+                        SelectedOptionSnapshot CHAR(1) NULL,
+                        SelectedOptionTextSnapshot NVARCHAR(200) NULL,
+                        ImagePathSnapshot NVARCHAR(500) NULL,
+                        ImageAltTextSnapshot NVARCHAR(200) NULL,
+                        CONSTRAINT FK_PracticeAttemptQuestions_Attempts FOREIGN KEY (PracticeAttemptId) REFERENCES PracticeAttempts (PracticeAttemptId),
+                        CONSTRAINT FK_PracticeAttemptQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
+                        CONSTRAINT FK_PracticeAttemptQuestions_QuestionOptions FOREIGN KEY (SelectedOptionId) REFERENCES QuestionOptions (QuestionOptionId),
+                        CONSTRAINT UQ_PracticeAttemptQuestions_Attempt_Question UNIQUE (PracticeAttemptId, QuestionId),
+                        CONSTRAINT UQ_PracticeAttemptQuestions_Attempt_Number UNIQUE (PracticeAttemptId, QuestionNumber),
+                        CONSTRAINT CK_PracticeAttemptQuestions_Number CHECK (QuestionNumber > 0),
+                        CONSTRAINT CK_PracticeAttemptQuestions_CorrectOption CHECK (CorrectOptionSnapshot IN ('A', 'B', 'C')),
+                        CONSTRAINT CK_PracticeAttemptQuestions_SelectedOption CHECK (SelectedOptionSnapshot IS NULL OR SelectedOptionSnapshot IN ('A', 'B', 'C')),
+                        CONSTRAINT CK_PracticeAttemptQuestions_Answered CHECK
+                        (
+                            (SelectedOptionId IS NULL AND SelectedOptionSnapshot IS NULL AND SelectedOptionTextSnapshot IS NULL AND IsCorrect = 0)
+                            OR (SelectedOptionId IS NOT NULL AND SelectedOptionSnapshot IS NOT NULL AND SelectedOptionTextSnapshot IS NOT NULL)
+                        ),
+                        CONSTRAINT CK_PracticeAttemptQuestions_Correct CHECK
+                        (
+                            SelectedOptionSnapshot IS NULL
+                            OR IsCorrect = CASE WHEN SelectedOptionSnapshot = CorrectOptionSnapshot THEN 1 ELSE 0 END
+                        ),
+                        CONSTRAINT CK_PracticeAttemptQuestions_ImageAlt CHECK (ImagePathSnapshot IS NULL OR (ImageAltTextSnapshot IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltTextSnapshot))) > 0))
+                    );
+                END";
+
+            // The two fixed exam types are application rules (see Scripts/mock-exam-demo.js), so there is no ExamTypes table.
+            const string mockExamSetsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'MockExamSets')
+                BEGIN
+                    CREATE TABLE MockExamSets
+                    (
+                        MockExamSetId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        ExamTypeCode NVARCHAR(30) NOT NULL,
+                        SetNumber INT NOT NULL,
+                        IsActive BIT NOT NULL CONSTRAINT DF_MockExamSets_IsActive DEFAULT 1,
+                        CreatedAt DATETIME2 NOT NULL,
+                        UpdatedAt DATETIME2 NOT NULL,
+                        CONSTRAINT UQ_MockExamSets_ExamType_SetNumber UNIQUE (ExamTypeCode, SetNumber),
+                        CONSTRAINT CK_MockExamSets_ExamType CHECK (ExamTypeCode IN ('combined', 'kpp-standard')),
+                        CONSTRAINT CK_MockExamSets_SetNumber CHECK (SetNumber > 0)
+                    );
+                END";
+
+            // DisplayOrder is the fixed position of the question within the exam. The per-section question counts of each
+            // exam type are application rules validated by the future Mock Exam save.
+            const string mockExamSetQuestionsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'MockExamSetQuestions')
+                BEGIN
+                    CREATE TABLE MockExamSetQuestions
+                    (
+                        MockExamSetQuestionId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        MockExamSetId INT NOT NULL,
+                        QuestionId INT NOT NULL,
+                        DisplayOrder INT NOT NULL,
+                        CONSTRAINT FK_MockExamSetQuestions_Sets FOREIGN KEY (MockExamSetId) REFERENCES MockExamSets (MockExamSetId),
+                        CONSTRAINT FK_MockExamSetQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
+                        CONSTRAINT UQ_MockExamSetQuestions_Set_Question UNIQUE (MockExamSetId, QuestionId),
+                        CONSTRAINT UQ_MockExamSetQuestions_Set_DisplayOrder UNIQUE (MockExamSetId, DisplayOrder),
+                        CONSTRAINT CK_MockExamSetQuestions_DisplayOrder CHECK (DisplayOrder > 0)
+                    );
+                END";
+
+            // IsPassed is decided by the server from the exam type's fixed pass marks when the attempt is saved.
+            const string mockExamAttemptsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'MockExamAttempts')
+                BEGIN
+                    CREATE TABLE MockExamAttempts
+                    (
+                        MockExamAttemptId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        UserId INT NOT NULL,
+                        MockExamSetId INT NOT NULL,
+                        StartedAt DATETIME2 NOT NULL,
+                        CompletedAt DATETIME2 NOT NULL,
+                        ColourBlindCorrect INT NOT NULL,
+                        ColourBlindTotal INT NOT NULL,
+                        TheoryCorrect INT NOT NULL,
+                        TheoryTotal INT NOT NULL,
+                        IsPassed BIT NOT NULL,
+                        TimeTakenSeconds INT NOT NULL,
+                        AutoSubmitted BIT NOT NULL CONSTRAINT DF_MockExamAttempts_AutoSubmitted DEFAULT 0,
+                        CONSTRAINT FK_MockExamAttempts_Users FOREIGN KEY (UserId) REFERENCES Users (UserId),
+                        CONSTRAINT FK_MockExamAttempts_Sets FOREIGN KEY (MockExamSetId) REFERENCES MockExamSets (MockExamSetId),
+                        CONSTRAINT CK_MockExamAttempts_ColourBlind CHECK (ColourBlindTotal > 0 AND ColourBlindCorrect >= 0 AND ColourBlindCorrect <= ColourBlindTotal),
+                        CONSTRAINT CK_MockExamAttempts_Theory CHECK (TheoryTotal > 0 AND TheoryCorrect >= 0 AND TheoryCorrect <= TheoryTotal),
+                        CONSTRAINT CK_MockExamAttempts_Time CHECK (TimeTakenSeconds >= 0),
+                        CONSTRAINT CK_MockExamAttempts_Times CHECK (CompletedAt >= StartedAt)
+                    );
+                END";
+
+            // Same snapshot approach as PracticeAttemptQuestions, plus the category code (for section grouping in a review)
+            // and the flag, which is kept whether or not the question was answered.
+            const string mockExamAttemptQuestionsSql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'MockExamAttemptQuestions')
+                BEGIN
+                    CREATE TABLE MockExamAttemptQuestions
+                    (
+                        MockExamAttemptQuestionId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        MockExamAttemptId INT NOT NULL,
+                        QuestionId INT NOT NULL,
+                        QuestionNumber INT NOT NULL,
+                        SelectedOptionId INT NULL,
+                        IsCorrect BIT NOT NULL,
+                        IsFlagged BIT NOT NULL CONSTRAINT DF_MockExamAttemptQuestions_IsFlagged DEFAULT 0,
+                        QuestionTextSnapshot NVARCHAR(500) NOT NULL,
+                        ExplanationSnapshot NVARCHAR(500) NOT NULL,
+                        OptionATextSnapshot NVARCHAR(200) NOT NULL,
+                        OptionBTextSnapshot NVARCHAR(200) NOT NULL,
+                        OptionCTextSnapshot NVARCHAR(200) NOT NULL,
+                        CorrectOptionSnapshot CHAR(1) NOT NULL,
+                        SelectedOptionSnapshot CHAR(1) NULL,
+                        SelectedOptionTextSnapshot NVARCHAR(200) NULL,
+                        ImagePathSnapshot NVARCHAR(500) NULL,
+                        ImageAltTextSnapshot NVARCHAR(200) NULL,
+                        QuestionCategoryCodeSnapshot NVARCHAR(40) NOT NULL,
+                        CONSTRAINT FK_MockExamAttemptQuestions_Attempts FOREIGN KEY (MockExamAttemptId) REFERENCES MockExamAttempts (MockExamAttemptId),
+                        CONSTRAINT FK_MockExamAttemptQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
+                        CONSTRAINT FK_MockExamAttemptQuestions_QuestionOptions FOREIGN KEY (SelectedOptionId) REFERENCES QuestionOptions (QuestionOptionId),
+                        CONSTRAINT UQ_MockExamAttemptQuestions_Attempt_Question UNIQUE (MockExamAttemptId, QuestionId),
+                        CONSTRAINT UQ_MockExamAttemptQuestions_Attempt_Number UNIQUE (MockExamAttemptId, QuestionNumber),
+                        CONSTRAINT CK_MockExamAttemptQuestions_Number CHECK (QuestionNumber > 0),
+                        CONSTRAINT CK_MockExamAttemptQuestions_CorrectOption CHECK (CorrectOptionSnapshot IN ('A', 'B', 'C')),
+                        CONSTRAINT CK_MockExamAttemptQuestions_SelectedOption CHECK (SelectedOptionSnapshot IS NULL OR SelectedOptionSnapshot IN ('A', 'B', 'C')),
+                        CONSTRAINT CK_MockExamAttemptQuestions_Answered CHECK
+                        (
+                            (SelectedOptionId IS NULL AND SelectedOptionSnapshot IS NULL AND SelectedOptionTextSnapshot IS NULL AND IsCorrect = 0)
+                            OR (SelectedOptionId IS NOT NULL AND SelectedOptionSnapshot IS NOT NULL AND SelectedOptionTextSnapshot IS NOT NULL)
+                        ),
+                        CONSTRAINT CK_MockExamAttemptQuestions_Correct CHECK
+                        (
+                            SelectedOptionSnapshot IS NULL
+                            OR IsCorrect = CASE WHEN SelectedOptionSnapshot = CorrectOptionSnapshot THEN 1 ELSE 0 END
+                        ),
+                        CONSTRAINT CK_MockExamAttemptQuestions_ImageAlt CHECK (ImagePathSnapshot IS NULL OR (ImageAltTextSnapshot IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltTextSnapshot))) > 0)),
+                        CONSTRAINT CK_MockExamAttemptQuestions_CategoryCode CHECK (LEN(LTRIM(RTRIM(QuestionCategoryCodeSnapshot))) > 0)
+                    );
+                END";
+
+            DatabaseHelper.ExecuteNonQuery(categoriesSql);
+            DatabaseHelper.ExecuteNonQuery(categorySeedSql);
+            DatabaseHelper.ExecuteNonQuery(practiceSetsSql);
+            DatabaseHelper.ExecuteNonQuery(questionsSql);
+            DatabaseHelper.ExecuteNonQuery(optionsSql);
+            DatabaseHelper.ExecuteNonQuery(practiceAttemptsSql);
+            DatabaseHelper.ExecuteNonQuery(practiceAttemptQuestionsSql);
+            DatabaseHelper.ExecuteNonQuery(mockExamSetsSql);
+            DatabaseHelper.ExecuteNonQuery(mockExamSetQuestionsSql);
+            DatabaseHelper.ExecuteNonQuery(mockExamAttemptsSql);
+            DatabaseHelper.ExecuteNonQuery(mockExamAttemptQuestionsSql);
+
+            // Indexes. Lookups already served by a unique constraint (for example PracticeSets by category, QuestionOptions by
+            // question, MockExamSets by type) get no extra index. The rest support history queries and the foreign-key
+            // checks that make deleting a referenced question, option or set fail.
+            EnsureIndex("Questions", "IX_Questions_QuestionCategoryId",
+                "CREATE INDEX IX_Questions_QuestionCategoryId ON Questions (QuestionCategoryId);");
+            EnsureIndex("Questions", "IX_Questions_PracticeSetId",
+                "CREATE INDEX IX_Questions_PracticeSetId ON Questions (PracticeSetId) WHERE PracticeSetId IS NOT NULL;");
+            EnsureIndex("QuestionOptions", "UX_QuestionOptions_OneCorrect",
+                "CREATE UNIQUE INDEX UX_QuestionOptions_OneCorrect ON QuestionOptions (QuestionId) WHERE IsCorrect = 1;");
+            EnsureIndex("PracticeAttempts", "IX_PracticeAttempts_User_CompletedAt",
+                "CREATE INDEX IX_PracticeAttempts_User_CompletedAt ON PracticeAttempts (UserId, CompletedAt DESC);");
+            EnsureIndex("PracticeAttempts", "IX_PracticeAttempts_PracticeSet_User",
+                "CREATE INDEX IX_PracticeAttempts_PracticeSet_User ON PracticeAttempts (PracticeSetId, UserId);");
+            EnsureIndex("PracticeAttemptQuestions", "IX_PracticeAttemptQuestions_QuestionId",
+                "CREATE INDEX IX_PracticeAttemptQuestions_QuestionId ON PracticeAttemptQuestions (QuestionId);");
+            EnsureIndex("PracticeAttemptQuestions", "IX_PracticeAttemptQuestions_SelectedOptionId",
+                "CREATE INDEX IX_PracticeAttemptQuestions_SelectedOptionId ON PracticeAttemptQuestions (SelectedOptionId) WHERE SelectedOptionId IS NOT NULL;");
+            EnsureIndex("MockExamSetQuestions", "IX_MockExamSetQuestions_QuestionId",
+                "CREATE INDEX IX_MockExamSetQuestions_QuestionId ON MockExamSetQuestions (QuestionId);");
+            EnsureIndex("MockExamAttempts", "IX_MockExamAttempts_User_CompletedAt",
+                "CREATE INDEX IX_MockExamAttempts_User_CompletedAt ON MockExamAttempts (UserId, CompletedAt DESC);");
+            EnsureIndex("MockExamAttempts", "IX_MockExamAttempts_Set_User",
+                "CREATE INDEX IX_MockExamAttempts_Set_User ON MockExamAttempts (MockExamSetId, UserId);");
+            EnsureIndex("MockExamAttemptQuestions", "IX_MockExamAttemptQuestions_QuestionId",
+                "CREATE INDEX IX_MockExamAttemptQuestions_QuestionId ON MockExamAttemptQuestions (QuestionId);");
+            EnsureIndex("MockExamAttemptQuestions", "IX_MockExamAttemptQuestions_SelectedOptionId",
+                "CREATE INDEX IX_MockExamAttemptQuestions_SelectedOptionId ON MockExamAttemptQuestions (SelectedOptionId) WHERE SelectedOptionId IS NOT NULL;");
+        }
+
+        // Creates an index only when no index of that name exists on the table. All arguments are constants in this file.
+        private static void EnsureIndex(string table, string indexName, string createIndexSql)
+        {
+            DatabaseHelper.ExecuteNonQuery(
+                "IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = '" + indexName + "' AND object_id = OBJECT_ID('" + table + "')) " +
+                "BEGIN " + createIndexSql + " END");
+        }
+
+        // Account status for a later Disable/Enable feature. SCHEMA ONLY: nothing reads or enforces it yet (login is unchanged).
+        // Existing users receive 'Active' from the column default. The CHECK is added only if every existing value is valid, so
+        // a column that already exists is never rewritten and no row is ever changed.
+        private static void EnsureUserStatusColumnExists()
+        {
+            const string addColumnSql = @"
+                IF COL_LENGTH('Users', 'Status') IS NULL
+                BEGIN
+                    ALTER TABLE Users ADD Status NVARCHAR(20) NOT NULL CONSTRAINT DF_Users_Status DEFAULT 'Active';
+                END";
+
+            const string addCheckSql = @"
+                IF COL_LENGTH('Users', 'Status') IS NOT NULL
+                   AND NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Users_Status' AND parent_object_id = OBJECT_ID('Users'))
+                BEGIN
+                    EXEC('IF NOT EXISTS (SELECT 1 FROM Users WHERE Status NOT IN (''Active'', ''Disabled''))
+                              ALTER TABLE Users ADD CONSTRAINT CK_Users_Status CHECK (Status IN (''Active'', ''Disabled''))');
+                END";
+
+            DatabaseHelper.ExecuteNonQuery(addColumnSql);
+            DatabaseHelper.ExecuteNonQuery(addCheckSql);
+        }
+
+        // One-time cleanup of a legacy Users.IsActive column that existed in some development databases but was never part of
+        // this project's schema. Users.Status (Active / Disabled) is the single account-status column; future Learner Records
+        // and login authorization must use Status and must never reference Users.IsActive.
+        // Guarded and transactional: it does nothing when the column is absent (every fresh and every already-cleaned database),
+        // and it refuses (with a clear error, changing nothing) if any user is switched off through IsActive, if Status holds an
+        // invalid value, or if anything other than the column's own default constraint depends on it. Only that default
+        // constraint (found by its real name) and the column itself are removed; the Users table and its rows are never rebuilt.
+        private static void EnsureLegacyUserIsActiveColumnRemoved()
+        {
+            const string sql = @"
+                IF COL_LENGTH('Users', 'IsActive') IS NOT NULL
+                BEGIN
+                    IF COL_LENGTH('Users', 'Status') IS NULL
+                        THROW 50001, 'Users.IsActive was not removed: Users.Status does not exist.', 1;
+
+                    DECLARE @usersId INT = OBJECT_ID('Users');
+                    DECLARE @colId INT = COLUMNPROPERTY(@usersId, 'IsActive', 'ColumnId');
+                    DECLARE @conflicts INT;
+                    DECLARE @blockers INT;
+                    DECLARE @defaultCount INT;
+                    DECLARE @defaultName SYSNAME;
+
+                    -- Status is the single account-status column, so nothing may be lost: refuse if any user is switched off through
+                    -- IsActive, or has a Status outside Active / Disabled. (IsActive = 1 with Status = 'Disabled' loses nothing.)
+                    EXEC sp_executesql
+                        N'SELECT @n = COUNT(*) FROM Users WHERE IsActive = 0 OR Status NOT IN (''Active'', ''Disabled'')',
+                        N'@n INT OUTPUT', @n = @conflicts OUTPUT;
+
+                    IF @conflicts > 0
+                        THROW 50002, 'Users.IsActive was not removed: some users have IsActive = 0 or an invalid Status. Resolve their account status first.', 1;
+
+                    -- The column's own default constraint is the only object allowed to depend on it.
+                    SELECT @blockers =
+                          (SELECT COUNT(*) FROM sys.check_constraints WHERE parent_object_id = @usersId AND (parent_column_id = @colId OR definition LIKE N'%[[]IsActive]%'))
+                        + (SELECT COUNT(*) FROM sys.index_columns WHERE object_id = @usersId AND column_id = @colId)
+                        + (SELECT COUNT(*) FROM sys.indexes WHERE object_id = @usersId AND filter_definition LIKE N'%[[]IsActive]%')
+                        + (SELECT COUNT(*) FROM sys.computed_columns WHERE object_id = @usersId AND definition LIKE N'%[[]IsActive]%')
+                        + (SELECT COUNT(*) FROM sys.foreign_key_columns WHERE (parent_object_id = @usersId AND parent_column_id = @colId) OR (referenced_object_id = @usersId AND referenced_column_id = @colId))
+                        + (SELECT COUNT(*) FROM sys.triggers WHERE parent_id = @usersId)
+                        + (SELECT COUNT(*) FROM sys.sql_expression_dependencies WHERE referenced_id = @usersId AND referenced_minor_id = @colId);
+
+                    IF @blockers > 0
+                        THROW 50003, 'Users.IsActive was not removed: other database objects depend on it. Remove those dependencies first.', 1;
+
+                    -- The default constraint is looked up by its real name (never assumed).
+                    SELECT @defaultCount = COUNT(*), @defaultName = MAX(name)
+                    FROM sys.default_constraints
+                    WHERE parent_object_id = @usersId AND parent_column_id = @colId;
+
+                    IF @defaultCount > 1
+                        THROW 50004, 'Users.IsActive was not removed: the column has more than one default constraint.', 1;
+
+                    BEGIN TRY
+                        BEGIN TRANSACTION;
+
+                        IF @defaultName IS NOT NULL
+                            EXEC(N'ALTER TABLE Users DROP CONSTRAINT ' + N'[' + @defaultName + N']');
+
+                        EXEC(N'ALTER TABLE Users DROP COLUMN IsActive');
+
+                        COMMIT TRANSACTION;
+                    END TRY
+                    BEGIN CATCH
+                        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+                        THROW;
+                    END CATCH
+                END";
+
+            DatabaseHelper.ExecuteNonQuery(sql);
         }
 
         // Hidden Road Sign Game. Creation order respects foreign keys:
@@ -416,9 +839,11 @@ namespace MyKPPLearn.Data
                         PasswordHash NVARCHAR(256) NOT NULL,
                         Role NVARCHAR(20) NOT NULL,
                         ProfileImagePath NVARCHAR(500) NULL,
+                        Status NVARCHAR(20) NOT NULL CONSTRAINT DF_Users_Status DEFAULT 'Active',
                         CreatedAt DATETIME2 NOT NULL,
                         UpdatedAt DATETIME2 NOT NULL,
-                        CONSTRAINT UQ_Users_Email UNIQUE (Email)
+                        CONSTRAINT UQ_Users_Email UNIQUE (Email),
+                        CONSTRAINT CK_Users_Status CHECK (Status IN ('Active', 'Disabled'))
                     );
                 END";
 
@@ -436,24 +861,6 @@ namespace MyKPPLearn.Data
                 END";
 
             DatabaseHelper.ExecuteNonQuery(sql);
-        }
-
-        private static void EnsureAdministratorSeed()
-        {
-            if (UserRepository.EmailExists(SeedAdminEmail))
-            {
-                return;
-            }
-
-            const string sql = @"
-                INSERT INTO Users (FullName, Email, PasswordHash, Role, CreatedAt, UpdatedAt)
-                VALUES (@FullName, @Email, @PasswordHash, @Role, SYSUTCDATETIME(), SYSUTCDATETIME());";
-
-            DatabaseHelper.ExecuteNonQuery(sql,
-                new SqlParameter("@FullName", SeedAdminFullName),
-                new SqlParameter("@Email", SeedAdminEmail),
-                new SqlParameter("@PasswordHash", SeedAdminPasswordHash),
-                new SqlParameter("@Role", SessionHelper.RoleAdministrator));
         }
     }
 }

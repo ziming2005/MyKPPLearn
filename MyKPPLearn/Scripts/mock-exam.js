@@ -1,25 +1,21 @@
 /*
  * ============================================================================
- * Phase 6 frontend-only Mock Examination data and Learner UI logic.
+ * Mock Examination: exam rules and Learner UI logic (UI prototype).
  *
- * // Phase 6 frontend-only Mock Examination data.
- * // Replace with database-backed Mock Exam data in a later phase.
- * // Demo content is not official JPJ/KPP examination content.
+ * Nothing is persisted: there are no Mock Exam repositories or attempt records, and all exam state (answers, flags, timer,
+ * result) lives in memory in this script and is discarded on refresh. No sample content is preloaded: the Mock Exam Sets and
+ * the question bank below start EMPTY, so the Learner pages show their existing empty states.
+ * A later phase replaces EXAM_SETS / BANK (and buildExam) with database-backed data.
  *
- * Nothing here is persisted: there are no Mock Exam tables, repositories or
- * attempt records. All exam state (answers, flags, timer, result) lives in
- * memory in this script and is discarded on refresh.
+ * What is real configuration here (and must stay): EXAM_TYPES, the two fixed exam types with their section counts,
+ * durations and pass marks.
  *
- * window.MockExamData exposes the exam-type rules and the generated demo
- * question bank to the Learner attempt UI (this file) and to the Admin
- * prototype (mock-exam-admin-demo.js).
+ * window.MockExamData exposes the exam-type rules, sets and question bank to the Learner attempt UI (this file) and to the
+ * Admin prototype (mock-exam-admin.js).
  * ============================================================================
  */
 (function (global) {
     "use strict";
-
-    var DEMO_IMAGE = "Content/images/illustrations/driving-theory.svg";
-    var DEMO_IMAGE_ALT = "Illustrative driving theory graphic (demo placeholder, not an official road sign image).";
 
     // ------------------------------------------------------------------
     // Exam types: exactly two. Car Only and Motorcycle Only share the
@@ -65,150 +61,20 @@
     ];
 
     // ------------------------------------------------------------------
-    // Mock Exam Sets per exam type. setNumber is the source of truth; the
-    // display name ("Mock Exam Set 2") is generated from it. Every set of a
-    // type shares that type's fixed structure; only the demo questions differ.
-    // Only "Active" sets are shown to learners.
+    // Mock Exam Sets per exam type: none are preloaded. Entry shape: { setNumber, status }, status "Active" or "Inactive".
+    // setNumber is the source of truth; the display name ("Mock Exam Set 2") is generated from it. Only "Active" sets are
+    // shown to learners.
     // ------------------------------------------------------------------
     var EXAM_SETS = {
-        "combined": [
-            { setNumber: 1, status: "Active" },
-            { setNumber: 2, status: "Active" },
-            { setNumber: 3, status: "Inactive" }
-        ],
-        "kpp-standard": [
-            { setNumber: 1, status: "Active" },
-            { setNumber: 2, status: "Active" },
-            { setNumber: 3, status: "Inactive" }
-        ]
+        "combined": [],
+        "kpp-standard": []
     };
 
     // ------------------------------------------------------------------
-    // Colour Blind demo questions: a plain coloured circle drawn as an inline
-    // SVG data URI (4 options, A-D). Not a real Ishihara plate.
+    // Question bank: none are preloaded. Question shape: { id, section: "colourBlind" | "theory", topic (theory only: the
+    // section id roadSigns / rulesOfTheRoad / kejaraSafety), text, image, imageAlt, options[], correctIndex, explanation }.
     // ------------------------------------------------------------------
-    var COLOURS = [
-        { name: "Red", hex: "#DC2626" },
-        { name: "Green", hex: "#16A34A" },
-        { name: "Blue", hex: "#2563EB" },
-        { name: "Yellow", hex: "#FACC15" },
-        { name: "Orange", hex: "#EA580C" },
-        { name: "Purple", hex: "#7E22CE" },
-        { name: "Black", hex: "#0F172A" },
-        { name: "Brown", hex: "#78350F" }
-    ];
-
-    function colourImage(hex) {
-        var svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'><rect width='160' height='160' fill='%23F1F5F9'/><circle cx='80' cy='80' r='54' fill='" + hex.replace("#", "%23") + "'/></svg>";
-        return "data:image/svg+xml;utf8," + svg;
-    }
-
-    function buildColourBlindQuestion(n) {
-        var correct = COLOURS[(n - 1) % COLOURS.length];
-        var options = [correct.name];
-        var offset = 1;
-
-        while (options.length < 4) {
-            options.push(COLOURS[((n - 1) + offset * 3) % COLOURS.length].name);
-            offset++;
-        }
-
-        // Rotate so the correct answer lands on a different letter per question.
-        var correctIndex = (n - 1) % 4;
-        var arranged = options.slice(1);
-        arranged.splice(correctIndex, 0, correct.name);
-
-        return {
-            id: "cb-" + n,
-            section: "colourBlind",
-            text: "Demo colour test " + n + ": which colour is the circle in the image?",
-            image: colourImage(correct.hex),
-            imageAlt: "Demo colour test image: a single coloured circle.",
-            options: arranged,
-            correctIndex: correctIndex,
-            explanation: "The circle in the demo image is " + correct.name.toLowerCase() + "."
-        };
-    }
-
-    // ------------------------------------------------------------------
-    // Theory demo questions (3 options, A-C). A few neutral hand-written
-    // examples, then generated placeholders for the remaining indexes.
-    // ------------------------------------------------------------------
-    var THEORY_SAMPLES = [
-        { text: "Before changing lanes, a driver should:", options: ["Check mirrors and signal first", "Change immediately", "Sound the horn only"], correctIndex: 0, explanation: "Checking mirrors and signalling lets other road users know your intention." },
-        { text: "A red traffic light generally means a driver should:", options: ["Slow down and continue", "Stop and wait", "Speed up to cross"], correctIndex: 1, explanation: "A red traffic light is the signal to stop." },
-        { text: "Seatbelts should generally be worn by:", options: ["The driver only", "Only on highways", "All occupants where fitted"], correctIndex: 2, explanation: "Wearing seatbelts reduces the risk of injury for every occupant." },
-        { text: "A safe following distance mainly helps a driver to:", options: ["React in time to stop safely", "Save fuel only", "Avoid using mirrors"], correctIndex: 0, explanation: "A larger gap gives more time to react and brake." },
-        { text: "Using a handheld mobile phone while driving is generally:", options: ["Safe", "Unsafe and distracting", "Required"], correctIndex: 1, explanation: "Handheld phone use takes attention away from the road." },
-        { text: "When approaching a pedestrian crossing with people waiting, a driver should:", options: ["Accelerate past", "Sound the horn", "Slow down and be prepared to stop"], correctIndex: 2, explanation: "Pedestrians should be given a safe opportunity to cross." },
-        { text: "Before overtaking, a driver should ensure:", options: ["The road ahead is clear and it is safe to do so", "The vehicle ahead is slow", "The horn is working"], correctIndex: 0, explanation: "Overtaking is only safe when the road ahead is clear." },
-        { text: "Regular vehicle maintenance mainly helps to:", options: ["Increase emissions", "Maintain roadworthiness and safety", "Reduce visibility"], correctIndex: 1, explanation: "Maintained brakes, tyres and lights keep the vehicle safe." },
-        { text: "Driving while tired is:", options: ["Acceptable on short trips", "Recommended at night", "A road safety risk"], correctIndex: 2, explanation: "Fatigue slows reactions and judgement." },
-        { text: "A triangular warning sign with a red border generally indicates:", options: ["A warning", "A mandatory action", "General information"], correctIndex: 0, explanation: "Triangular signs with a red border are generally warning signs." }
-    ];
-
-    // Each theory question belongs to one of the three theory topics, which are also the exam sections.
-    // The ten hand-written samples are tagged by what they are about; the generated ones are spread
-    // across the topics so every topic has plenty of questions for a set to draw from.
-    var SAMPLE_TOPICS = ["rulesOfTheRoad", "rulesOfTheRoad", "kejaraSafety", "rulesOfTheRoad", "kejaraSafety",
-        "rulesOfTheRoad", "rulesOfTheRoad", "kejaraSafety", "kejaraSafety", "roadSigns"];
-
-    function theoryTopic(n) {
-        if (n <= SAMPLE_TOPICS.length) { return SAMPLE_TOPICS[n - 1]; }
-
-        var slot = n % 12;                       // 4/12 road signs, 5/12 rules, 3/12 KEJARA & safety
-        return slot < 4 ? "roadSigns" : (slot < 9 ? "rulesOfTheRoad" : "kejaraSafety");
-    }
-
-    function buildTheoryQuestion(n) {
-        var sample = n <= THEORY_SAMPLES.length ? THEORY_SAMPLES[n - 1] : null;
-        var question;
-
-        if (sample) {
-            question = {
-                text: sample.text,
-                options: sample.options.slice(),
-                correctIndex: sample.correctIndex,
-                explanation: sample.explanation
-            };
-        } else {
-            var correctIndex = (n * 7) % 3;
-            question = {
-                text: "Demo theory question " + n + ": select the option marked as the demo answer.",
-                options: [
-                    "Demo answer A for question " + n,
-                    "Demo answer B for question " + n,
-                    "Demo answer C for question " + n
-                ],
-                correctIndex: correctIndex,
-                explanation: "Demo explanation: the demo answer for question " + n + " is option " + String.fromCharCode(65 + correctIndex) + ". This is placeholder content, not official examination material."
-            };
-        }
-
-        question.id = "th-" + n;
-        question.section = "theory";
-        question.topic = theoryTopic(n);
-        question.image = null;
-        question.imageAlt = null;
-
-        // A few theory questions carry an optional image; most are text-only.
-        if (n % 9 === 0) {
-            question.image = DEMO_IMAGE;
-            question.imageAlt = DEMO_IMAGE_ALT;
-        }
-
-        return question;
-    }
-
-    // Demo question bank used by both the exam builder and the Admin
-    // "Manage Questions" selection UI (bank is larger than any single exam).
-    var BANK_COLOUR_BLIND = 16;
-    var BANK_THEORY = 120;
     var BANK = [];
-    var i;
-
-    for (i = 1; i <= BANK_COLOUR_BLIND; i++) { BANK.push(buildColourBlindQuestion(i)); }
-    for (i = 1; i <= BANK_THEORY; i++) { BANK.push(buildTheoryQuestion(i)); }
 
     function clone(value) {
         return JSON.parse(JSON.stringify(value));
@@ -232,6 +98,8 @@
     /** Takes `count` items starting at `offset`, wrapping around the end of the array. */
     function takeCircular(source, offset, count) {
         var picked = [];
+
+        if (!source.length) { return picked; }     // an empty bank yields no questions (never an index into nothing)
 
         for (var k = 0; k < count; k++) {
             picked.push(source[(offset + k) % source.length]);
@@ -284,7 +152,7 @@
 
             var setIndex = Math.max(1, parseInt(setNumber, 10) || 1) - 1;
             var colourBlindBank = bankBySection("colourBlind");
-            var colourBlindOffset = (setIndex * 8) % colourBlindBank.length;
+            var colourBlindOffset = colourBlindBank.length ? (setIndex * 8) % colourBlindBank.length : 0;
             var questions = [];
 
             type.sections.forEach(function (section) {
@@ -295,7 +163,7 @@
                 } else {
                     // Theory sections draw only from their own topic, so "Road Signs" holds road sign questions.
                     var topicBank = bankByTopic(section.id);
-                    source = takeCircular(topicBank, (setIndex * section.count) % topicBank.length, section.count);
+                    source = takeCircular(topicBank, topicBank.length ? (setIndex * section.count) % topicBank.length : 0, section.count);
                 }
 
                 source = clone(source);
@@ -316,8 +184,15 @@
     // ========================================================================
     // Learner UI: Mock Exam attempt
     // ========================================================================
+    // Every question (all four sections) has exactly three options: A, B and C. Anything beyond the third is never shown or accepted.
+    var OPTION_LETTERS = "ABC";
+
     function letterFor(index) {
-        return String.fromCharCode(65 + index);
+        return OPTION_LETTERS.charAt(index);
+    }
+
+    function optionsOf(question) {
+        return (question.options || []).slice(0, OPTION_LETTERS.length);
     }
 
     function formatClock(totalSeconds) {
@@ -353,6 +228,13 @@
         var setName = MockExamData.setLabel(setInfo.setNumber);
         var examLabel = type.name + " \u2014 " + setName;
         var questions = MockExamData.buildExam(type.id, setInfo.setNumber);
+
+        // A set whose questions are not available cannot be started: send the learner back to the set list.
+        if (!questions.length) {
+            window.location.replace(setsUrl);
+            return;
+        }
+
         var total = questions.length;
 
         // ---- attempt state (frontend only) ----
@@ -609,7 +491,7 @@
         function renderOptions(question, index) {
             optionsEl.innerHTML = "";
 
-            question.options.forEach(function (text, optionIndex) {
+            optionsOf(question).forEach(function (text, optionIndex) {
                 var button = document.createElement("button");
                 button.type = "button";
                 button.className = "option-row";

@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.config" />
+    <Content Include="Error.html" />
     <Content Include="Global.asax" />
     <Content Include="Site.Master" />
     <Content Include="Default.aspx" />
@@ -113,18 +114,18 @@
     <Content Include="Content\images\illustrations\driving-theory.svg" />
     <Content Include="Scripts\site.js" />
     <Content Include="Scripts\app-shell.js" />
-    <Content Include="Scripts\practice-demo.js" />
+    <Content Include="Scripts\practice.js" />
     <Content Include="Scripts\confirm-modal.js" />
     <Content Include="Scripts\table-labels.js" />
-    <Content Include="Scripts\practice-admin-demo.js" />
-    <Content Include="Scripts\mock-exam-demo.js" />
-    <Content Include="Scripts\mock-exam-admin-demo.js" />
+    <Content Include="Scripts\practice-admin.js" />
+    <Content Include="Scripts\mock-exam.js" />
+    <Content Include="Scripts\mock-exam-admin.js" />
     <Content Include="Scripts\image-preview.js" />
     <Content Include="Scripts\hidden-road-sign-editor.js" />
     <Content Include="Scripts\hidden-road-sign-game.js" />
     <Content Include="Scripts\road-sign-fit.js" />
     <Content Include="Scripts\used-numbers.js" />
-    <Content Include="Scripts\learner-records-demo.js" />
+    <Content Include="Scripts\learner-records-data.js" />
     <Content Include="Scripts\learner-records-admin.js" />
     <Content Include="Admin\LearnerRecordDetails.aspx" />
     <Content Include="Scripts\profile.js" />
@@ -385,6 +386,14 @@
     <Compile Include="Data\UserProfile.cs" />
     <Compile Include="Data\UserProfileRepository.cs" />
     <Compile Include="Data\HiddenRoadSignAttemptRepository.cs" />
+    <Compile Include="Data\LearnerRecordRepository.cs" />
+    <Compile Include="Data\PracticeSetRepository.cs" />
+    <Compile Include="Data\QuestionCategoryRepository.cs" />
+    <Compile Include="Data\QuestionRepository.cs" />
+    <Compile Include="Common\QuestionImageStorage.cs" />
+    <Compile Include="Data\MockExamSetRepository.cs" />
+    <Compile Include="Data\PracticeAttemptRepository.cs" />
+    <Compile Include="Data\MockExamAttemptRepository.cs" />
     <Compile Include="Learner\Game.aspx.cs">
       <DependentUpon>Game.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

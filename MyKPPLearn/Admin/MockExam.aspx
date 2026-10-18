@@ -153,6 +153,6 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script src="<%= ResolveUrl("~/Scripts/used-numbers.js") %>?v=20261010"></script>
-    <script src="<%= ResolveUrl("~/Scripts/mock-exam-demo.js") + "?v=" + MockExamScriptVersion %>"></script>
-    <script src="<%= ResolveUrl("~/Scripts/mock-exam-admin-demo.js") + "?v=" + MockExamAdminScriptVersion %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/mock-exam.js") + "?v=" + MockExamScriptVersion %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/mock-exam-admin.js") + "?v=" + MockExamAdminScriptVersion %>"></script>
 </asp:Content>

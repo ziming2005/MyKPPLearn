@@ -123,7 +123,7 @@
 
             <div class="form-group">
                 <span class="form-label" id="qbOptionsLabel">Options</span>
-                <span class="form-hint">Enter four different options and choose the correct one.</span>
+                <span class="form-hint">Enter three different options (A, B and C) and choose the correct one.</span>
 
                 <div class="qb-option">
                     <span class="qb-option__letter" aria-hidden="true">A</span>
@@ -139,11 +139,6 @@
                     <span class="qb-option__letter" aria-hidden="true">C</span>
                     <input id="qbFormOptionC" type="text" class="form-input" maxlength="200" aria-label="Option C" autocomplete="off" />
                     <label class="qb-option__correct"><input type="radio" name="qbCorrectAnswer" value="2" /> Correct</label>
-                </div>
-                <div class="qb-option">
-                    <span class="qb-option__letter" aria-hidden="true">D</span>
-                    <input id="qbFormOptionD" type="text" class="form-input" maxlength="200" aria-label="Option D" autocomplete="off" />
-                    <label class="qb-option__correct"><input type="radio" name="qbCorrectAnswer" value="3" /> Correct</label>
                 </div>
 
                 <p id="qbOptionsError" class="field-error" role="alert" hidden></p>
@@ -184,6 +179,6 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice-demo.js") + "?v=20261019-ps" %>"></script>
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin-demo.js") + "?v=20261019-qb2" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice.js") + "?v=20261021-c" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin.js") + "?v=20261021-c" %>"></script>
 </asp:Content>

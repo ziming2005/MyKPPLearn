@@ -8,13 +8,13 @@ namespace MyKPPLearn.Learner
 {
     /// <summary>
     /// Phase 6 UI prototype. The actual exam — timer, questions, answers, flags, scoring,
-    /// result and review — is entirely frontend state driven by Scripts/mock-exam-demo.js.
+    /// result and review — is entirely frontend state driven by Scripts/mock-exam.js.
     /// Nothing here touches a database or Session; a page refresh resets the attempt.
     /// This code-behind only validates the "type" and "set" query strings.
     /// </summary>
     public partial class MockExamAttempt : System.Web.UI.Page
     {
-        // Mirrors the exam type ids defined in Scripts/mock-exam-demo.js, for
+        // Mirrors the exam type ids defined in Scripts/mock-exam.js, for
         // query-string validation only.
         private static readonly Dictionary<string, string> KnownTypes = new Dictionary<string, string>
         {
@@ -30,7 +30,7 @@ namespace MyKPPLearn.Learner
         {
             get
             {
-                string scriptPath = Server.MapPath("~/Scripts/mock-exam-demo.js");
+                string scriptPath = Server.MapPath("~/Scripts/mock-exam.js");
                 return File.GetLastWriteTimeUtc(scriptPath).Ticks.ToString(CultureInfo.InvariantCulture);
             }
         }
@@ -50,7 +50,7 @@ namespace MyKPPLearn.Learner
 
             // Only the shape of "set" is checked here (a positive integer). Whether that set
             // exists, belongs to the type and is Active lives in the frontend mock data, so
-            // Scripts/mock-exam-demo.js redirects to the Exam Sets page for anything else.
+            // Scripts/mock-exam.js redirects to the Exam Sets page for anything else.
             int setNumber;
 
             if (!int.TryParse(Request.QueryString["set"], NumberStyles.None, CultureInfo.InvariantCulture, out setNumber) || setNumber < 1)

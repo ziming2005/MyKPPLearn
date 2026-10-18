@@ -1,23 +1,20 @@
 /*
  * ============================================================================
- * Phase 5 frontend-only mock data and Learner UI logic for Standard Practice.
+ * Standard Practice: category configuration and Learner UI logic (UI prototype).
  *
- * Everything in this file is a UI PROTOTYPE. Nothing here is persisted to
- * SQL Server: there is no PracticeSets/Questions/PracticeAttempts database
- * table and no server-side repository behind any of it. All categories,
- * practice sets, questions, options and "statuses" below are temporary
- * in-memory demonstration content, not official JPJ/KPP examination content.
- * Replace with database-backed repositories in a later phase.
+ * Nothing here is persisted to SQL Server and no sample content is preloaded: the practice set and question collections
+ * below start EMPTY. The Learner pages therefore show their existing empty states, and the Admin pages start with no rows.
+ * A later phase replaces the SETS / QUESTIONS collections with database-backed data; the UI functions only talk to the
+ * PracticeDemoData object, so they stay unchanged.
  *
- * window.PracticeDemoData exposes read access to this mock content for both
- * the Learner pages (this file) and the Admin prototype (practice-admin-demo.js).
+ * What is real configuration here (and must stay): the four question categories (ids, titles, descriptions, icons, colours).
+ *
+ * window.PracticeDemoData exposes read access to this data for both the Learner pages (this file) and the Admin prototype
+ * (practice-admin.js).
  * ============================================================================
  */
 (function (global) {
     "use strict";
-
-    var DEMO_IMAGE = "Content/images/illustrations/driving-theory.svg";
-    var DEMO_IMAGE_ALT = "Illustrative driving theory graphic (demo placeholder, not an official road sign image).";
 
     // ------------------------------------------------------------------
     // Categories (exactly four; Hidden Road Sign is a separate module)
@@ -52,95 +49,11 @@
     ];
 
     // ------------------------------------------------------------------
-    // Question pools per category. Demonstration content only: simple,
-    // general road-safety literacy statements used to exercise the UI,
-    // not a claim of official/authoritative Malaysian JPJ/KPP wording.
+    // Practice sets and questions: none are preloaded. Set shape: { id, categoryId, number, questionCount, status }.
+    // Question shape: { id, setId, categoryId, text, options[], correctIndex, explanation, image, imageAlt, status }.
     // ------------------------------------------------------------------
-    var POOLS = {
-        "colour-recognition": [
-            { text: "Which colour typically means “stop” at a traffic light?", options: ["Red", "Green", "Yellow", "Blue"], correctIndex: 0, explanation: "A red traffic light is the universal signal for traffic to stop." },
-            { text: "Which colour usually means it is safe to proceed at a traffic light?", options: ["Red", "Green", "Yellow", "White"], correctIndex: 1, explanation: "A green traffic light generally means the way ahead is clear to proceed." },
-            { text: "An amber (yellow) traffic light generally means a driver should:", options: ["Speed up to cross quickly", "Prepare to stop if it is safe to do so", "Reverse", "Park immediately"], correctIndex: 1, explanation: "Amber is a transition signal warning that the light is about to turn red." },
-            { text: "Warning signs are most often shown using which colour to attract attention?", options: ["Yellow", "Grey", "Brown", "Pink"], correctIndex: 0, explanation: "Yellow/amber is widely used for warning signs because it stands out clearly." },
-            { text: "Blue circular signs are generally used to show:", options: ["Prohibitions", "Mandatory instructions", "Warnings", "Decorative markings"], correctIndex: 1, explanation: "Blue circular signs are a common convention for mandatory instructions." },
-            { text: "Green road signs are most commonly associated with:", options: ["Danger ahead", "Directional or informational guidance", "Prohibition", "No meaning at all"], correctIndex: 1, explanation: "Green is commonly used for directional and informational guidance signs." }
-        ],
-        "road-signs": [
-            { text: "A triangular sign with a red border generally indicates:", options: ["A mandatory action", "A warning", "General information", "A parking area"], correctIndex: 1, explanation: "Triangular red-bordered signs are a common convention for warnings." },
-            { text: "A circular sign with a red border and a diagonal line generally indicates:", options: ["A mandatory action", "A prohibition", "A warning", "Tourist information"], correctIndex: 1, explanation: "Red circular signs with a diagonal line commonly indicate something is prohibited." },
-            { text: "An octagonal red sign is internationally recognised as:", options: ["Yield", "Stop", "Speed limit", "No entry"], correctIndex: 1, explanation: "The eight-sided red sign is widely recognised as a Stop sign." },
-            { text: "A sign showing a red circle with a plain white horizontal bar typically means:", options: ["No entry", "Hospital ahead", "Picnic area", "School zone"], correctIndex: 0, explanation: "A plain red circle with a white bar is a common “No entry” sign." },
-            { text: "Rectangular road signs are most often used for:", options: ["Warnings", "Directional or informational guidance", "Prohibitions", "Decoration"], correctIndex: 1, explanation: "Rectangular signs are typically used to guide or inform drivers." },
-            { text: "A downward-pointing triangular sign with a red border commonly means:", options: ["Give way", "A permanent stop ahead", "No overtaking", "Fuel station ahead"], correctIndex: 0, explanation: "An inverted red-bordered triangle is a common convention for “Give way”." },
-            { text: "Blue rectangular signs along a road are typically used for:", options: ["Warnings", "Informational guidance such as directions", "Prohibitions", "Danger"], correctIndex: 1, explanation: "Blue rectangular signs commonly provide informational guidance, such as directions.", image: DEMO_IMAGE, imageAlt: DEMO_IMAGE_ALT }
-        ],
-        "rules-of-the-road": [
-            { text: "Before changing lanes, a driver should:", options: ["Change immediately", "Check mirrors and signal first", "Sound the horn only", "Close their eyes briefly"], correctIndex: 1, explanation: "Checking mirrors and signalling first lets other road users know your intention." },
-            { text: "When approaching a pedestrian crossing with people waiting to cross, a driver should:", options: ["Accelerate past", "Slow down and be prepared to stop", "Sound the horn and continue", "Reverse"], correctIndex: 1, explanation: "Slowing down and being ready to stop keeps pedestrians safe." },
-            { text: "A safe following distance mainly helps a driver to:", options: ["React in time to stop safely", "Save fuel only", "Avoid using mirrors", "Overtake more easily"], correctIndex: 0, explanation: "Enough following distance gives time to react and stop safely if needed." },
-            { text: "Seatbelts should generally be worn by:", options: ["Only on highways", "The driver only", "All occupants where fitted", "Only at night"], correctIndex: 2, explanation: "Seatbelts protect occupants in any seat where one is fitted, at any time." },
-            { text: "Using a handheld mobile phone while driving is generally considered:", options: ["Safe", "Unsafe and distracting", "Required", "Encouraged"], correctIndex: 1, explanation: "Handheld phone use distracts attention from the road and is unsafe." },
-            { text: "Before overtaking another vehicle, a driver should:", options: ["Ensure the road ahead is clear and it is safe to do so", "Flash headlights only", "Always overtake on the inside", "Close the following distance first"], correctIndex: 0, explanation: "Overtaking should only happen when the driver can see it is clearly safe." }
-        ],
-        "kejara-safety": [
-            { text: "A demerit points system such as KEJARA is generally used to:", options: ["Reward safe driving with prizes", "Record points against a licence for traffic offences", "Set fuel prices", "Issue parking tickets only"], correctIndex: 1, explanation: "Demerit point systems record points against a licence when offences occur." },
-            { text: "Repeatedly committing serious traffic offences under a demerit points system may eventually lead to:", options: ["A free upgrade", "Licence suspension or other penalties", "No consequence", "A discount"], correctIndex: 1, explanation: "Accumulating enough demerit points can lead to licence suspension or other penalties." },
-            { text: "Wearing a helmet correctly while riding a motorcycle primarily helps to:", options: ["Look fashionable", "Reduce the risk of head injury in a crash", "Increase speed", "Improve fuel economy"], correctIndex: 1, explanation: "A correctly worn helmet reduces the risk and severity of head injury." },
-            { text: "Driving under the influence of alcohol or drugs is:", options: ["Acceptable in small amounts", "A serious road safety offence", "Encouraged for confidence", "Only a minor issue"], correctIndex: 1, explanation: "Driving under the influence seriously impairs judgement and reaction time." },
-            { text: "Regular vehicle maintenance (brakes, tyres, lights) mainly helps to:", options: ["Maintain roadworthiness and safety", "Increase emissions", "Void insurance", "Reduce resale value"], correctIndex: 0, explanation: "Regular maintenance keeps a vehicle safe and roadworthy." },
-            { text: "Child passengers are generally safest when they are:", options: ["Sitting on an adult's lap", "Secured in an appropriate child restraint or seatbelt", "Standing in the vehicle", "Left unsupervised"], correctIndex: 1, explanation: "An appropriate child restraint or seatbelt is the safest way to secure a child passenger." }
-        ]
-    };
-
-    var QUESTIONS_PER_SET = 5;
-
-    // ------------------------------------------------------------------
-    // Build sets + questions from the pools above. Pure UI demo data:
-    // sets reuse/rotate the small pools, they are not a real question bank.
-    // ------------------------------------------------------------------
-    var SET_PLAN = [
-        { categoryId: "colour-recognition", count: 2, inactive: [] },
-        { categoryId: "road-signs", count: 3, inactive: [3] },
-        { categoryId: "rules-of-the-road", count: 2, inactive: [] },
-        { categoryId: "kejara-safety", count: 2, inactive: [] }
-    ];
-
     var SETS = [];
     var QUESTIONS = [];
-
-    SET_PLAN.forEach(function (plan) {
-        var pool = POOLS[plan.categoryId];
-
-        for (var n = 1; n <= plan.count; n++) {
-            var setId = plan.categoryId + "-" + n;
-            var isInactive = plan.inactive.indexOf(n) !== -1;
-
-            SETS.push({
-                id: setId,
-                categoryId: plan.categoryId,
-                number: n,
-                questionCount: QUESTIONS_PER_SET,
-                status: isInactive ? "Inactive" : "Active"
-            });
-
-            for (var i = 0; i < QUESTIONS_PER_SET; i++) {
-                var source = pool[((n - 1) * QUESTIONS_PER_SET + i) % pool.length];
-
-                QUESTIONS.push({
-                    id: setId + "-q" + (i + 1),
-                    setId: setId,
-                    categoryId: plan.categoryId,
-                    text: source.text,
-                    options: source.options.slice(),
-                    correctIndex: source.correctIndex,
-                    explanation: source.explanation,
-                    image: source.image || null,
-                    imageAlt: source.imageAlt || null,
-                    status: "Active"
-                });
-            }
-        }
-    });
 
     /** Single source of truth for a set's display name: derived from its number. */
     function setLabel(number) {
@@ -205,8 +118,15 @@
     // Each init function no-ops when its page container is not on the page.
     // ========================================================================
 
+    // Every question has exactly three options: A, B and C. Anything beyond the third is never shown or accepted.
+    var OPTION_LETTERS = "ABC";
+
     function letterFor(index) {
-        return "ABCD".charAt(index);
+        return OPTION_LETTERS.charAt(index);
+    }
+
+    function optionsOf(question) {
+        return (question.options || []).slice(0, OPTION_LETTERS.length);
     }
 
     var MAX_SET_BUTTONS = 4;
@@ -365,6 +285,13 @@
         }
 
         var questions = PracticeDemoData.getQuestions(setInfo.id);
+
+        // A set without questions cannot be practised (there is nothing to show): send the learner back to the set list.
+        if (!questions.length) {
+            window.location.href = "PracticeSets.aspx?category=" + encodeURIComponent(categoryId);
+            return;
+        }
+
         var total = questions.length;
         var answers = questions.map(function () { return { selectedIndex: null }; });
         var currentIndex = 0;
@@ -478,7 +405,7 @@
             questionOptions.innerHTML = "";
             var answered = state.selectedIndex !== null;
 
-            question.options.forEach(function (text, index) {
+            optionsOf(question).forEach(function (text, index) {
                 var button = document.createElement("button");
                 button.type = "button";
                 button.className = "option-row";

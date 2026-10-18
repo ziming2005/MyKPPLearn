@@ -20,5 +20,5 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice-demo.js") + "?v=20261017-set-labels" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice.js") + "?v=20261021-c" %>"></script>
 </asp:Content>

@@ -5,7 +5,7 @@ namespace MyKPPLearn.Admin
 {
     /// <summary>
     /// Phase 5 UI prototype. Every row, filter and action on this page is driven entirely
-    /// by frontend-only mock data (Scripts/practice-demo.js + Scripts/practice-admin-demo.js).
+    /// by frontend-only mock data (Scripts/practice.js + Scripts/practice-admin.js).
     /// There is no Practice Sets database table or repository: this code-behind only
     /// performs the page's authorization check and sets the page heading.
     /// </summary>

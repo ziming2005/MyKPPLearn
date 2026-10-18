@@ -4,7 +4,7 @@ using MyKPPLearn.Security;
 namespace MyKPPLearn.Admin
 {
     /// <summary>
-    /// UI prototype. Every learner, count and date on this page is mock data from Scripts/learner-records-demo.js
+    /// UI prototype. Every learner, count and date on this page is mock data from Scripts/learner-records-data.js
     /// (searched and paged in the browser). Nothing is read from the Users table or any attempt table: this code-behind
     /// only performs the Administrator authorization check and sets the page heading.
     /// </summary>

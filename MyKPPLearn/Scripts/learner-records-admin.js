@@ -1,5 +1,5 @@
 /*
- * Admin Learner Records UI (list + detail). Works on MOCK data from learner-records-demo.js only; nothing is read from or written to
+ * Admin Learner Records UI (list + detail). Works on MOCK data from learner-records-data.js only; nothing is read from or written to
  * the database. Text from the data is only ever written with textContent.
  */
 (function () {

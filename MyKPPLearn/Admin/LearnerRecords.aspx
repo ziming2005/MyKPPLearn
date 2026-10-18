@@ -95,6 +95,6 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/learner-records-demo.js") + "?v=20261019r" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/learner-records-data.js") + "?v=20261020-b" %>"></script>
     <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261019r" %>"></script>
 </asp:Content>

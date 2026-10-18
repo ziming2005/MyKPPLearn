@@ -7,7 +7,7 @@ namespace MyKPPLearn.Learner
 {
     /// <summary>
     /// Phase 5 UI prototype. The Practice Sets, their questions and options shown on this
-    /// page all come from the frontend-only mock data in Scripts/practice-demo.js — there is
+    /// page all come from the frontend-only mock data in Scripts/practice.js — there is
     /// no Practice database table or repository behind this page. This code-behind only
     /// validates the "category" query string against the four known Standard Practice
     /// categories (the same validate-and-redirect pattern used by the Learning module),
@@ -15,7 +15,7 @@ namespace MyKPPLearn.Learner
     /// </summary>
     public partial class PracticeSets : System.Web.UI.Page
     {
-        // Mirrors the four category ids defined in Scripts/practice-demo.js. Kept here only
+        // Mirrors the four category ids defined in Scripts/practice.js. Kept here only
         // for query-string validation; the category list/metadata itself is not duplicated.
         private static readonly Dictionary<string, string> KnownCategories = new Dictionary<string, string>
         {

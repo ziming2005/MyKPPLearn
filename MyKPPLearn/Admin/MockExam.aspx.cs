@@ -7,7 +7,7 @@ namespace MyKPPLearn.Admin
 {
     /// <summary>
     /// Phase 6 UI prototype. Every row, filter and action on this page is driven entirely
-    /// by frontend-only mock data (Scripts/mock-exam-demo.js + Scripts/mock-exam-admin-demo.js).
+    /// by frontend-only mock data (Scripts/mock-exam.js + Scripts/mock-exam-admin.js).
     /// There is no Mock Exam database table or repository: this code-behind only performs
     /// the page's authorization check and sets the page heading.
     /// </summary>
@@ -15,12 +15,12 @@ namespace MyKPPLearn.Admin
     {
         public string MockExamScriptVersion
         {
-            get { return ScriptVersion("~/Scripts/mock-exam-demo.js"); }
+            get { return ScriptVersion("~/Scripts/mock-exam.js"); }
         }
 
         public string MockExamAdminScriptVersion
         {
-            get { return ScriptVersion("~/Scripts/mock-exam-admin-demo.js"); }
+            get { return ScriptVersion("~/Scripts/mock-exam-admin.js"); }
         }
 
         private string ScriptVersion(string virtualPath)

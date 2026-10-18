@@ -3,7 +3,7 @@
  * Phase 5 frontend-only Admin UI prototype for Practice Sets and Question Bank.
  *
  * This file performs NO server calls and NO database operations. All rows
- * shown here come from window.PracticeDemoData (see Scripts/practice-demo.js,
+ * shown here come from window.PracticeDemoData (see Scripts/practice.js,
  * which must be loaded first) and are copied into local, in-memory arrays
  * that this script mutates directly. Add/Edit/Delete/status-toggle are all
  * UI-only: nothing is sent to the server, and a page refresh resets every
@@ -459,7 +459,7 @@
         if (!root || !window.PracticeDemoData) { return; }
 
         var NOTE = " (Prototype only: not saved.)";
-        var LETTERS = "ABCD";
+        var LETTERS = "ABC";          // every question has exactly three options: A, B and C
         var MAX_TEXT = 500;
         var MAX_OPTION = 200;
         var MAX_EXPLANATION = 500;
@@ -506,7 +506,7 @@
         var removeImageBtn = document.getElementById("qbRemoveImage");
         var altGroup = document.getElementById("qbAltGroup");
         var formImageAlt = document.getElementById("qbFormImageAlt");
-        var optionInputs = ["A", "B", "C", "D"].map(function (letter) { return document.getElementById("qbFormOption" + letter); });
+        var optionInputs = ["A", "B", "C"].map(function (letter) { return document.getElementById("qbFormOption" + letter); });
         var radios = document.querySelectorAll("input[name='qbCorrectAnswer']");
         var formExplanation = document.getElementById("qbFormExplanation");
         var statusHint = document.getElementById("qbStatusHint");
@@ -866,7 +866,7 @@
                 refreshFormSetOptions();
                 formSet.value = question.setId;
                 formText.value = question.text;
-                optionInputs.forEach(function (input, index) { input.value = question.options[index]; });
+                optionInputs.forEach(function (input, index) { input.value = question.options[index] || ""; });
                 setCorrect(question.correctIndex);
                 formExplanation.value = question.explanation;
                 statusHint.hidden = true;
@@ -1027,7 +1027,7 @@
             var emptyIndex = options.indexOf("");
 
             if (emptyIndex !== -1) {
-                problem(errors.options, "All four options are required (Option " + LETTERS.charAt(emptyIndex) + " is empty).", optionInputs[emptyIndex]);
+                problem(errors.options, "All three options are required (Option " + LETTERS.charAt(emptyIndex) + " is empty).", optionInputs[emptyIndex]);
             } else {
                 outer:
                 for (var i = 0; i < options.length; i++) {

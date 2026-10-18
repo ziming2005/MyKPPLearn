@@ -45,6 +45,13 @@ namespace MyKPPLearn
                     return;
                 }
 
+                // Same message as a wrong password, so the form never reveals which accounts exist or are disabled.
+                if (!string.Equals(user.Status, "Active", StringComparison.Ordinal))
+                {
+                    ShowError("Invalid email or password.");
+                    return;
+                }
+
                 SessionHelper.SignIn(Session, user.UserId, user.FullName, user.Role, user.ProfileImagePath);
 
                 if (string.Equals(user.Role, SessionHelper.RoleAdministrator, StringComparison.Ordinal))

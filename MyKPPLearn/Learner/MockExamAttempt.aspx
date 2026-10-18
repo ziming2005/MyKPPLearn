@@ -208,5 +208,5 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/mock-exam-demo.js") + "?v=" + MockExamScriptVersion %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/mock-exam.js") + "?v=" + MockExamScriptVersion %>"></script>
 </asp:Content>

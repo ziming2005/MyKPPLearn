@@ -8,7 +8,7 @@
  *
  * This file performs NO server calls and NO database operations. Exam types,
  * the sets and the demo question bank come from window.MockExamData
- * (Scripts/mock-exam-demo.js, which must be loaded first), so the sets and
+ * (Scripts/mock-exam.js, which must be loaded first), so the sets and
  * their questions here are the same ones the learner exam is built from.
  * The state below is local and in memory: Add/Edit/Delete, status toggles and
  * question selection are UI-only, and a page refresh resets everything back to
@@ -639,7 +639,7 @@
         if (!container.children.length) {
             var none = document.createElement("p");
             none.className = "form-hint";
-            none.textContent = "No questions match the search.";
+            none.textContent = bankForSection(sectionId).length ? "No questions match the search." : "No questions are available in this section yet.";
             container.appendChild(none);
         }
     }
