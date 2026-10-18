@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<preserve resultType="3" virtualPath="/C:/Program Files/Git/Register.aspx" hash="fffffff58834ac70" filehash="335be33771a2f823" flags="110000" assembly="App_Web_kqlphzjf" type="ASP.register_aspx">
-    <filedeps>
-        <filedep name="/C:/Program Files/Git/Register.aspx" />
-        <filedep name="/C:/Program Files/Git/Site.Master" />
-    </filedeps>
-</preserve>

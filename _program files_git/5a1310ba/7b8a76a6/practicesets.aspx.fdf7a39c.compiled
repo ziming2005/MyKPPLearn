@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<preserve resultType="3" virtualPath="/C:/Program Files/Git/Admin/PracticeSets.aspx" hash="fffffff58834ac70" filehash="36f06511e9f5c4c2" flags="110000" assembly="App_Web_zdlo4psa" type="ASP.admin_practicesets_aspx">
-    <filedeps>
-        <filedep name="/C:/Program Files/Git/Admin.Master" />
-        <filedep name="/C:/Program Files/Git/Admin/PracticeSets.aspx" />
-    </filedeps>
-</preserve>
