@@ -4,9 +4,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="alert alert-warning">
-        UI prototype. Questions shown here are frontend-only mock data; nothing is read from or written to the database.
-    </div>
 
     <div id="qbToast" class="alert alert-success" hidden role="status"></div>
 
@@ -103,7 +100,7 @@
             <div class="form-group">
                 <label class="form-label" for="qbFormImage">Image (optional)</label>
                 <input type="file" id="qbFormImage" class="form-input" accept=".jpg,.jpeg,.png,.webp" />
-                <span class="form-hint">JPG, PNG or WEBP, up to 2 MB. UI demo only: the image is previewed locally and is never uploaded.</span>
+                <span class="form-hint">JPG, PNG or WEBP, up to 2 MB. The image is validated and stored when the question is saved.</span>
                 <p id="qbImageError" class="field-error" role="alert" hidden></p>
 
                 <div id="qbImagePreviewWrap" class="image-position-preview__image-slot" hidden>
@@ -179,6 +176,5 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice.js") + "?v=20261021-c" %>"></script>
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin.js") + "?v=20261021-c" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261031e"></script>
 </asp:Content>

@@ -4,9 +4,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="alert alert-warning">
-        UI prototype. Practice Sets shown here are frontend-only mock data; nothing is read from or written to the database.
-    </div>
 
     <div id="psToast" class="alert alert-success" hidden role="status"></div>
 
@@ -105,6 +102,5 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script src="<%= ResolveUrl("~/Scripts/used-numbers.js") %>?v=20261010"></script>
-    <script src="<%= ResolveUrl("~/Scripts/practice.js") + "?v=20261021-c" %>"></script>
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin.js") + "?v=20261021-c" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261031d"></script>
 </asp:Content>

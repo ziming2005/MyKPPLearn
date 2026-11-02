@@ -30,6 +30,28 @@ namespace MyKPPLearn
             }
         }
 
+        protected string PracticeDataJson() {
+            string page = System.IO.Path.GetFileName(Request.Path);
+            if (!IsPage(page, "Practice.aspx") && !IsPage(page, "PracticeSets.aspx") && !IsPage(page, "PracticeAttempt.aspx")) return "null";
+            SessionHelper.RequireLearner(Page);
+            var questions = new System.Collections.Generic.List<object>();
+            var sets = new System.Collections.Generic.List<object>();
+            foreach (System.Data.DataRow r in MyKPPLearn.Data.DatabaseHelper.ExecuteQuery(@"SELECT p.PracticeSetId,p.SetNumber,p.IsActive,c.Code AS CategoryCode,(SELECT COUNT(*) FROM Questions q WHERE q.PracticeSetId=p.PracticeSetId AND q.IsActive=1) AS ActiveQuestionCount FROM PracticeSets p JOIN QuestionCategories c ON c.QuestionCategoryId=p.QuestionCategoryId WHERE c.IsActive=1 ORDER BY c.DisplayOrder,p.SetNumber").Rows) {
+                if (Convert.ToBoolean(r["IsActive"]) && Convert.ToInt32(r["ActiveQuestionCount"]) > 0)
+                    sets.Add(new { id=Convert.ToInt32(r["PracticeSetId"]), categoryId=Convert.ToString(r["CategoryCode"]), number=Convert.ToInt32(r["SetNumber"]), questionCount=Convert.ToInt32(r["ActiveQuestionCount"]), status="Active" });
+            }
+            foreach (System.Data.DataRow q in MyKPPLearn.Data.DatabaseHelper.ExecuteQuery(@"SELECT q.*, c.Code FROM Questions q JOIN PracticeSets p ON p.PracticeSetId=q.PracticeSetId JOIN QuestionCategories c ON c.QuestionCategoryId=p.QuestionCategoryId WHERE q.IsActive=1 AND p.IsActive=1 AND c.IsActive=1 ORDER BY q.QuestionId").Rows) {
+                var options = new System.Collections.Generic.List<string>();
+                int correct = -1;
+                foreach (System.Data.DataRow o in MyKPPLearn.Data.QuestionRepository.GetOptions(Convert.ToInt32(q["QuestionId"])).Rows) {
+                    if (Convert.ToBoolean(o["IsCorrect"])) correct=options.Count;
+                    options.Add(Convert.ToString(o["OptionText"]));
+                }
+                string image=Convert.ToString(q["ImagePath"]);
+                questions.Add(new { id=Convert.ToInt32(q["QuestionId"]), setId=Convert.ToInt32(q["PracticeSetId"]), categoryId=Convert.ToString(q["Code"]), text=Convert.ToString(q["QuestionText"]), options=options, correctIndex=correct, explanation=Convert.ToString(q["Explanation"]), image=string.IsNullOrEmpty(image) ? "" : ResolveUrl(image), imageAlt=Convert.ToString(q["ImageAltText"]), status="Active" });
+            }
+            return new System.Web.Script.Serialization.JavaScriptSerializer { MaxJsonLength = int.MaxValue }.Serialize(new { sets=sets, questions=questions }).Replace("<", "\\u003c");
+        }
         private void SetActiveNav()
         {
             string currentPage = System.IO.Path.GetFileName(Request.Path);
@@ -63,3 +85,6 @@ namespace MyKPPLearn
         }
     }
 }
+
+
+

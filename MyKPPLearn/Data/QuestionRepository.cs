@@ -1,13 +1,38 @@
+using System;
+using System.Data;
+using System.Data.SqlClient;
+
 namespace MyKPPLearn.Data
 {
-    /// <summary>
-    /// Module: Admin Question Bank (the shared question bank for Standard Practice and Mock Exam), including each question's options.
-    /// Tables: Questions and QuestionOptions, with QuestionCategories, PracticeSets and the attempt tables for the references that protect a question.
-    /// Skeleton only: the CRUD is implemented later by the assigned teammate.
-    /// </summary>
+    public sealed class QuestionInput { public int QuestionId; public int CategoryId; public int? PracticeSetId; public string QuestionText; public string Explanation; public string ImagePath; public string ImageAltText; public string[] Options; public int CorrectOption; }
+    public enum QuestionDeleteResult { Deleted, NotFound, HasAttempts, UsedByMockExam }
     public static class QuestionRepository
     {
-        // TODO: implement (list, create, update, safe delete; exactly three options A/B/C with exactly one correct answer;
-        //       category/practice set validation; protect questions referenced by attempts).
+        public const int MaxQuestionLength=500, MaxOptionLength=200, MaxExplanationLength=500, MaxAltTextLength=200;
+        private const string SelectSql=@"SELECT q.QuestionId,q.QuestionCategoryId,q.PracticeSetId,q.QuestionText,q.Explanation,q.ImagePath,q.ImageAltText,q.IsActive,c.Code CategoryCode,c.Title CategoryTitle,p.SetNumber,
+            (SELECT COUNT(*) FROM PracticeAttemptQuestions x WHERE x.QuestionId=q.QuestionId)+(SELECT COUNT(*) FROM MockExamAttemptQuestions x WHERE x.QuestionId=q.QuestionId) AttemptCount,
+            (SELECT COUNT(*) FROM MockExamSetQuestions x WHERE x.QuestionId=q.QuestionId) MockExamUseCount
+            FROM Questions q INNER JOIN QuestionCategories c ON c.QuestionCategoryId=q.QuestionCategoryId LEFT JOIN PracticeSets p ON p.PracticeSetId=q.PracticeSetId";
+        public static DataTable GetAllForAdmin(){return DatabaseHelper.ExecuteQuery(SelectSql+" ORDER BY c.DisplayOrder,p.SetNumber,q.QuestionId DESC");}
+        public static DataRow GetById(int id){DataTable t=DatabaseHelper.ExecuteQuery(SelectSql+" WHERE q.QuestionId=@Id",new SqlParameter("@Id",id));return t.Rows.Count==0?null:t.Rows[0];}
+        public static DataTable GetOptions(int id){return DatabaseHelper.ExecuteQuery("SELECT OptionOrder,OptionText,IsCorrect FROM QuestionOptions WHERE QuestionId=@Id ORDER BY OptionOrder",new SqlParameter("@Id",id));}
+        public static string Validate(QuestionInput x) {
+            if(x==null||x.CategoryId<1)return "Select a category."; if(string.IsNullOrWhiteSpace(x.QuestionText)||x.QuestionText.Trim().Length>MaxQuestionLength)return "Question is required (up to 500 characters)."; if(string.IsNullOrWhiteSpace(x.Explanation)||x.Explanation.Trim().Length>MaxExplanationLength)return "Explanation is required (up to 500 characters).";
+            if(x.Options==null||x.Options.Length!=3)return "Exactly three answer options (A, B and C) are required."; for(int i=0;i<3;i++){if(string.IsNullOrWhiteSpace(x.Options[i])||x.Options[i].Trim().Length>MaxOptionLength)return "Options A, B and C are required (up to 200 characters each).";for(int j=0;j<i;j++)if(string.Equals(x.Options[i].Trim(),x.Options[j].Trim(),StringComparison.OrdinalIgnoreCase))return "Each option must be different.";} if(x.CorrectOption<1||x.CorrectOption>3)return "Select exactly one correct answer."; if(!string.IsNullOrEmpty(x.ImagePath)&&(string.IsNullOrWhiteSpace(x.ImageAltText)||x.ImageAltText.Trim().Length>MaxAltTextLength))return "Provide an image description (up to 200 characters)."; return null;
+        }
+        public static int Save(QuestionInput x) {
+            string error=Validate(x);if(error!=null)throw new ArgumentException(error); using(SqlConnection c=DatabaseHelper.GetConnection()){c.Open();using(SqlTransaction tx=c.BeginTransaction()){try{
+                if(x.PracticeSetId.HasValue&&!SetMatchesCategory(c,tx,x.PracticeSetId.Value,x.CategoryId))throw new ArgumentException("The selected Practice Set does not belong to this category."); int id=x.QuestionId;
+                if(id==0){using(SqlCommand cmd=new SqlCommand(@"INSERT INTO Questions(QuestionCategoryId,PracticeSetId,QuestionText,Explanation,ImagePath,ImageAltText,IsActive,CreatedAt,UpdatedAt) OUTPUT INSERTED.QuestionId VALUES(@C,@P,@Q,@E,@I,@A,1,SYSUTCDATETIME(),SYSUTCDATETIME())",c,tx)){AddQuestion(cmd,x);id=Convert.ToInt32(cmd.ExecuteScalar());}}
+                else {using(SqlCommand cmd=new SqlCommand(@"UPDATE Questions SET QuestionCategoryId=@C,PracticeSetId=@P,QuestionText=@Q,Explanation=@E,ImagePath=@I,ImageAltText=@A,UpdatedAt=SYSUTCDATETIME() WHERE QuestionId=@Id",c,tx)){AddQuestion(cmd,x);cmd.Parameters.AddWithValue("@Id",id);if(cmd.ExecuteNonQuery()!=1)throw new ArgumentException("Question not found.");}}
+                using(SqlCommand clearCorrect=new SqlCommand("UPDATE QuestionOptions SET IsCorrect=0 WHERE QuestionId=@Id",c,tx)){clearCorrect.Parameters.AddWithValue("@Id",id);clearCorrect.ExecuteNonQuery();}
+                for(int i=0;i<3;i++){using(SqlCommand cmd=new SqlCommand(@"IF EXISTS(SELECT 1 FROM QuestionOptions WHERE QuestionId=@Id AND OptionOrder=@O) UPDATE QuestionOptions SET OptionText=@T,IsCorrect=@Correct WHERE QuestionId=@Id AND OptionOrder=@O ELSE INSERT INTO QuestionOptions(QuestionId,OptionText,OptionOrder,IsCorrect) VALUES(@Id,@T,@O,@Correct)",c,tx)){cmd.Parameters.AddWithValue("@Id",id);cmd.Parameters.AddWithValue("@O",i+1);cmd.Parameters.AddWithValue("@T",x.Options[i].Trim());cmd.Parameters.AddWithValue("@Correct",i+1==x.CorrectOption);cmd.ExecuteNonQuery();}}
+                if(Scalar(c,tx,"SELECT COUNT(*) FROM QuestionOptions WHERE QuestionId=@Id",id)!=3||Scalar(c,tx,"SELECT COUNT(*) FROM QuestionOptions WHERE QuestionId=@Id AND IsCorrect=1",id)!=1)throw new InvalidOperationException("The question must retain exactly three options and one correct answer.");tx.Commit();return id;
+            }catch{tx.Rollback();throw;}}}}
+        public static bool SetActive(int id,bool active){return DatabaseHelper.ExecuteNonQuery("UPDATE Questions SET IsActive=@A,UpdatedAt=SYSUTCDATETIME() WHERE QuestionId=@Id",new SqlParameter("@Id",id),new SqlParameter("@A",active))==1;}
+        public static QuestionDeleteResult Delete(int id){using(SqlConnection c=DatabaseHelper.GetConnection()){c.Open();using(SqlTransaction tx=c.BeginTransaction()){try{if(Scalar(c,tx,"SELECT COUNT(*) FROM Questions WHERE QuestionId=@Id",id)==0){tx.Rollback();return QuestionDeleteResult.NotFound;}if(Scalar(c,tx,"SELECT COUNT(*) FROM PracticeAttemptQuestions WITH (UPDLOCK,HOLDLOCK) WHERE QuestionId=@Id",id)>0||Scalar(c,tx,"SELECT COUNT(*) FROM MockExamAttemptQuestions WITH (UPDLOCK,HOLDLOCK) WHERE QuestionId=@Id",id)>0){tx.Rollback();return QuestionDeleteResult.HasAttempts;}if(Scalar(c,tx,"SELECT COUNT(*) FROM MockExamSetQuestions WITH (UPDLOCK,HOLDLOCK) WHERE QuestionId=@Id",id)>0){tx.Rollback();return QuestionDeleteResult.UsedByMockExam;}using(SqlCommand cmd=new SqlCommand("DELETE FROM QuestionOptions WHERE QuestionId=@Id; DELETE FROM Questions WHERE QuestionId=@Id;",c,tx)){cmd.Parameters.AddWithValue("@Id",id);cmd.ExecuteNonQuery();}tx.Commit();return QuestionDeleteResult.Deleted;}catch{tx.Rollback();throw;}}}}
+        private static void AddQuestion(SqlCommand c,QuestionInput x){c.Parameters.AddWithValue("@C",x.CategoryId);c.Parameters.AddWithValue("@P",(object)x.PracticeSetId??DBNull.Value);c.Parameters.AddWithValue("@Q",x.QuestionText.Trim());c.Parameters.AddWithValue("@E",x.Explanation.Trim());c.Parameters.AddWithValue("@I",(object)x.ImagePath??DBNull.Value);c.Parameters.AddWithValue("@A",(object)x.ImageAltText??DBNull.Value);}
+        private static bool SetMatchesCategory(SqlConnection c,SqlTransaction tx,int set,int category){using(SqlCommand cmd=new SqlCommand("SELECT COUNT(*) FROM PracticeSets WHERE PracticeSetId=@P AND QuestionCategoryId=@C",c,tx)){cmd.Parameters.AddWithValue("@P",set);cmd.Parameters.AddWithValue("@C",category);return Convert.ToInt32(cmd.ExecuteScalar())==1;}}
+        private static int Scalar(SqlConnection c,SqlTransaction tx,string sql,int id){using(SqlCommand cmd=new SqlCommand(sql,c,tx)){cmd.Parameters.AddWithValue("@Id",id);return Convert.ToInt32(cmd.ExecuteScalar());}}
     }
 }

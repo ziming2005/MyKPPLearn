@@ -52,8 +52,8 @@
     // Practice sets and questions: none are preloaded. Set shape: { id, categoryId, number, questionCount, status }.
     // Question shape: { id, setId, categoryId, text, options[], correctIndex, explanation, image, imageAlt, status }.
     // ------------------------------------------------------------------
-    var SETS = [];
-    var QUESTIONS = [];
+    var SETS = (global.PracticeDatabaseData || {}).sets || [];
+    var QUESTIONS = (global.PracticeDatabaseData || {}).questions || [];
 
     /** Single source of truth for a set's display name: derived from its number. */
     function setLabel(number) {
@@ -524,7 +524,7 @@
             updateProgress();
 
             if (question.image) {
-                questionImage.src = appRoot + question.image;
+                questionImage.src = question.image;
                 questionImage.alt = question.imageAlt || "";
                 questionImageWrap.hidden = false;
             } else {
@@ -644,7 +644,7 @@
 
                 if (question.image) {
                     var img = document.createElement("img");
-                    img.src = appRoot + question.image;
+                    img.src = question.image;
                     img.alt = question.imageAlt || "";
                     img.className = "lesson-image";
                     item.appendChild(img);
@@ -776,3 +776,5 @@
         initAttemptPage();
     });
 })(window);
+
+

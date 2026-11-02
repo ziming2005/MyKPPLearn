@@ -71,6 +71,7 @@
     </form>
     <script src="<%= ResolveUrl("~/Scripts/app-shell.js") + "?v=20261011-nav" %>"></script>
     <script src="<%= ResolveUrl("~/Scripts/confirm-modal.js") + "?v=20261019" %>"></script>
-    <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />
+    <script>window.PracticeDatabaseData = <%= PracticeDataJson() %>;</script> <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />
 </body>
 </html>
+
