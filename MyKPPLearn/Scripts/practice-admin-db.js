@@ -222,7 +222,7 @@
                 var tr = document.createElement("tr");
                 if (set.status !== "Active") { tr.className = "row--inactive"; }
 
-                addCell(tr, "Practice Set " + set.number);
+                addCell(tr, String(set.number));
                 addCell(tr, categoryTitle(set.categoryId));
                 addCell(tr, set.activeQuestionCount + " active / " + set.questionCount);
 
@@ -433,7 +433,7 @@
 
         function setTitle(id) {
             var match = data.sets.filter(function (s) { return s.id === id; })[0];
-            return match ? "Practice Set " + match.number : "Mock exam only";
+            return match ? String(match.number) : "Mock exam only";
         }
 
         function render() {
