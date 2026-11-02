@@ -70,8 +70,7 @@
                 <p id="psCategoryError" class="field-error" role="alert" hidden></p>
             </div>
 
-            <p id="psNumberInfo" class="form-hint"></p>
-            <p class="form-hint">Press Add New Question to write the set's questions one by one. Each question is saved to the Question Bank when you press Save Question, so a problem with one question never affects the ones already saved. The set becomes Active when its first question is saved; you can deactivate it from the list.</p>
+            <p id="psNumberInfo" class="form-hint" hidden></p>
         </div>
 
         <div id="psQuestionsCard" class="card table-card ps-questions">
@@ -117,5 +116,5 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261106"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261107"></script>
 </asp:Content>

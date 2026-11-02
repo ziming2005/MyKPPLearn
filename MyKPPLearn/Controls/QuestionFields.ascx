@@ -15,7 +15,7 @@
 <div class="form-group">
     <label class="form-label" for="qbFormImage">Image (optional)</label>
     <input type="file" id="qbFormImage" class="form-input" accept=".jpg,.jpeg,.png,.webp" />
-    <span class="form-hint">JPG, PNG or WEBP, up to 2 MB. The image is validated and stored when the question is saved.</span>
+    <span class="form-hint">JPG, PNG or WEBP, up to 10 MB. The image is validated and stored when the question is saved.</span>
     <p id="qbImageError" class="field-error" role="alert" hidden></p>
 
     <div id="qbImagePreviewWrap" class="image-position-preview__image-slot" hidden>

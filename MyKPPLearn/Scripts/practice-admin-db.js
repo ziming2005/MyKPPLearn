@@ -16,7 +16,7 @@
     var MAX_TEXT = 500;
     var MAX_OPTION = 200;
     var MAX_ALT = 200;
-    var MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+    var MAX_IMAGE_BYTES = 10 * 1024 * 1024;
     var IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
     var QUESTIONS_PER_PAGE = 20;
 
@@ -293,7 +293,7 @@
             if (IMAGE_TYPES.indexOf(file.type) < 0) {
                 errors.add("qbImageError", "Choose a JPG, PNG or WEBP image.", imageInput);
             } else if (file.size > MAX_IMAGE_BYTES) {
-                errors.add("qbImageError", "Image must be 2 MB or smaller.", imageInput);
+                errors.add("qbImageError", "Image must be 10 MB or smaller.", imageInput);
             }
 
             if (errors.any()) {
@@ -401,7 +401,7 @@
                 return [
                     [/^question/i, "qbTextError", formText],
                     [/image description/i, "qbAltError", formAlt],
-                    [/image|jpg|png|webp|2 mb/i, "qbImageError", imageInput],
+                    [/image|jpg|png|webp|\d+ mb/i, "qbImageError", imageInput],
                     [/option/i, "qbOptionsError", optionInputs[0]],
                     [/correct answer/i, "qbCorrectError", radios()[0]],
                     [/explanation/i, "qbExplanationError", formExplanation]
@@ -513,13 +513,10 @@
             });
         }
 
-        /** The number a new set in the selected category will get: the lowest one not used yet (the server decides). */
-        function showNextNumber() {
-            var category = toInt(formCategory.value);
-            var used = data.sets.filter(function (s) { return s.categoryId === category; }).map(function (s) { return s.number; });
-            var next = 1;
-            while (used.indexOf(next) >= 0) { next++; }
-            setText(byId("psNumberInfo"), "This set will be Practice Set " + next + ". The number is given automatically when its first question is saved.");
+        function hideNumberInfo() {
+            var numberInfo = byId("psNumberInfo");
+            setText(numberInfo, "");
+            numberInfo.hidden = true;
         }
 
         /**
@@ -539,9 +536,11 @@
             formCategory.disabled = !!current;
 
             if (current) {
-                setText(byId("psNumberInfo"), "This is Practice Set " + current.number + " of " + categoryTitle(current.categoryId) + ".");
+                var numberInfo = byId("psNumberInfo");
+                setText(numberInfo, "This is Practice Set " + current.number + " of " + categoryTitle(current.categoryId) + ".");
+                numberInfo.hidden = false;
             } else {
-                showNextNumber();
+                hideNumberInfo();
             }
         }
 
@@ -736,7 +735,7 @@
         byId("psQSaveBtn").onclick = save;
         saveOnEnter(questionForm, save);
         formCategory.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); } });
-        formCategory.addEventListener("change", showNextNumber);
+        formCategory.addEventListener("change", hideNumberInfo);
         clearOnInput(formCategory, "psCategoryError");
         filter.onchange = render;
 

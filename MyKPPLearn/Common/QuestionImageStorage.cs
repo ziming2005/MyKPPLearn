@@ -9,12 +9,12 @@ namespace MyKPPLearn.Common
     /// <summary>
     /// Question Bank images live in their own folder (Content/images/questions/), separate from lesson, profile and game images.
     /// Only the relative path is stored in Questions.ImagePath. Physical names are always generated GUIDs.
-    /// Rules: .jpg/.jpeg/.png/.webp, 2 MB, and the file's real signature must match its type.
+    /// Rules: .jpg/.jpeg/.png/.webp, 10 MB, and the file's real signature must match its type.
     /// </summary>
     public static class QuestionImageStorage
     {
         public const string RelativeFolder = "Content/images/questions/";
-        public const int MaxBytes = 2 * 1024 * 1024;
+        public const int MaxBytes = 10 * 1024 * 1024;
 
         public static string Validate(HttpPostedFile file)
         {
@@ -65,7 +65,7 @@ namespace MyKPPLearn.Common
 
             if (bytes.Length == 0 || bytes.Length > MaxBytes)
             {
-                throw new ArgumentException("Image must be 2 MB or smaller.");
+                throw new ArgumentException("Image must be 10 MB or smaller.");
             }
 
             string type = dataUrl.Substring(5, semicolon - 5).ToLowerInvariant();
