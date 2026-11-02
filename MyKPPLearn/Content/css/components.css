@@ -21,6 +21,11 @@
   white-space: nowrap;
 }
 
+/* display:inline-flex above would otherwise override the hidden attribute. */
+.btn[hidden] {
+  display: none;
+}
+
 .btn:active {
   transform: translateY(1px);
 }

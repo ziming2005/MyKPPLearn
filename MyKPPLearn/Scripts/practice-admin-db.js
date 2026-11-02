@@ -49,6 +49,16 @@
         return b;
     }
 
+    /** The Active/Inactive toggle switch (.btn-status in components.css). */
+    function makeStatusButton(status, onToggle) {
+        var isActive = status === "Active";
+        var b = makeButton(isActive ? "Active" : "Inactive",
+            "btn btn-secondary btn-small btn-status " + (isActive ? "btn-status--active" : "btn-status--inactive"),
+            onToggle);
+        b.setAttribute("aria-label", b.textContent + ". Click to " + (isActive ? "deactivate" : "activate") + ".");
+        return b;
+    }
+
     /**
      * A Delete button that uses the site's confirm modal (Scripts/confirm-modal.js): the first click only opens
      * the modal; the modal's confirm repeats the click with data-confirmed="1", and only that click runs onConfirm.
@@ -140,6 +150,14 @@
             tableWrap.hidden = rows.length === 0;
             empty.hidden = rows.length > 0;
 
+            // Nothing created yet: offer "Add". Nothing matches the filter: offer "Clear Filter".
+            setText(document.getElementById("psEmptyTitle"), data.sets.length === 0
+                ? "No practice sets have been created yet."
+                : "No practice sets match the selected filter.");
+            document.getElementById("psEmptyAdd").hidden = data.sets.length > 0;
+            document.getElementById("psEmptyClear").hidden = data.sets.length === 0;
+            document.getElementById("psClearFilter").hidden = !category;
+
             rows.forEach(function (set) {
                 var tr = document.createElement("tr");
                 if (set.status !== "Active") { tr.className = "row--inactive"; }
@@ -149,7 +167,7 @@
                 addCell(tr, set.activeQuestionCount + " active / " + set.questionCount);
 
                 var statusCell = document.createElement("td");
-                statusCell.appendChild(makeButton(set.status, "btn btn-secondary btn-small btn-status", function () {
+                statusCell.appendChild(makeStatusButton(set.status, function () {
                     call("Toggle", { id: set.id, active: set.status !== "Active" }).then(check).then(function () {
                         load();
                         showMessage(toast, "Practice Set updated.");
@@ -301,6 +319,14 @@
             document.getElementById("qbTableWrap").hidden = rows.length === 0;
             document.getElementById("qbEmpty").hidden = rows.length > 0;
 
+            // Nothing created yet: offer "Add". Nothing matches the filters: offer "Clear Filters".
+            setText(document.getElementById("qbEmptyTitle"), data.questions.length === 0
+                ? "No questions have been created yet."
+                : "No questions match the selected filters.");
+            document.getElementById("qbEmptyAdd").hidden = data.questions.length > 0;
+            document.getElementById("qbEmptyClear").hidden = data.questions.length === 0;
+            document.getElementById("qbClearFilters").hidden = !(category || set || status || term);
+
             rows.forEach(function (q) {
                 var tr = document.createElement("tr");
                 if (q.status !== "Active") { tr.className = "row--inactive"; }
@@ -310,7 +336,7 @@
                 addCell(tr, setTitle(q.setId));
 
                 var statusCell = document.createElement("td");
-                statusCell.appendChild(makeButton(q.status, "btn btn-secondary btn-small btn-status", function () {
+                statusCell.appendChild(makeStatusButton(q.status, function () {
                     call("Toggle", { id: q.id, active: q.status !== "Active" }).then(check).then(function () {
                         load();
                         showMessage(toast, "Question updated.");
