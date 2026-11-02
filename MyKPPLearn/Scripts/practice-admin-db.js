@@ -31,11 +31,48 @@
                 try { json = JSON.parse(raw); } catch (ignore) { }
 
                 if (!response.ok) {
-                    throw new Error((json && json.Message) || "The request could not be completed. Please try again.");
+                    return checkSignedIn().then(function () {
+                        throw new Error((json && json.Message) || "The request could not be completed. Please try again.");
+                    });
                 }
 
                 return json.d;
             });
+        });
+    }
+
+    /**
+     * Page methods report an expired session only as a generic server error, so after a failure we ask for the page
+     * itself: if it now redirects (to Login), the session has ended and the page is reloaded so the user can sign in.
+     */
+    function checkSignedIn() {
+        return fetch(location.pathname, { credentials: "same-origin", redirect: "manual" }).then(function (r) {
+            if (r.type === "opaqueredirect" || r.status === 302) {
+                location.reload();
+                throw new Error("Your session has ended. Please sign in again.");
+            }
+        }, function () { /* network problem: keep the original error */ });
+    }
+
+    /** Runs one save at a time: the button is disabled until the request finishes (stops double submits). */
+    function guarded(button, run) {
+        return function () {
+            if (button.disabled) { return; }
+            var result = run();
+            if (!result || typeof result.then !== "function") { return; }
+            button.disabled = true;
+            result.then(function () { button.disabled = false; }, function () { button.disabled = false; });
+        };
+    }
+
+    /** Enter in a single-line field saves the form instead of posting the whole ASP.NET page back. */
+    function saveOnEnter(container, save) {
+        container.addEventListener("keydown", function (e) {
+            var tag = e.target.tagName;
+            if (e.key === "Enter" && (tag === "INPUT" || tag === "SELECT") && e.target.type !== "file") {
+                e.preventDefault();
+                save();
+            }
         });
     }
 
@@ -314,9 +351,9 @@
         }
 
         function save() {
-            if (!validate()) { return; }
+            if (!validate()) { return null; }
 
-            call("Save", { id: editingId, categoryId: toInt(formCategory.value), number: toInt(formNumber.value) })
+            return call("Save", { id: editingId, categoryId: toInt(formCategory.value), number: toInt(formNumber.value) })
                 .then(function (result) {
                     if (result && result.error) {
                         // The server's answer belongs to a field: a duplicate/number problem or the category lock.
@@ -337,7 +374,9 @@
         byId("psAddBtn").onclick = function () { openForm(null); };
         byId("psEmptyAdd").onclick = function () { openForm(null); };
         byId("psCancelBtn").onclick = closeForm;
-        byId("psSaveBtn").onclick = save;
+        var saveSet = guarded(byId("psSaveBtn"), save);
+        byId("psSaveBtn").onclick = saveSet;
+        saveOnEnter(form, saveSet);
         filter.onchange = render;
         formCategory.addEventListener("change", showUsedNumbers);
         clearOnInput(formCategory, "psCategoryError");
@@ -685,10 +724,12 @@
             return !errors.any();
         }
 
-        /** Places a server message under the field it is about, or in the image field when unsure. */
+        /** Places a server message under the field it is about; anything else goes to the message box. */
         function showServerError(message) {
             var rules = [
-                [/category|practice set/i, "qbSetError", formSet],
+                [/not found|try again|question data/i, null, null],
+                [/^select a category/i, "qbCategoryError", formCategory],
+                [/practice set/i, "qbSetError", formSet],
                 [/^question/i, "qbTextError", formText],
                 [/image description/i, "qbAltError", formAlt],
                 [/image|jpg|png|webp|2 mb/i, "qbImageError", imageInput],
@@ -699,7 +740,7 @@
             var match = rules.filter(function (r) { return r[0].test(message); })[0];
             var errors = createErrors();
 
-            if (match) {
+            if (match && match[1]) {
                 errors.add(match[1], message, match[2]);
                 errors.focusFirst();
             } else {
@@ -709,7 +750,7 @@
         }
 
         function save() {
-            if (!validate()) { return; }
+            if (!validate()) { return null; }
 
             var question = {
                 id: editingId,
@@ -723,7 +764,7 @@
                 correctIndex: correctIndex()
             };
 
-            call("Save", { question: question }).then(function (result) {
+            return call("Save", { question: question }).then(function (result) {
                 if (result && result.error) {
                     showServerError(result.error);
                     return;
@@ -738,7 +779,9 @@
         byId("qbAddBtn").onclick = function () { openForm(null); };
         byId("qbEmptyAdd").onclick = function () { openForm(null); };
         byId("qbCancelBtn").onclick = closeForm;
-        byId("qbSaveBtn").onclick = save;
+        var saveQuestion = guarded(byId("qbSaveBtn"), save);
+        byId("qbSaveBtn").onclick = saveQuestion;
+        saveOnEnter(form, saveQuestion);
         filterCategory.onchange = function () { fillSetFilter(); filterChanged(); };
         filterSet.onchange = filterChanged;
         filterStatus.onchange = filterChanged;
