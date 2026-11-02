@@ -132,6 +132,7 @@
     <Content Include="Controls\ProfileEditor.ascx" />
     <Content Include="Scripts\hidden-road-sign-view.js" />
     <Content Include="App_Data\DatabaseSetup.sql" />
+    <Content Include="App_Data\SeedPracticeQuestions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\ProfileEditor.ascx.cs">
