@@ -401,13 +401,21 @@
             return data.sets.filter(function (s) { return s.categoryId === categoryId; });
         }
 
+        /**
+         * The Practice Set filter lists each set number once ("Practice Set 1" covers Practice Set 1 of every category);
+         * the Category filter narrows it to one category. Values are set numbers, plus "none" for mock-exam-only questions.
+         */
         function fillSetFilter() {
             var category = toInt(filterCategory.value);
             var sets = category ? setsIn(category) : data.sets;
             var selected = filterSet.value;
+            var numbers = [];
 
-            fillSelect(filterSet, [{ id: "none", title: "Mock exam only" }].concat(sets.map(function (s) {
-                return { id: s.id, title: "Practice Set " + s.number };
+            sets.forEach(function (s) { if (numbers.indexOf(s.number) < 0) { numbers.push(s.number); } });
+            numbers.sort(function (a, b) { return a - b; });
+
+            fillSelect(filterSet, [{ id: "none", title: "Mock exam only" }].concat(numbers.map(function (n) {
+                return { id: n, title: "Practice Set " + n };
             })), "All Practice Sets");
 
             filterSet.value = selected;
@@ -431,6 +439,11 @@
             return match ? match.title : "";
         }
 
+        function setNumber(id) {
+            var match = data.sets.filter(function (s) { return s.id === id; })[0];
+            return match ? match.number : 0;
+        }
+
         function setTitle(id) {
             var match = data.sets.filter(function (s) { return s.id === id; })[0];
             return match ? String(match.number) : "Mock exam only";
@@ -444,7 +457,7 @@
 
             var rows = data.questions.filter(function (q) {
                 return (!category || q.categoryId === category)
-                    && (!set || (set === "none" ? q.setId == null : q.setId === toInt(set)))
+                    && (!set || (set === "none" ? q.setId == null : setNumber(q.setId) === toInt(set)))
                     && (!status || q.status === status)
                     && (!term || q.text.toLowerCase().indexOf(term) >= 0);
             });
