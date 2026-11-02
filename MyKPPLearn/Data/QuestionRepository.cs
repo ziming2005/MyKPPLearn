@@ -44,7 +44,9 @@ namespace MyKPPLearn.Data
 
         public static DataTable GetAllForAdmin()
         {
-            return DatabaseHelper.ExecuteQuery(SelectSql + " ORDER BY c.DisplayOrder, p.SetNumber, q.QuestionId DESC");
+            // By category, then set (mock-exam-only questions last), then the order the questions were added.
+            return DatabaseHelper.ExecuteQuery(SelectSql + @"
+                ORDER BY c.DisplayOrder, CASE WHEN p.SetNumber IS NULL THEN 1 ELSE 0 END, p.SetNumber, q.QuestionId");
         }
 
         public static DataRow GetById(int id)
