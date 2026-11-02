@@ -4,6 +4,7 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Web;
 using System.Web.Services;
 using MyKPPLearn.Data;
 using MyKPPLearn.Security;
@@ -54,7 +55,8 @@ namespace MyKPPLearn.Admin
             public int id;
             public string sectionId;   // colourBlind, roadSigns, rulesOfTheRoad or kejaraSafety
             public string text;
-            public bool hasImage;
+            public string image;       // site-absolute URL of the question's picture, or null
+            public string imageAlt;
             public string status;
         }
 
@@ -105,7 +107,8 @@ namespace MyKPPLearn.Admin
                     id = Convert.ToInt32(row["QuestionId"]),
                     sectionId = sectionId,
                     text = Convert.ToString(row["QuestionText"]),
-                    hasImage = !row.IsNull("ImagePath"),
+                    image = row.IsNull("ImagePath") ? null : VirtualPathUtility.ToAbsolute("~/" + Convert.ToString(row["ImagePath"]).TrimStart('~', '/')),
+                    imageAlt = row.IsNull("ImageAltText") ? null : Convert.ToString(row["ImageAltText"]),
                     status = Convert.ToBoolean(row["IsActive"]) ? "Active" : "Inactive"
                 });
             }

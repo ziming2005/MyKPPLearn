@@ -6,11 +6,10 @@ namespace MyKPPLearn.Data
 {
     public enum PracticeSetDeleteResult { Deleted, NotFound, HasQuestions, HasAttempts }
 
-    public enum PracticeSetUpdateResult { Updated, NotFound, CategoryLocked }
-
     /// <summary>
     /// Data access for Practice Sets (Admin Practice Sets and the Learner Practice pages).
-    /// A set's display name ("Practice Set N") comes from SetNumber, which is unique per category.
+    /// A set's display name ("Practice Set N") comes from SetNumber, which is unique per category and assigned
+    /// automatically. A set's category and number never change after it is created.
     /// All queries are parameterized.
     /// </summary>
     public static class PracticeSetRepository
@@ -44,48 +43,33 @@ namespace MyKPPLearn.Data
             return table.Rows.Count == 0 ? null : table.Rows[0];
         }
 
-        /// <summary>New sets start Inactive: a set can only be activated once it has an active question.</summary>
-        public static int Create(int categoryId, int setNumber)
+        /// <summary>
+        /// Creates an Inactive set in the category with the lowest unused number (1, 2, 3...; a gap left by a deleted set
+        /// is filled first). The number is chosen and inserted in one transaction, with UPDLOCK/HOLDLOCK on the category's
+        /// sets, so two admins adding at the same moment get different numbers. A set can only be active with an active
+        /// question; saving its first question in the Question Bank activates it (QuestionBank.Save).
+        /// </summary>
+        public static int Create(int categoryId)
         {
             const string sql = @"
+                SET XACT_ABORT ON;
+                BEGIN TRANSACTION;
+
+                DECLARE @Number INT =
+                    (SELECT MIN(n.Number)
+                     FROM (SELECT 1 AS Number
+                           UNION ALL
+                           SELECT SetNumber + 1 FROM PracticeSets WITH (UPDLOCK, HOLDLOCK) WHERE QuestionCategoryId = @CategoryId) n
+                     WHERE NOT EXISTS (SELECT 1 FROM PracticeSets p
+                                       WHERE p.QuestionCategoryId = @CategoryId AND p.SetNumber = n.Number));
+
                 INSERT INTO PracticeSets (QuestionCategoryId, SetNumber, IsActive, CreatedAt, UpdatedAt)
                 OUTPUT INSERTED.PracticeSetId
-                VALUES (@CategoryId, @SetNumber, 0, SYSUTCDATETIME(), SYSUTCDATETIME());";
+                VALUES (@CategoryId, @Number, 0, SYSUTCDATETIME(), SYSUTCDATETIME());
 
-            return Convert.ToInt32(DatabaseHelper.ExecuteScalar(sql,
-                new SqlParameter("@CategoryId", categoryId),
-                new SqlParameter("@SetNumber", setNumber)));
-        }
+                COMMIT TRANSACTION;";
 
-        /// <summary>
-        /// Changes a set's number and category. The category cannot change while the set has questions,
-        /// because each question's category must match its set's category (enforced by a composite foreign key).
-        /// </summary>
-        public static PracticeSetUpdateResult Update(int id, int categoryId, int setNumber)
-        {
-            DataRow current = GetById(id);
-
-            if (current == null)
-            {
-                return PracticeSetUpdateResult.NotFound;
-            }
-
-            if (Convert.ToInt32(current["QuestionCategoryId"]) != categoryId && Convert.ToInt32(current["QuestionCount"]) > 0)
-            {
-                return PracticeSetUpdateResult.CategoryLocked;
-            }
-
-            const string sql = @"
-                UPDATE PracticeSets
-                SET QuestionCategoryId = @CategoryId, SetNumber = @SetNumber, UpdatedAt = SYSUTCDATETIME()
-                WHERE PracticeSetId = @Id;";
-
-            int rows = DatabaseHelper.ExecuteNonQuery(sql,
-                new SqlParameter("@Id", id),
-                new SqlParameter("@CategoryId", categoryId),
-                new SqlParameter("@SetNumber", setNumber));
-
-            return rows == 1 ? PracticeSetUpdateResult.Updated : PracticeSetUpdateResult.NotFound;
+            return Convert.ToInt32(DatabaseHelper.ExecuteScalar(sql, new SqlParameter("@CategoryId", categoryId)));
         }
 
         /// <summary>Activating requires at least one active question; returns false when that rule (or the id) fails.</summary>

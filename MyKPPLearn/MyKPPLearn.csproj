@@ -130,6 +130,7 @@
     <Content Include="Admin\LearnerRecordDetails.aspx" />
     <Content Include="Scripts\profile.js" />
     <Content Include="Controls\ProfileEditor.ascx" />
+    <Content Include="Controls\QuestionFields.ascx" />
     <Content Include="Scripts\hidden-road-sign-view.js" />
     <Content Include="App_Data\DatabaseSetup.sql" />
     <Content Include="App_Data\SeedPracticeQuestions.sql" />

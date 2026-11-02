@@ -1,4 +1,5 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="QuestionBank.aspx.cs" Inherits="MyKPPLearn.Admin.QuestionBank" %>
+<%@ Register Src="~/Controls/QuestionFields.ascx" TagPrefix="uc" TagName="QuestionFields" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">Question Bank | MyKPP Learn</asp:Content>
 
@@ -95,65 +96,7 @@
                 <p id="qbSetError" class="field-error" role="alert" hidden></p>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="qbFormText">Question</label>
-                <textarea id="qbFormText" class="form-input" rows="3" maxlength="500"></textarea>
-                <span class="char-counter"><span id="qbTextCount">0</span> / 500</span>
-                <p id="qbTextError" class="field-error" role="alert" hidden></p>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="qbFormImage">Image (optional)</label>
-                <input type="file" id="qbFormImage" class="form-input" accept=".jpg,.jpeg,.png,.webp" />
-                <span class="form-hint">JPG, PNG or WEBP, up to 2 MB. The image is validated and stored when the question is saved.</span>
-                <p id="qbImageError" class="field-error" role="alert" hidden></p>
-
-                <div id="qbImagePreviewWrap" class="image-position-preview__image-slot" hidden>
-                    <img id="qbImagePreview" alt="" />
-                </div>
-                <div id="qbImageTools" class="qb-image-tools" hidden>
-                    <button type="button" id="qbRemoveImage" class="btn btn-secondary btn-small btn-danger">Remove image</button>
-                </div>
-            </div>
-
-            <div id="qbAltGroup" class="form-group" hidden>
-                <label class="form-label" for="qbFormImageAlt">Image description</label>
-                <input id="qbFormImageAlt" type="text" class="form-input" maxlength="200" autocomplete="off" />
-                <span class="form-hint">Describe the image for learners who use a screen reader.</span>
-                <p id="qbAltError" class="field-error" role="alert" hidden></p>
-            </div>
-
-            <div class="form-group">
-                <span class="form-label" id="qbOptionsLabel">Options</span>
-                <span class="form-hint">Enter three different options (A, B and C) and choose the correct one.</span>
-
-                <div class="qb-option">
-                    <span class="qb-option__letter" aria-hidden="true">A</span>
-                    <input id="qbFormOptionA" type="text" class="form-input" maxlength="200" aria-label="Option A" autocomplete="off" />
-                    <label class="qb-option__correct"><input type="radio" name="qbCorrectAnswer" value="0" /> Correct</label>
-                </div>
-                <div class="qb-option">
-                    <span class="qb-option__letter" aria-hidden="true">B</span>
-                    <input id="qbFormOptionB" type="text" class="form-input" maxlength="200" aria-label="Option B" autocomplete="off" />
-                    <label class="qb-option__correct"><input type="radio" name="qbCorrectAnswer" value="1" /> Correct</label>
-                </div>
-                <div class="qb-option">
-                    <span class="qb-option__letter" aria-hidden="true">C</span>
-                    <input id="qbFormOptionC" type="text" class="form-input" maxlength="200" aria-label="Option C" autocomplete="off" />
-                    <label class="qb-option__correct"><input type="radio" name="qbCorrectAnswer" value="2" /> Correct</label>
-                </div>
-
-                <p id="qbOptionsError" class="field-error" role="alert" hidden></p>
-                <p id="qbCorrectError" class="field-error" role="alert" hidden></p>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="qbFormExplanation">Explanation</label>
-                <textarea id="qbFormExplanation" class="form-input" rows="3" maxlength="500"></textarea>
-                <span class="char-counter"><span id="qbExplanationCount">0</span> / 500</span>
-                <span class="form-hint">Shown to learners when they answer incorrectly, or review an incorrect/unanswered question.</span>
-                <p id="qbExplanationError" class="field-error" role="alert" hidden></p>
-            </div>
+            <uc:QuestionFields ID="QuestionFields1" runat="server" />
 
             <p id="qbStatusHint" class="form-hint">A new question starts as Active. Use the Status button in the list to deactivate it.</p>
 
@@ -167,5 +110,5 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261103"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261106"></script>
 </asp:Content>

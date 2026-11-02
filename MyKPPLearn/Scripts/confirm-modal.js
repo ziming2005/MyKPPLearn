@@ -58,8 +58,11 @@
             var target = pending;
             close(true);
             if (target) {
+                // The repeated click is dispatched synchronously, so every handler on it (including a button's own
+                // check for data-confirmed) sees the mark; it is removed once the click is over.
                 target.setAttribute("data-confirmed", "1");
                 target.click();
+                target.removeAttribute("data-confirmed");
             }
         });
     }
@@ -83,7 +86,6 @@
         }
 
         if (el.getAttribute("data-confirmed") === "1") {
-            el.removeAttribute("data-confirmed");
             return;
         }
 

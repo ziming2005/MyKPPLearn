@@ -1,7 +1,9 @@
 /*
  * Database-backed Admin Practice Sets and Question Bank.
- * Both pages are shells; this script calls the page's own page methods (Admin/PracticeSets.aspx and
- * Admin/QuestionBank.aspx code-behind) with JSON over POST and redraws the table from the result.
+ * Both pages are shells; this script calls their page methods (Admin/PracticeSets.aspx and
+ * Admin/QuestionBank.aspx code-behind) with JSON over POST and redraws the page from the result.
+ * A Practice Set's page writes its questions one at a time with the Question Bank's own page methods, so every
+ * question goes through the same validation and is saved to the Question Bank on its own.
  *
  * Form validation runs twice: here, so mistakes show under the field straight away, and again on the server
  * (PracticeSets.Save / QuestionRepository.Validate), which is the rule that counts. A page method reports a
@@ -18,9 +20,9 @@
     var IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
     var QUESTIONS_PER_PAGE = 20;
 
-    /** Calls a page method on the current page and resolves with its return value ("d"). */
-    function call(name, data) {
-        return fetch(location.pathname + "/" + name, {
+    /** Calls a page method (on the current page unless another page's path is given) and resolves with its return value ("d"). */
+    function call(name, data, page) {
+        return fetch((page || location.pathname) + "/" + name, {
             method: "POST",
             credentials: "same-origin",
             headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -197,6 +199,217 @@
         input.addEventListener("change", handler);
     }
 
+    /**
+     * Puts a server message under the field it is about. rules: [pattern, errorId, input]; a rule without an errorId,
+     * or no matching rule, sends the message to fail instead.
+     */
+    function showServerError(rules, message, fail) {
+        var match = rules.filter(function (r) { return r[0].test(message); })[0];
+        var errors = createErrors();
+
+        if (match && match[1]) {
+            errors.add(match[1], message, match[2]);
+            errors.focusFirst();
+        } else {
+            fail(new Error(message));
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // The question fields (Controls/QuestionFields.ascx): text, image, options, correct answer and explanation.
+    // Used by the Question Bank form and by a Practice Set's question form.
+    // ------------------------------------------------------------------
+    function createQuestionFields(appRoot) {
+        var image = null;      // null, the question's stored path, or a new upload as a data URL
+        var formText = byId("qbFormText");
+        var formExplanation = byId("qbFormExplanation");
+        var formAlt = byId("qbFormImageAlt");
+        var imageInput = byId("qbFormImage");
+        var altGroup = byId("qbAltGroup");
+        var previewWrap = byId("qbImagePreviewWrap");
+        var previewImg = byId("qbImagePreview");
+        var imageTools = byId("qbImageTools");
+        var optionInputs = ["A", "B", "C"].map(function (letter) { return byId("qbFormOption" + letter); });
+        var errorIds = ["qbTextError", "qbImageError", "qbAltError", "qbOptionsError", "qbCorrectError", "qbExplanationError"];
+
+        function radios() { return document.querySelectorAll("input[name='qbCorrectAnswer']"); }
+
+        function inputs() { return [formText, imageInput, formAlt, formExplanation].concat(optionInputs); }
+
+        /** Shows the current or newly chosen image with its Remove button, or hides both when there is none. */
+        function showImage() {
+            var hasImage = !!image;
+            previewWrap.hidden = !hasImage;
+            imageTools.hidden = !hasImage;
+            altGroup.hidden = !hasImage;
+
+            if (hasImage) {
+                previewImg.src = image.indexOf("data:") === 0 ? image : appRoot + image;
+                previewImg.alt = formAlt.value || "Question image";
+            } else {
+                previewImg.removeAttribute("src");
+            }
+        }
+
+        /** Live "n / 500" counters under the question and explanation boxes. */
+        function updateCounts() {
+            [[formText, "qbTextCount"], [formExplanation, "qbExplanationCount"]].forEach(function (pair) {
+                var count = byId(pair[1]);
+                if (!pair[0] || !count) { return; }
+                var length = pair[0].value.trim().length;
+                count.textContent = String(length);
+                if (count.parentNode) { count.parentNode.classList.toggle("char-counter--over", length > MAX_TEXT); }
+            });
+        }
+
+        function correctIndex() {
+            var correct = -1;
+            Array.prototype.forEach.call(radios(), function (radio, i) { if (radio.checked) { correct = i; } });
+            return correct;
+        }
+
+        formText.addEventListener("input", updateCounts);
+        formExplanation.addEventListener("input", updateCounts);
+        clearOnInput(formText, "qbTextError");
+        clearOnInput(formAlt, "qbAltError");
+        clearOnInput(formExplanation, "qbExplanationError");
+        optionInputs.forEach(function (input) { clearOnInput(input, "qbOptionsError"); });
+        Array.prototype.forEach.call(radios(), function (radio) { clearOnInput(radio, "qbCorrectError"); });
+
+        byId("qbRemoveImage").onclick = function () {
+            image = null;
+            imageInput.value = "";
+            formAlt.value = "";
+            showImage();
+        };
+
+        imageInput.onchange = function () {
+            var file = imageInput.files[0];
+            var errors = createErrors();
+
+            clearErrors(["qbImageError"], [imageInput]);
+            if (!file) { return; }
+
+            if (IMAGE_TYPES.indexOf(file.type) < 0) {
+                errors.add("qbImageError", "Choose a JPG, PNG or WEBP image.", imageInput);
+            } else if (file.size > MAX_IMAGE_BYTES) {
+                errors.add("qbImageError", "Image must be 2 MB or smaller.", imageInput);
+            }
+
+            if (errors.any()) {
+                imageInput.value = "";
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function () {
+                image = reader.result;
+                showImage();
+                formAlt.focus();
+            };
+            reader.readAsDataURL(file);
+        };
+
+        return {
+            errorIds: errorIds,
+            inputs: inputs,
+
+            /** Fills the fields from a question, or empties them for a new one. */
+            fill: function (q) {
+                clearErrors(errorIds, inputs());
+                formText.value = q ? q.text : "";
+                formExplanation.value = q ? q.explanation : "";
+
+                var buttons = radios();
+                optionInputs.forEach(function (input, i) {
+                    input.value = q ? (q.options[i] || "") : "";
+                    buttons[i].checked = !!q && q.correctIndex === i;
+                });
+
+                formAlt.value = q ? (q.imageAlt || "") : "";
+                image = q ? q.image : null;
+                imageInput.value = "";
+                showImage();
+                updateCounts();
+            },
+
+            focus: function () { formText.focus(); },
+
+            /** True when something has been typed or chosen (used before throwing a new question away). */
+            hasContent: function () {
+                return !!(formText.value.trim() || formExplanation.value.trim() || image || correctIndex() >= 0
+                    || optionInputs.some(function (input) { return input.value.trim(); }));
+            },
+
+            /** Mirrors QuestionRepository.Validate, with each message under its own field. */
+            validate: function (errors) {
+                var text = formText.value.trim();
+                var explanation = formExplanation.value.trim();
+                var options = optionInputs.map(function (input) { return input.value.trim(); });
+
+                if (!text) {
+                    errors.add("qbTextError", "Question is required.", formText);
+                } else if (text.length > MAX_TEXT) {
+                    errors.add("qbTextError", "Question must be 500 characters or fewer.", formText);
+                }
+
+                if (image && !formAlt.value.trim()) {
+                    errors.add("qbAltError", "Describe the image for screen reader users.", formAlt);
+                } else if (formAlt.value.trim().length > MAX_ALT) {
+                    errors.add("qbAltError", "Image description must be 200 characters or fewer.", formAlt);
+                }
+
+                var emptyIndex = options.indexOf("");
+                var longIndex = -1;
+                options.forEach(function (o, i) { if (longIndex < 0 && o.length > MAX_OPTION) { longIndex = i; } });
+                var lower = options.map(function (o) { return o.toLowerCase(); });
+                var duplicate = lower.some(function (o, i) { return o && lower.indexOf(o) !== i; });
+
+                if (emptyIndex >= 0) {
+                    errors.add("qbOptionsError", "Options A, B and C are all required.", optionInputs[emptyIndex]);
+                } else if (longIndex >= 0) {
+                    errors.add("qbOptionsError", "Each option must be 200 characters or fewer.", optionInputs[longIndex]);
+                } else if (duplicate) {
+                    errors.add("qbOptionsError", "Each option must be different.", optionInputs[0]);
+                }
+
+                if (correctIndex() < 0) {
+                    errors.add("qbCorrectError", "Select the correct answer.", radios()[0]);
+                }
+
+                if (!explanation) {
+                    errors.add("qbExplanationError", "Explanation is required.", formExplanation);
+                } else if (explanation.length > MAX_TEXT) {
+                    errors.add("qbExplanationError", "Explanation must be 500 characters or fewer.", formExplanation);
+                }
+            },
+
+            /** The question's fields for QuestionBank.Save (id, category and set are added by the caller). */
+            read: function () {
+                return {
+                    text: formText.value,
+                    explanation: formExplanation.value,
+                    image: image,
+                    imageAlt: image ? formAlt.value : null,
+                    options: optionInputs.map(function (input) { return input.value; }),
+                    correctIndex: correctIndex()
+                };
+            },
+
+            /** showServerError rules for these fields. */
+            serverRules: function () {
+                return [
+                    [/^question/i, "qbTextError", formText],
+                    [/image description/i, "qbAltError", formAlt],
+                    [/image|jpg|png|webp|2 mb/i, "qbImageError", imageInput],
+                    [/option/i, "qbOptionsError", optionInputs[0]],
+                    [/correct answer/i, "qbCorrectError", radios()[0]],
+                    [/explanation/i, "qbExplanationError", formExplanation]
+                ];
+            }
+        };
+    }
+
     var setsPage = byId("psListView");
     var questionsPage = byId("qbListView");
 
@@ -204,24 +417,34 @@
     if (questionsPage) { initQuestionBank(); }
 
     // ------------------------------------------------------------------
-    // Admin Practice Sets
+    // Admin Practice Sets: the list, and one set's page (Add / Edit) where its questions are written one by one.
     // ------------------------------------------------------------------
     function initPracticeSets() {
         var data = { categories: [], sets: [] };
-        var editingId = 0;
+        var current = null;        // the set being added (null until its first question is saved) or edited
+        var questions = [];        // the current set's questions
+        var editingQuestionId = 0; // 0 = the question form holds a new question
+        var adding = false;        // the page was opened with Add Practice Set (it stays the Add page after saves)
+        var form = byId("psFormView");
+        var appRoot = form.getAttribute("data-app-root") || "/";
+        var questionBank = appRoot + "Admin/QuestionBank.aspx";
         var toast = byId("psToast");
+        var questionToast = byId("psQuestionToast");
         var filter = byId("psCategoryFilter");
         var body = byId("psTableBody");
         var tableWrap = byId("psTableWrap");
         var empty = byId("psEmpty");
-        var form = byId("psFormView");
         var formCategory = byId("psFormCategory");
-        var formNumber = byId("psFormNumber");
-        var categoryHint = byId("psCategoryHint");
-        var usedNumbers = byId("psUsedNumbers");
-        var errorIds = ["psCategoryError", "psNumberError"];
+        var questionForm = byId("psQuestionForm");
+        var fields = createQuestionFields(appRoot);
 
         function fail(e) { showMessage(toast, e.message, true); }
+
+        /** Errors while the set's page is open are shown next to the question form, where the admin is working. */
+        function failHere(e) {
+            showMessage(questionToast, e.message, true);
+            questionToast.scrollIntoView({ block: "center" });
+        }
 
         function load() {
             return call("LoadData").then(function (result) {
@@ -275,7 +498,7 @@
                 var actionsCell = document.createElement("td");
                 var actions = document.createElement("div");
                 actions.className = "row-actions";
-                actions.appendChild(makeButton("Edit", null, function () { openForm(set); }));
+                actions.appendChild(makeButton("Edit", null, function () { openSet(set); }));
                 actions.appendChild(makeDeleteButton("Delete Practice Set " + set.number + " (" + categoryTitle(set.categoryId) + ")?", function () {
                     call("Delete", { id: set.id }).then(function (message) {
                         if (message !== "Deleted") { throw new Error(message); }
@@ -290,97 +513,232 @@
             });
         }
 
-        /** "Used Numbers: 1, 2, 4" for the selected category, as on the Chapters form. */
-        function showUsedNumbers() {
-            if (!usedNumbers || !window.UsedNumbers) { return; }
+        /** The number a new set in the selected category will get: the lowest one not used yet (the server decides). */
+        function showNextNumber() {
             var category = toInt(formCategory.value);
-            var numbers = data.sets
-                .filter(function (s) { return s.categoryId === category; })
-                .map(function (s) { return s.number; });
-            setText(usedNumbers, window.UsedNumbers.format(numbers));
+            var used = data.sets.filter(function (s) { return s.categoryId === category; }).map(function (s) { return s.number; });
+            var next = 1;
+            while (used.indexOf(next) >= 0) { next++; }
+            setText(byId("psNumberInfo"), "This set will be Practice Set " + next + ". The number is given automatically when its first question is saved.");
         }
 
-        function openForm(set) {
-            editingId = set ? set.id : 0;
-            clearErrors(errorIds, [formCategory, formNumber]);
-
-            formCategory.value = set ? set.categoryId : (toInt(filter.value) || (data.categories[0] && data.categories[0].id));
-            formNumber.value = set ? set.number : "";
-
-            // A set's category cannot change while it has questions (the server enforces this too).
-            var locked = !!(set && set.questionCount);
-            formCategory.disabled = locked;
-            categoryHint.hidden = !locked;
-
-            var heading = set ? "Edit Practice Set" : "Add Practice Set";
+        /**
+         * Add and Edit share one layout: the set's question list with Add New Question. Add also shows the category,
+         * which is fixed (with the set's number) once the first question has created the set.
+         */
+        function showSet() {
+            var heading = adding ? "Add Practice Set" : "Edit Practice Set " + current.number;
             setText(byId("psFormHeading"), heading);
             setText(byId("psFormCrumb"), heading);
-            byId("psStatusHint").hidden = !!set;
-            showUsedNumbers();
 
+            var subtitle = byId("psFormSubtitle");
+            subtitle.hidden = adding;
+            setText(subtitle, adding ? "" : categoryTitle(current.categoryId));
+
+            byId("psSetCard").hidden = !adding;
+            formCategory.disabled = !!current;
+
+            if (current) {
+                setText(byId("psNumberInfo"), "This is Practice Set " + current.number + " of " + categoryTitle(current.categoryId) + ".");
+            } else {
+                showNextNumber();
+            }
+        }
+
+        function renderQuestions() {
+            var list = byId("psQuestionsBody");
+            list.innerHTML = "";
+
+            setText(byId("psQuestionsTitle"), "Questions (" + questions.length + ")");
+            byId("psQuestionsEmpty").hidden = questions.length > 0;
+            byId("psQuestionsTableWrap").hidden = questions.length === 0;
+
+            questions.forEach(function (q, index) {
+                var tr = document.createElement("tr");
+                if (q.status !== "Active") { tr.className = "row--inactive"; }
+
+                addCell(tr, (index + 1) + ". " + q.text);
+
+                var statusCell = document.createElement("td");
+                statusCell.appendChild(makeStatusButton(q.status, function () {
+                    call("Toggle", { id: q.id, active: q.status !== "Active" }, questionBank).then(check).then(function (result) {
+                        reloadSet();
+                        showMessage(questionToast, result.notice ? "Question updated. " + result.notice : "Question updated.");
+                    }).catch(failHere);
+                }));
+                tr.appendChild(statusCell);
+
+                var actionsCell = document.createElement("td");
+                var actions = document.createElement("div");
+                actions.className = "row-actions";
+                actions.appendChild(makeButton("Edit", null, function () { openQuestion(q); }));
+                actions.appendChild(makeDeleteButton("Delete this question from the Question Bank?", function () {
+                    call("Delete", { id: q.id }, questionBank).then(function (message) {
+                        if (message.indexOf("Deleted") !== 0) { throw new Error(message); }
+                        if (editingQuestionId === q.id) { closeQuestion(); }
+                        reloadSet();
+                        var notice = message.substring("Deleted".length).trim();
+                        showMessage(questionToast, notice ? "Question deleted. " + notice : "Question deleted.");
+                    }).catch(failHere);
+                }));
+                actionsCell.appendChild(actions);
+                tr.appendChild(actionsCell);
+
+                list.appendChild(tr);
+            });
+        }
+
+        /** Reloads the current set (its status may change with its questions) and its questions. */
+        function reloadSet() {
+            return Promise.all([call("LoadData"), call("Questions", { setId: current.id })]).then(function (results) {
+                data = results[0];
+                questions = results[1];
+                current = data.sets.filter(function (s) { return s.id === current.id; })[0] || current;
+                var selected = filter.value;
+                fillSelect(filter, data.categories, "All Categories");
+                filter.value = selected;
+                render();
+                showSet();
+                renderQuestions();
+            }).catch(failHere);
+        }
+
+        function showForm() {
+            questionToast.hidden = true;
             form.hidden = false;
             setsPage.hidden = true;
             window.scrollTo(0, 0);
-            formNumber.focus();
         }
 
-        function closeForm() {
+        /** Add Practice Set: choose the category, then write the first question. */
+        function openAdd() {
+            adding = true;
+            current = null;
+            questions = [];
+            closeQuestion();
+            clearErrors(["psCategoryError"], [formCategory]);
+            formCategory.value = toInt(filter.value) || (data.categories[0] && data.categories[0].id);
+            showSet();
+            renderQuestions();
+            showForm();
+            formCategory.focus();
+        }
+
+        /** Edit Practice Set: its questions, each added, edited or deleted on its own. */
+        function openSet(set) {
+            adding = false;
+            current = set;
+            questions = [];
+            closeQuestion();
+            showSet();
+            renderQuestions();
+            showForm();
+            call("Questions", { setId: set.id }).then(function (result) {
+                questions = result;
+                renderQuestions();
+            }).catch(failHere);
+        }
+
+        function openQuestion(q) {
+            editingQuestionId = q ? q.id : 0;
+            fields.fill(q);
+
+            setText(byId("psQuestionHeading"), q ? "Edit Question" : "New Question");
+            byId("psQuestionHint").hidden = !!q;
+            questionToast.hidden = true;
+            questionForm.hidden = false;
+            questionForm.scrollIntoView({ block: "start" });
+            fields.focus();
+        }
+
+        function closeQuestion() {
+            editingQuestionId = 0;
+            questionForm.hidden = true;
+        }
+
+        function closeSet() {
+            closeQuestion();
+            current = null;
             form.hidden = true;
             setsPage.hidden = false;
+            load();
         }
 
-        function validate() {
+        /** The set for a new question: the current one, or (on Add) a new set created in the chosen category. */
+        function ensureSet() {
+            if (current) { return Promise.resolve(current); }
+
+            return call("Create", { categoryId: toInt(formCategory.value) }).then(function (set) {
+                if (set && set.error) {
+                    var errors = createErrors();
+                    errors.add("psCategoryError", set.error, formCategory);
+                    errors.focusFirst();
+                    return null;
+                }
+
+                current = set;
+                showSet();
+                return set;
+            });
+        }
+
+        /** Saves one question to the Question Bank; questions saved before are never affected by this one. */
+        function saveQuestion() {
             var errors = createErrors();
-            var category = toInt(formCategory.value);
-            var number = formNumber.value.trim();
+            clearErrors(fields.errorIds.concat(["psCategoryError"]), fields.inputs().concat([formCategory]));
 
-            clearErrors(errorIds, [formCategory, formNumber]);
-
-            if (!category) {
+            if (!current && !toInt(formCategory.value)) {
                 errors.add("psCategoryError", "Select a category.", formCategory);
             }
 
-            if (!/^[1-9][0-9]{0,8}$/.test(number)) {
-                errors.add("psNumberError", number ? "Enter a whole number from 1 upwards." : "Practice Set number is required.", formNumber);
-            } else if (category && data.sets.some(function (s) { return s.id !== editingId && s.categoryId === category && s.number === toInt(number); })) {
-                errors.add("psNumberError", categoryTitle(category) + " already has Practice Set " + toInt(number) + ". Please choose a different number.", formNumber);
-            }
-
+            fields.validate(errors);
             errors.focusFirst();
-            return !errors.any();
-        }
+            if (errors.any()) { return null; }
 
-        function save() {
-            if (!validate()) { return null; }
+            var isNew = !editingQuestionId;
+            var created = !current;
 
-            return call("Save", { id: editingId, categoryId: toInt(formCategory.value), number: toInt(formNumber.value) })
-                .then(function (result) {
+            return ensureSet().then(function (set) {
+                if (!set) { return; }
+
+                var question = fields.read();
+                question.id = editingQuestionId;
+                question.categoryId = set.categoryId;
+                question.setId = set.id;
+
+                return call("Save", { question: question }, questionBank).then(function (result) {
                     if (result && result.error) {
-                        // The server's answer belongs to a field: a duplicate/number problem or the category lock.
-                        var errors = createErrors();
-                        var isCategory = /category/i.test(result.error) && !/already has/i.test(result.error);
-                        errors.add(isCategory ? "psCategoryError" : "psNumberError", result.error, isCategory ? formCategory : formNumber);
-                        errors.focusFirst();
+                        if (created) { reloadSet(); }
+                        showServerError([[/not found|try again|question data|category|practice set/i, null, null]].concat(fields.serverRules()),
+                            result.error, failHere);
                         return;
                     }
 
-                    closeForm();
-                    load();
-                    showMessage(toast, "Practice Set saved.");
-                })
-                .catch(fail);
+                    var message = (created ? "Practice Set " + set.number + " created. " : "") + "Question saved to the Question Bank.";
+                    if (result.notice) { message += " " + result.notice; }
+
+                    return reloadSet().then(function () {
+                        closeQuestion();
+                        if (isNew) { message += " Press Add New Question for the next one."; }
+                        showMessage(questionToast, message);
+                        questionToast.scrollIntoView({ block: "center" });
+                    });
+                });
+            }).catch(failHere);
         }
 
-        byId("psAddBtn").onclick = function () { openForm(null); };
-        byId("psEmptyAdd").onclick = function () { openForm(null); };
-        byId("psCancelBtn").onclick = closeForm;
-        var saveSet = guarded(byId("psSaveBtn"), save);
-        byId("psSaveBtn").onclick = saveSet;
-        saveOnEnter(form, saveSet);
-        filter.onchange = render;
-        formCategory.addEventListener("change", showUsedNumbers);
+        byId("psAddBtn").onclick = openAdd;
+        byId("psEmptyAdd").onclick = openAdd;
+        byId("psAddQuestionBtn").onclick = function () { openQuestion(null); };
+        byId("psQCancelBtn").onclick = closeQuestion;
+        byId("psBackBtn").onclick = closeSet;
+        var save = guarded(byId("psQSaveBtn"), saveQuestion);
+        byId("psQSaveBtn").onclick = save;
+        saveOnEnter(questionForm, save);
+        formCategory.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); } });
+        formCategory.addEventListener("change", showNextNumber);
         clearOnInput(formCategory, "psCategoryError");
-        clearOnInput(formNumber, "psNumberError");
+        filter.onchange = render;
 
         ["psClearFilter", "psEmptyClear"].forEach(function (id) {
             var clear = byId(id);
@@ -397,7 +755,6 @@
         var data = { categories: [], sets: [], questions: [] };
         var editingId = 0;
         var page = 1;
-        var image = null;      // null, the question's stored path, or a new upload as a data URL
         var appRoot = questionsPage.getAttribute("data-app-root") || "/";
         var toast = byId("qbToast");
         var body = byId("qbTableBody");
@@ -408,19 +765,8 @@
         var search = byId("qbSearch");
         var formCategory = byId("qbFormCategory");
         var formSet = byId("qbFormSet");
-        var formText = byId("qbFormText");
-        var formExplanation = byId("qbFormExplanation");
-        var formAlt = byId("qbFormImageAlt");
-        var imageInput = byId("qbFormImage");
-        var altGroup = byId("qbAltGroup");
-        var previewWrap = byId("qbImagePreviewWrap");
-        var previewImg = byId("qbImagePreview");
-        var imageTools = byId("qbImageTools");
-        var letters = ["A", "B", "C"];
-        var optionInputs = letters.map(function (letter) { return byId("qbFormOption" + letter); });
-        var errorIds = ["qbCategoryError", "qbSetError", "qbTextError", "qbImageError", "qbAltError", "qbOptionsError", "qbCorrectError", "qbExplanationError"];
-
-        function radios() { return document.querySelectorAll("input[name='qbCorrectAnswer']"); }
+        var fields = createQuestionFields(appRoot);
+        var errorIds = ["qbCategoryError", "qbSetError"].concat(fields.errorIds);
 
         function fail(e) { showMessage(toast, e.message, true); }
 
@@ -512,7 +858,7 @@
             var pageRows = rows.slice(start, start + QUESTIONS_PER_PAGE);
 
             setText(byId("qbSummary"), rows.length
-                ? "Showing " + (start + 1) + "\u2013" + (start + pageRows.length) + " of " + rows.length + (rows.length === 1 ? " question" : " questions")
+                ? "Showing " + (start + 1) + "–" + (start + pageRows.length) + " of " + rows.length + (rows.length === 1 ? " question" : " questions")
                 : "");
             renderPager(pages);
 
@@ -597,57 +943,13 @@
             render();
         }
 
-        /** Shows the current or newly chosen image with its Remove button, or hides both when there is none. */
-        function showImage() {
-            var hasImage = !!image;
-            previewWrap.hidden = !hasImage;
-            imageTools.hidden = !hasImage;
-            altGroup.hidden = !hasImage;
-
-            if (hasImage) {
-                previewImg.src = image.indexOf("data:") === 0 ? image : appRoot + image;
-                previewImg.alt = formAlt.value || "Question image";
-            } else {
-                previewImg.removeAttribute("src");
-            }
-        }
-
-        /** Live "n / 500" counters under the question and explanation boxes. */
-        function updateCounts() {
-            [[formText, "qbTextCount"], [formExplanation, "qbExplanationCount"]].forEach(function (pair) {
-                var count = byId(pair[1]);
-                if (!pair[0] || !count) { return; }
-                var length = pair[0].value.trim().length;
-                count.textContent = String(length);
-                if (count.parentNode) { count.parentNode.classList.toggle("char-counter--over", length > MAX_TEXT); }
-            });
-        }
-
-        function allInputs() {
-            return [formCategory, formSet, formText, imageInput, formAlt, formExplanation].concat(optionInputs);
-        }
-
         function openForm(q) {
             editingId = q ? q.id : 0;
-            clearErrors(errorIds, allInputs());
+            clearErrors(errorIds, [formCategory, formSet].concat(fields.inputs()));
 
             formCategory.value = q ? q.categoryId : (toInt(filterCategory.value) || (data.categories[0] && data.categories[0].id));
             fillFormSets(q ? q.setId : null);
-
-            formText.value = q ? q.text : "";
-            formExplanation.value = q ? q.explanation : "";
-
-            var buttons = radios();
-            optionInputs.forEach(function (input, i) {
-                input.value = q ? (q.options[i] || "") : "";
-                buttons[i].checked = !!q && q.correctIndex === i;
-            });
-
-            formAlt.value = q ? (q.imageAlt || "") : "";
-            image = q ? q.image : null;
-            imageInput.value = "";
-            showImage();
-            updateCounts();
+            fields.fill(q);
 
             var heading = q ? "Edit Question" : "Add Question";
             setText(byId("qbFormHeading"), heading);
@@ -657,7 +959,7 @@
             form.hidden = false;
             questionsPage.hidden = true;
             window.scrollTo(0, 0);
-            formText.focus();
+            fields.focus();
         }
 
         function closeForm() {
@@ -665,108 +967,38 @@
             questionsPage.hidden = false;
         }
 
-        function correctIndex() {
-            var correct = -1;
-            Array.prototype.forEach.call(radios(), function (radio, i) { if (radio.checked) { correct = i; } });
-            return correct;
-        }
-
-        /** Mirrors QuestionRepository.Validate, with each message under its own field. */
         function validate() {
             var errors = createErrors();
-            var text = formText.value.trim();
-            var explanation = formExplanation.value.trim();
-            var options = optionInputs.map(function (input) { return input.value.trim(); });
 
-            clearErrors(errorIds, allInputs());
+            clearErrors(errorIds, [formCategory, formSet].concat(fields.inputs()));
 
             if (!toInt(formCategory.value)) {
                 errors.add("qbCategoryError", "Select a category.", formCategory);
             }
 
-            if (!text) {
-                errors.add("qbTextError", "Question is required.", formText);
-            } else if (text.length > MAX_TEXT) {
-                errors.add("qbTextError", "Question must be 500 characters or fewer.", formText);
-            }
-
-            if (image && !formAlt.value.trim()) {
-                errors.add("qbAltError", "Describe the image for screen reader users.", formAlt);
-            } else if (formAlt.value.trim().length > MAX_ALT) {
-                errors.add("qbAltError", "Image description must be 200 characters or fewer.", formAlt);
-            }
-
-            var emptyIndex = options.indexOf("");
-            var longIndex = -1;
-            options.forEach(function (o, i) { if (longIndex < 0 && o.length > MAX_OPTION) { longIndex = i; } });
-            var lower = options.map(function (o) { return o.toLowerCase(); });
-            var duplicate = lower.some(function (o, i) { return o && lower.indexOf(o) !== i; });
-
-            if (emptyIndex >= 0) {
-                errors.add("qbOptionsError", "Options A, B and C are all required.", optionInputs[emptyIndex]);
-            } else if (longIndex >= 0) {
-                errors.add("qbOptionsError", "Each option must be 200 characters or fewer.", optionInputs[longIndex]);
-            } else if (duplicate) {
-                errors.add("qbOptionsError", "Each option must be different.", optionInputs[0]);
-            }
-
-            if (correctIndex() < 0) {
-                errors.add("qbCorrectError", "Select the correct answer.", radios()[0]);
-            }
-
-            if (!explanation) {
-                errors.add("qbExplanationError", "Explanation is required.", formExplanation);
-            } else if (explanation.length > MAX_TEXT) {
-                errors.add("qbExplanationError", "Explanation must be 500 characters or fewer.", formExplanation);
-            }
-
+            fields.validate(errors);
             errors.focusFirst();
             return !errors.any();
-        }
-
-        /** Places a server message under the field it is about; anything else goes to the message box. */
-        function showServerError(message) {
-            var rules = [
-                [/not found|try again|question data/i, null, null],
-                [/^select a category|category can't change/i, "qbCategoryError", formCategory],
-                [/practice set/i, "qbSetError", formSet],
-                [/^question/i, "qbTextError", formText],
-                [/image description/i, "qbAltError", formAlt],
-                [/image|jpg|png|webp|2 mb/i, "qbImageError", imageInput],
-                [/option/i, "qbOptionsError", optionInputs[0]],
-                [/correct answer/i, "qbCorrectError", radios()[0]],
-                [/explanation/i, "qbExplanationError", formExplanation]
-            ];
-            var match = rules.filter(function (r) { return r[0].test(message); })[0];
-            var errors = createErrors();
-
-            if (match && match[1]) {
-                errors.add(match[1], message, match[2]);
-                errors.focusFirst();
-            } else {
-                fail(new Error(message));
-                window.scrollTo(0, 0);
-            }
         }
 
         function save() {
             if (!validate()) { return null; }
 
-            var question = {
-                id: editingId,
-                categoryId: toInt(formCategory.value),
-                setId: toInt(formSet.value) || null,
-                text: formText.value,
-                explanation: formExplanation.value,
-                image: image,
-                imageAlt: image ? formAlt.value : null,
-                options: optionInputs.map(function (input) { return input.value; }),
-                correctIndex: correctIndex()
-            };
+            var question = fields.read();
+            question.id = editingId;
+            question.categoryId = toInt(formCategory.value);
+            question.setId = toInt(formSet.value) || null;
 
             return call("Save", { question: question }).then(function (result) {
                 if (result && result.error) {
-                    showServerError(result.error);
+                    showServerError([
+                        [/not found|try again|question data/i, null, null],
+                        [/^select a category|category can't change/i, "qbCategoryError", formCategory],
+                        [/practice set/i, "qbSetError", formSet]
+                    ].concat(fields.serverRules()), result.error, function (e) {
+                        fail(e);
+                        window.scrollTo(0, 0);
+                    });
                     return;
                 }
 
@@ -787,16 +1019,9 @@
         filterStatus.onchange = filterChanged;
         search.oninput = filterChanged;
         formCategory.addEventListener("change", function () { fillFormSets(null); });
-        formText.addEventListener("input", updateCounts);
-        formExplanation.addEventListener("input", updateCounts);
 
         clearOnInput(formCategory, "qbCategoryError");
         clearOnInput(formSet, "qbSetError");
-        clearOnInput(formText, "qbTextError");
-        clearOnInput(formAlt, "qbAltError");
-        clearOnInput(formExplanation, "qbExplanationError");
-        optionInputs.forEach(function (input) { clearOnInput(input, "qbOptionsError"); });
-        Array.prototype.forEach.call(radios(), function (radio) { clearOnInput(radio, "qbCorrectError"); });
 
         ["qbClearFilters", "qbEmptyClear"].forEach(function (id) {
             var clear = byId(id);
@@ -811,40 +1036,6 @@
                 filterChanged();
             };
         });
-
-        byId("qbRemoveImage").onclick = function () {
-            image = null;
-            imageInput.value = "";
-            formAlt.value = "";
-            showImage();
-        };
-
-        imageInput.onchange = function () {
-            var file = imageInput.files[0];
-            var errors = createErrors();
-
-            clearErrors(["qbImageError"], [imageInput]);
-            if (!file) { return; }
-
-            if (IMAGE_TYPES.indexOf(file.type) < 0) {
-                errors.add("qbImageError", "Choose a JPG, PNG or WEBP image.", imageInput);
-            } else if (file.size > MAX_IMAGE_BYTES) {
-                errors.add("qbImageError", "Image must be 2 MB or smaller.", imageInput);
-            }
-
-            if (errors.any()) {
-                imageInput.value = "";
-                return;
-            }
-
-            var reader = new FileReader();
-            reader.onload = function () {
-                image = reader.result;
-                showImage();
-                formAlt.focus();
-            };
-            reader.readAsDataURL(file);
-        };
 
         load();
     }

@@ -57,7 +57,7 @@ namespace MyKPPLearn.Data
         public static DataTable GetQuestionChoices()
         {
             return DatabaseHelper.ExecuteQuery(@"
-                SELECT q.QuestionId, c.Code AS CategoryCode, q.QuestionText, q.ImagePath, q.IsActive
+                SELECT q.QuestionId, c.Code AS CategoryCode, q.QuestionText, q.ImagePath, q.ImageAltText, q.IsActive
                 FROM Questions q
                 INNER JOIN QuestionCategories c ON c.QuestionCategoryId = q.QuestionCategoryId
                 ORDER BY c.DisplayOrder, q.QuestionId");

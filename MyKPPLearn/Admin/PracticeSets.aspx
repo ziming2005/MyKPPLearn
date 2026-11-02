@@ -1,4 +1,5 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="PracticeSets.aspx.cs" Inherits="MyKPPLearn.Admin.PracticeSets" %>
+<%@ Register Src="~/Controls/QuestionFields.ascx" TagPrefix="uc" TagName="QuestionFields" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">Practice Sets | MyKPP Learn</asp:Content>
 
@@ -47,8 +48,8 @@
         </div>
     </div>
 
-    <!-- ================= ADD / EDIT ================= -->
-    <div id="psFormView" hidden>
+    <!-- ================= ADD / EDIT: THE SET AND ITS QUESTIONS ================= -->
+    <div id="psFormView" data-app-root='<%= ResolveUrl("~/") %>' hidden>
         <nav class="breadcrumb" aria-label="Breadcrumb">
             <a href="~/Admin/PracticeSets.aspx" runat="server">Practice Sets</a>
             <span aria-hidden="true">/</span>
@@ -58,38 +59,63 @@
         <div class="page-toolbar">
             <div>
                 <h2 id="psFormHeading">Add Practice Set</h2>
+                <p id="psFormSubtitle" hidden></p>
             </div>
         </div>
 
-        <div class="card form-card">
-
+        <div id="psSetCard" class="card form-card lesson-form-card">
             <div class="form-group">
                 <label class="form-label" for="psFormCategory">Category</label>
                 <select id="psFormCategory" class="form-input"></select>
-                <span id="psCategoryHint" class="form-hint" hidden>The category can't be changed because this set has questions.</span>
                 <p id="psCategoryError" class="field-error" role="alert" hidden></p>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="psFormNumber">Practice Set Number</label>
-                <input id="psFormNumber" type="text" inputmode="numeric" maxlength="9" autocomplete="off" class="form-input form-input--short" />
-                <span id="psUsedNumbers" class="used-numbers"></span>
-                <span class="form-hint">The Practice Set number shown to learners (1, 2, 3...). Each number must be unique within its category.</span>
-                <p id="psNumberError" class="field-error" role="alert" hidden></p>
-            </div>
+            <p id="psNumberInfo" class="form-hint"></p>
+            <p class="form-hint">Press Add New Question to write the set's questions one by one. Each question is saved to the Question Bank when you press Save Question, so a problem with one question never affects the ones already saved. The set becomes Active when its first question is saved; you can deactivate it from the list.</p>
+        </div>
 
-            <p id="psStatusHint" class="form-hint">A new set starts as Inactive. Add its questions in the Question Bank, then activate it from the list.</p>
+        <div id="psQuestionsCard" class="card table-card ps-questions">
+            <div class="ps-questions__head">
+                <h3 id="psQuestionsTitle">Questions</h3>
+                <button type="button" id="psAddQuestionBtn" class="btn btn-primary btn-small">Add New Question</button>
+            </div>
+            <p id="psQuestionsEmpty" class="form-hint ps-questions__empty" hidden>This set has no questions yet. Press Add New Question to write the first one.</p>
+            <div id="psQuestionsTableWrap" class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Question</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="psQuestionsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="psQuestionToast" class="alert alert-success" hidden role="status"></div>
+
+        <div id="psQuestionForm" class="card form-card lesson-form-card ps-question-form" hidden>
+            <h3 id="psQuestionHeading">New Question</h3>
+
+            <uc:QuestionFields ID="QuestionFields1" runat="server" />
+
+            <p id="psQuestionHint" class="form-hint">The question is saved to the Question Bank as part of this Practice Set. A new question starts as Active.</p>
 
             <div class="form-actions">
-                <button type="button" id="psSaveBtn" class="btn btn-primary">Save</button>
-                <button type="button" id="psCancelBtn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="psQSaveBtn" class="btn btn-primary">Save Question</button>
+                <button type="button" id="psQCancelBtn" class="btn btn-secondary">Cancel</button>
             </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" id="psBackBtn" class="btn btn-secondary">Back to Practice Sets</button>
         </div>
     </div>
 
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/used-numbers.js") %>?v=20261010"></script>
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261103"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261106"></script>
 </asp:Content>

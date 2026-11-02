@@ -121,8 +121,6 @@
                 <input id="mxQSearch" type="search" class="form-input form-input--auto" placeholder="Search questions" autocomplete="off" />
             </div>
 
-            <p class="form-hint">Select exactly the required number of active questions in every section. A section that is full cannot take more until you untick one. Questions come from the Question Bank: the Colour Blind Test uses Colour Recognition questions.</p>
-
             <div id="mxQGroups"></div>
 
             <p id="mxQMessage" class="field-error" hidden role="alert"></p>
@@ -130,6 +128,17 @@
             <div class="form-actions">
                 <button type="button" id="mxQSaveBtn" class="btn btn-primary">Save Selection</button>
                 <button type="button" id="mxQBackBtn" class="btn btn-secondary">Back to Mock Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Picture of a question, opened from its Image badge -->
+    <div id="mxImageOverlay" class="modal-overlay" hidden>
+        <div class="modal-panel card mx-image-modal" role="dialog" aria-modal="true" aria-labelledby="mxImageTitle">
+            <h3 id="mxImageTitle"></h3>
+            <img id="mxImagePicture" class="mx-image-modal__picture" alt="" />
+            <div class="form-actions">
+                <button type="button" id="mxImageCloseBtn" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </div>

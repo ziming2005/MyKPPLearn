@@ -66,7 +66,7 @@
     }
 
     var types = MockExamData.getExamTypes();
-    var bank = [];          // { id, sectionId, text, hasImage, status } from the Question Bank
+    var bank = [];          // { id, sectionId, text, image, imageAlt, status } from the Question Bank
     var bankById = {};
     var sets = [];          // { id, typeId, number, status, attemptCount, selected: [questionId] }
 
@@ -615,10 +615,16 @@
                 text.textContent = q.text;
                 label.appendChild(text);
 
-                if (q.hasImage) {
-                    var imageBadge = document.createElement("span");
-                    imageBadge.className = "badge";
+                if (q.image) {
+                    var imageBadge = document.createElement("button");
+                    imageBadge.type = "button";
+                    imageBadge.className = "badge mx-qitem__image";
                     imageBadge.textContent = "Image";
+                    imageBadge.setAttribute("aria-label", "View the image of Q" + q.id);
+                    imageBadge.addEventListener("click", function (event) {
+                        event.preventDefault();   // inside the label: do not tick the question
+                        openImage(q);
+                    });
                     label.appendChild(imageBadge);
                 }
 
@@ -733,6 +739,34 @@
     qSection.addEventListener("change", renderQuestionLists);
     qSearch.addEventListener("input", renderQuestionLists);
     qSearch.addEventListener("keydown", function (event) { if (event.key === "Enter") { event.preventDefault(); } });
+
+    // ------------------------------------------------------------------
+    // Image viewer for the Image badges.
+    // ------------------------------------------------------------------
+    var imageOverlay = byId("mxImageOverlay");
+    var imagePicture = byId("mxImagePicture");
+    var imageCloseBtn = byId("mxImageCloseBtn");
+    var imageOpener = null;
+
+    function openImage(q) {
+        imageOpener = document.activeElement;
+        byId("mxImageTitle").textContent = "Q" + q.id + ": " + q.text;
+        imagePicture.src = q.image;
+        imagePicture.alt = q.imageAlt || "";
+        imageOverlay.hidden = false;
+        imageCloseBtn.focus();
+    }
+
+    function closeImage() {
+        if (imageOverlay.hidden) { return; }
+        imageOverlay.hidden = true;
+        imagePicture.removeAttribute("src");
+        if (imageOpener && imageOpener.focus) { imageOpener.focus(); }
+    }
+
+    imageCloseBtn.addEventListener("click", closeImage);
+    imageOverlay.addEventListener("click", function (event) { if (event.target === imageOverlay) { closeImage(); } });
+    document.addEventListener("keydown", function (event) { if (event.key === "Escape") { closeImage(); } });
 
     qSaveBtn.addEventListener("click", function () {
         if (busy) { return; }

@@ -51,7 +51,17 @@ namespace MyKPPLearn.Admin
         {
             PracticeSets.RequireAdmin();
 
-            // All options in one query, grouped by question, instead of one query per question.
+            return new QuestionDataDto
+            {
+                categories = PracticeSets.LoadCategories(),
+                sets = PracticeSets.LoadSets(),
+                questions = LoadQuestions(row => true)
+            };
+        }
+
+        /// <summary>The questions that pass the filter, with their options (one query for all options).</summary>
+        internal static List<QuestionDto> LoadQuestions(Func<DataRow, bool> include)
+        {
             Dictionary<int, DataRow[]> optionsByQuestion = new Dictionary<int, DataRow[]>();
 
             foreach (DataRow option in QuestionRepository.GetAllOptions().Rows)
@@ -73,21 +83,21 @@ namespace MyKPPLearn.Admin
                 }
             }
 
-            QuestionDataDto output = new QuestionDataDto
-            {
-                categories = PracticeSets.LoadCategories(),
-                sets = PracticeSets.LoadSets(),
-                questions = new List<QuestionDto>()
-            };
+            List<QuestionDto> questions = new List<QuestionDto>();
 
             foreach (DataRow row in QuestionRepository.GetAllForAdmin().Rows)
             {
+                if (!include(row))
+                {
+                    continue;
+                }
+
                 DataRow[] options;
                 optionsByQuestion.TryGetValue(Convert.ToInt32(row["QuestionId"]), out options);
-                output.questions.Add(ToQuestion(row, options ?? new DataRow[3]));
+                questions.Add(ToQuestion(row, options ?? new DataRow[3]));
             }
 
-            return output;
+            return questions;
         }
 
         [WebMethod(EnableSession = true)]
@@ -168,6 +178,11 @@ namespace MyKPPLearn.Admin
                     CorrectOption = question.correctIndex + 1
                 };
 
+                // A set that had no questions becomes Active with its first one (a new set starts Inactive only because
+                // it is empty). Later questions never change the status the administrator chose.
+                DataRow targetSet = question.setId.HasValue && question.setId != oldSetId ? PracticeSetRepository.GetById(question.setId.Value) : null;
+                bool firstInSet = targetSet != null && Convert.ToInt32(targetSet["QuestionCount"]) == 0;
+
                 int id = QuestionRepository.Save(input);
 
                 if (oldPath != null && !string.Equals(oldPath, newPath, StringComparison.Ordinal))
@@ -177,12 +192,22 @@ namespace MyKPPLearn.Admin
 
                 QuestionDto saved = ToQuestion(QuestionRepository.GetById(id));
 
+                List<string> notices = new List<string>();
+
                 // Moving the question out of a set may leave that set Active with no active questions.
                 if (oldSetId.HasValue && oldSetId != question.setId)
                 {
-                    saved.notice = DeactivatedNotice(oldSetId.Value);
+                    string deactivated = DeactivatedNotice(oldSetId.Value);
+                    if (deactivated != null) { notices.Add(deactivated); }
                 }
 
+                if (firstInSet && !Convert.ToBoolean(targetSet["IsActive"]) && saved.status == "Active"
+                    && PracticeSetRepository.SetActive(question.setId.Value, true))
+                {
+                    notices.Add("Practice Set " + targetSet["SetNumber"] + " (" + targetSet["CategoryTitle"] + ") is now Active.");
+                }
+
+                saved.notice = notices.Count > 0 ? string.Join(" ", notices) : null;
                 return saved;
             }
             catch (ArgumentException ex)

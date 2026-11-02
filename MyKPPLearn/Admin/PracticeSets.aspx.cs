@@ -11,8 +11,10 @@ namespace MyKPPLearn.Admin
 {
     /// <summary>
     /// Admin Practice Sets. The page markup is a shell; Scripts/practice-admin-db.js calls the page methods below
-    /// (JSON over POST) to list, add, edit, activate/deactivate and delete sets. Every method re-checks the
-    /// Administrator role because page methods bypass Page_Load.
+    /// (JSON over POST) to list, add, activate/deactivate and delete sets. A set's page adds, edits and deletes its
+    /// questions one at a time through the Question Bank's page methods (Admin/QuestionBank.aspx), so each question is
+    /// saved to the Question Bank on its own. Every method re-checks the Administrator role because page methods
+    /// bypass Page_Load.
     /// </summary>
     public partial class PracticeSets : System.Web.UI.Page
     {
@@ -59,48 +61,39 @@ namespace MyKPPLearn.Admin
             };
         }
 
+        /// <summary>Creates an Inactive set in the category; its number is the lowest one not yet used there.</summary>
         [WebMethod(EnableSession = true)]
-        public static SetDto Save(int id, int categoryId, int number)
+        public static SetDto Create(int categoryId)
         {
             RequireAdmin();
-
-            if (number < 1)
-            {
-                return new SetDto { error = "Enter a whole number from 1 upwards." };
-            }
 
             if (!QuestionCategoryRepository.Exists(categoryId))
             {
                 return new SetDto { error = "Select a valid category." };
             }
 
+            int id;
+
             try
             {
-                if (id == 0)
-                {
-                    id = PracticeSetRepository.Create(categoryId, number);
-                }
-                else
-                {
-                    PracticeSetUpdateResult result = PracticeSetRepository.Update(id, categoryId, number);
-
-                    if (result == PracticeSetUpdateResult.NotFound)
-                    {
-                        return new SetDto { error = "Practice Set not found." };
-                    }
-
-                    if (result == PracticeSetUpdateResult.CategoryLocked)
-                    {
-                        return new SetDto { error = "Move or delete this set's questions before changing its category." };
-                    }
-                }
+                id = PracticeSetRepository.Create(categoryId);
             }
             catch (SqlException ex) when (ex.Number == 2601 || ex.Number == 2627)
             {
-                return new SetDto { error = "That category already has this Practice Set number." };
+                // Another admin took the same number at the same moment; the next try picks the following one.
+                id = PracticeSetRepository.Create(categoryId);
             }
 
             return ToSet(PracticeSetRepository.GetById(id));
+        }
+
+        /// <summary>The questions of one set, oldest first, for the set's Edit page.</summary>
+        [WebMethod(EnableSession = true)]
+        public static List<QuestionBank.QuestionDto> Questions(int setId)
+        {
+            RequireAdmin();
+
+            return QuestionBank.LoadQuestions(row => !row.IsNull("PracticeSetId") && Convert.ToInt32(row["PracticeSetId"]) == setId);
         }
 
         [WebMethod(EnableSession = true)]
