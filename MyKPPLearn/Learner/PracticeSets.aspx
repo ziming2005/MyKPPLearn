@@ -20,5 +20,6 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice.js") + "?v=20261021-c" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice.js") + "?v=20261031-db" %>"></script>
 </asp:Content>
+

@@ -1,16 +1,13 @@
 /*
  * ============================================================================
- * Standard Practice: category configuration and Learner UI logic (UI prototype).
+ * Standard Practice: category configuration and Learner UI logic.
  *
- * Nothing here is persisted to SQL Server and no sample content is preloaded: the practice set and question collections
- * below start EMPTY. The Learner pages therefore show their existing empty states, and the Admin pages start with no rows.
- * A later phase replaces the SETS / QUESTIONS collections with database-backed data; the UI functions only talk to the
- * PracticeDemoData object, so they stay unchanged.
+ * Practice sets and questions come from the database: Learner.Master writes the active sets and their active questions
+ * into window.PracticeDatabaseData on the Practice pages. The UI functions only talk to the PracticeDemoData object
+ * below, which reads those collections.
  *
  * What is real configuration here (and must stay): the four question categories (ids, titles, descriptions, icons, colours).
- *
- * window.PracticeDemoData exposes read access to this data for both the Learner pages (this file) and the Admin prototype
- * (practice-admin.js).
+ * The admin pages do not use this file; they use practice-admin-db.js.
  * ============================================================================
  */
 (function (global) {
@@ -52,8 +49,8 @@
     // Practice sets and questions: none are preloaded. Set shape: { id, categoryId, number, questionCount, status }.
     // Question shape: { id, setId, categoryId, text, options[], correctIndex, explanation, image, imageAlt, status }.
     // ------------------------------------------------------------------
-    var SETS = [];
-    var QUESTIONS = [];
+    var SETS = (global.PracticeDatabaseData || {}).sets || [];
+    var QUESTIONS = (global.PracticeDatabaseData || {}).questions || [];
 
     /** Single source of truth for a set's display name: derived from its number. */
     function setLabel(number) {
@@ -524,7 +521,7 @@
             updateProgress();
 
             if (question.image) {
-                questionImage.src = appRoot + question.image;
+                questionImage.src = question.image;
                 questionImage.alt = question.imageAlt || "";
                 questionImageWrap.hidden = false;
             } else {
@@ -644,7 +641,7 @@
 
                 if (question.image) {
                     var img = document.createElement("img");
-                    img.src = appRoot + question.image;
+                    img.src = question.image;
                     img.alt = question.imageAlt || "";
                     img.className = "lesson-image";
                     item.appendChild(img);
@@ -776,3 +773,5 @@
         initAttemptPage();
     });
 })(window);
+
+
