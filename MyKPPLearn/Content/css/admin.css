@@ -172,52 +172,7 @@ textarea.form-input {
   opacity: 0.6;
 }
 
-/* Practice Sets: category colour dot (same colours as the learner Practice cards), question-count link, form preview. */
-.ps-cat__dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background-color: var(--color-primary);
-}
-
-.ps-cat__dot--red { background-color: #DC2626; }
-.ps-cat__dot--blue { background-color: #2563EB; }
-.ps-cat__dot--green { background-color: #15803D; }
-.ps-cat__dot--purple { background-color: #7C3AED; }
-
-.ps-count-link {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-.ps-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 280px;
-  margin-top: 8px;
-}
-
-.ps-preview__category {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--fs-small);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.ps-preview__title,
-.ps-preview__count {
-  margin: 0;
-}
-
-.ps-preview__count {
-  color: var(--color-text-secondary);
-}
-
-/* Question Bank: option rows with an inline "Correct" radio, image tools, "Image" badge, learner-style preview. */
+/* Question Bank: option rows with an inline "Correct" radio, and the image tools. */
 .qb-option {
   display: flex;
   align-items: center;
@@ -256,94 +211,6 @@ textarea.form-input {
 
 .qb-image-tools {
   margin-top: 10px;
-}
-
-.qb-badge-image {
-  margin-left: 8px;
-  vertical-align: middle;
-}
-
-.qb-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-width: 640px;
-  margin-top: 8px;
-}
-
-.qb-preview__image img {
-  display: block;
-  max-width: 100%;
-  max-height: 260px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-}
-
-.qb-preview__question {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.qb-preview__options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.qb-preview__option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  background-color: var(--color-surface);
-}
-
-.qb-preview__option--correct {
-  border-color: var(--color-success);
-  background-color: #F0FDF4;
-}
-
-.qb-preview__letter {
-  flex: 0 0 auto;
-  font-weight: 700;
-  color: var(--color-navy);
-}
-
-.qb-preview__option-text {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.qb-preview__mark {
-  flex: 0 0 auto;
-  font-weight: 700;
-  color: var(--color-success);
-}
-
-.qb-preview__explanation {
-  padding: 12px 14px;
-  border-radius: 10px;
-  background-color: var(--color-bg-page);
-}
-
-.qb-preview__explanation-label {
-  margin: 0 0 4px;
-  font-weight: 700;
-  color: var(--color-navy);
-}
-
-.qb-preview__explanation-label span {
-  font-weight: 500;
-  font-size: var(--fs-small);
-  color: var(--color-text-secondary);
-}
-
-.qb-preview__explanation-text {
-  margin: 0;
-  overflow-wrap: anywhere;
 }
 
 @media (max-width: 479px) {
@@ -455,32 +322,6 @@ a.stat-card--link:focus-visible {
 .char-counter--over {
   color: var(--color-error, #B91C1C);
   font-weight: 700;
-}
-
-/* Add / Edit Chapter preview: same look as the learner's chapter card. */
-.chapter-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 360px;
-  margin-top: 8px;
-  border-top: 3px solid var(--dash-color, var(--color-primary));
-}
-
-.chapter-preview__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.chapter-preview__title,
-.chapter-preview__text {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.chapter-preview .progress-track__fill {
-  background-color: var(--dash-color, var(--color-primary));
 }
 
 @media (min-width: 992px) {
@@ -1750,7 +1591,6 @@ body.hrs-modal-open {
   align-items: center;
   gap: 6px;
 }
-
 
 .lr-modal-actions {
   display: flex;

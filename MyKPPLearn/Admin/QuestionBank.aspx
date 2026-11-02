@@ -59,6 +59,11 @@
                 </table>
             </div>
         </div>
+
+        <div id="qbFooter" class="lr-footer" hidden>
+            <p id="qbSummary" class="lr-footer__summary" aria-live="polite"></p>
+            <nav id="qbPager" class="lr-pager" aria-label="Question pages"></nav>
+        </div>
     </div>
 
     <!-- ================= ADD / EDIT ================= -->
@@ -162,5 +167,5 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261102c"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261102d"></script>
 </asp:Content>

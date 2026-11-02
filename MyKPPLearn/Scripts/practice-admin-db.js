@@ -16,6 +16,7 @@
     var MAX_ALT = 200;
     var MAX_IMAGE_BYTES = 2 * 1024 * 1024;
     var IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+    var QUESTIONS_PER_PAGE = 20;
 
     /** Calls a page method on the current page and resolves with its return value ("d"). */
     function call(name, data) {
@@ -356,6 +357,7 @@
     function initQuestionBank() {
         var data = { categories: [], sets: [], questions: [] };
         var editingId = 0;
+        var page = 1;
         var image = null;      // null, the question's stored path, or a new upload as a data URL
         var appRoot = questionsPage.getAttribute("data-app-root") || "/";
         var toast = byId("qbToast");
@@ -450,6 +452,17 @@
             body.innerHTML = "";
             byId("qbTableWrap").hidden = rows.length === 0;
             byId("qbEmpty").hidden = rows.length > 0;
+            byId("qbFooter").hidden = rows.length === 0;
+
+            var pages = Math.max(1, Math.ceil(rows.length / QUESTIONS_PER_PAGE));
+            page = Math.min(Math.max(1, page), pages);
+            var start = (page - 1) * QUESTIONS_PER_PAGE;
+            var pageRows = rows.slice(start, start + QUESTIONS_PER_PAGE);
+
+            setText(byId("qbSummary"), rows.length
+                ? "Showing " + (start + 1) + "\u2013" + (start + pageRows.length) + " of " + rows.length + (rows.length === 1 ? " question" : " questions")
+                : "");
+            renderPager(pages);
 
             // Nothing created yet: offer "Add". Nothing matches the filters: offer "Clear Filters".
             setText(byId("qbEmptyTitle"), data.questions.length === 0
@@ -459,7 +472,7 @@
             byId("qbEmptyClear").hidden = data.questions.length === 0;
             byId("qbClearFilters").hidden = !(category || set || status || term);
 
-            rows.forEach(function (q) {
+            pageRows.forEach(function (q) {
                 var tr = document.createElement("tr");
                 if (q.status !== "Active") { tr.className = "row--inactive"; }
 
@@ -495,6 +508,41 @@
 
                 body.appendChild(tr);
             });
+        }
+
+        /** Previous, page numbers and Next, styled like the Learner Records pager (.lr-pager). */
+        function renderPager(pages) {
+            var pager = byId("qbPager");
+            pager.textContent = "";
+            if (pages <= 1) { return; }
+
+            function add(label, target, options) {
+                var b = document.createElement("button");
+                b.type = "button";
+                b.className = "lr-pager__btn" + (options.active ? " is-active" : "");
+                b.textContent = label;
+                if (options.disabled) { b.disabled = true; }
+                if (options.active) { b.setAttribute("aria-current", "page"); }
+                if (options.ariaLabel) { b.setAttribute("aria-label", options.ariaLabel); }
+                b.addEventListener("click", function () {
+                    page = target;
+                    render();
+                    byId("qbTableWrap").scrollIntoView({ block: "start" });
+                });
+                pager.appendChild(b);
+            }
+
+            add("Previous", page - 1, { disabled: page === 1 });
+            for (var i = 1; i <= pages; i++) {
+                add(String(i), i, { active: i === page, ariaLabel: "Page " + i });
+            }
+            add("Next", page + 1, { disabled: page === pages });
+        }
+
+        /** Any filter change starts again from the first page. */
+        function filterChanged() {
+            page = 1;
+            render();
         }
 
         /** Shows the current or newly chosen image with its Remove button, or hides both when there is none. */
@@ -678,10 +726,10 @@
         byId("qbEmptyAdd").onclick = function () { openForm(null); };
         byId("qbCancelBtn").onclick = closeForm;
         byId("qbSaveBtn").onclick = save;
-        filterCategory.onchange = function () { fillSetFilter(); render(); };
-        filterSet.onchange = render;
-        filterStatus.onchange = render;
-        search.oninput = render;
+        filterCategory.onchange = function () { fillSetFilter(); filterChanged(); };
+        filterSet.onchange = filterChanged;
+        filterStatus.onchange = filterChanged;
+        search.oninput = filterChanged;
         formCategory.addEventListener("change", function () { fillFormSets(null); });
         formText.addEventListener("input", updateCounts);
         formExplanation.addEventListener("input", updateCounts);
@@ -704,7 +752,7 @@
                 filterSet.value = "";
                 filterStatus.value = "";
                 search.value = "";
-                render();
+                filterChanged();
             };
         });
 
