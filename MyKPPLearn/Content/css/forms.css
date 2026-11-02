@@ -145,6 +145,17 @@
   font-weight: 600;
 }
 
+/* display:block above would otherwise override the hidden attribute. */
+.form-hint[hidden],
+.field-error[hidden] {
+  display: none;
+}
+
+/* A field the script marked invalid (aria-invalid="true"). */
+.form-input[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
 /* --------------------------------------------------------------------
    Validation summary / alerts
    -------------------------------------------------------------------- */

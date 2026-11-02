@@ -2,12 +2,20 @@
  * Database-backed Admin Practice Sets and Question Bank.
  * Both pages are shells; this script calls the page's own page methods (Admin/PracticeSets.aspx and
  * Admin/QuestionBank.aspx code-behind) with JSON over POST and redraws the table from the result.
- * A method reports a validation problem as { error: "..." }; a server failure becomes a rejected promise.
+ *
+ * Form validation runs twice: here, so mistakes show under the field straight away, and again on the server
+ * (PracticeSets.Save / QuestionRepository.Validate), which is the rule that counts. A page method reports a
+ * validation problem as { error: "..." }; a server failure becomes a rejected promise.
  */
 (function () {
     "use strict";
 
     var MOCK_EXAM_ONLY = "No practice set (mock exam only)";
+    var MAX_TEXT = 500;
+    var MAX_OPTION = 200;
+    var MAX_ALT = 200;
+    var MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+    var IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
     /** Calls a page method on the current page and resolves with its return value ("d"). */
     function call(name, data) {
@@ -35,6 +43,8 @@
         if (result && result.error) { throw new Error(result.error); }
         return result;
     }
+
+    function byId(id) { return document.getElementById(id); }
 
     function setText(el, value) { el.textContent = value == null ? "" : String(value); }
 
@@ -94,7 +104,7 @@
         el.className = "alert alert-" + (isError ? "error" : "success");
         setText(el, text);
         window.clearTimeout(el._timer);
-        el._timer = window.setTimeout(function () { el.hidden = true; }, 4500);
+        el._timer = window.setTimeout(function () { el.hidden = true; }, isError ? 8000 : 4500);
     }
 
     function addCell(tr, value) {
@@ -103,8 +113,54 @@
         tr.appendChild(td);
     }
 
-    var setsPage = document.getElementById("psListView");
-    var questionsPage = document.getElementById("qbListView");
+    // ------------------------------------------------------------------
+    // Inline field errors: <p class="field-error"> under each field.
+    // ------------------------------------------------------------------
+
+    /** Collects field errors for one form, shows them under their fields and focuses the first one. */
+    function createErrors() {
+        var shown = [];
+
+        return {
+            add: function (errorId, message, input) {
+                var el = byId(errorId);
+                if (el) { setText(el, message); el.hidden = false; }
+                if (input) { input.setAttribute("aria-invalid", "true"); }
+                shown.push({ el: el, input: input });
+            },
+            any: function () { return shown.length > 0; },
+            focusFirst: function () {
+                var first = shown[0];
+                if (!first) { return; }
+                var target = first.input || first.el;
+                if (target && target.scrollIntoView) { target.scrollIntoView({ block: "center" }); }
+                if (first.input && first.input.focus) { first.input.focus({ preventScroll: true }); }
+            }
+        };
+    }
+
+    function clearErrors(errorIds, inputs) {
+        errorIds.forEach(function (id) {
+            var el = byId(id);
+            if (el) { el.hidden = true; setText(el, ""); }
+        });
+        inputs.forEach(function (input) { if (input) { input.removeAttribute("aria-invalid"); } });
+    }
+
+    /** Clears one field's error as soon as the user edits that field. */
+    function clearOnInput(input, errorId) {
+        if (!input) { return; }
+        var handler = function () {
+            input.removeAttribute("aria-invalid");
+            var el = byId(errorId);
+            if (el) { el.hidden = true; }
+        };
+        input.addEventListener("input", handler);
+        input.addEventListener("change", handler);
+    }
+
+    var setsPage = byId("psListView");
+    var questionsPage = byId("qbListView");
 
     if (setsPage) { initPracticeSets(); }
     if (questionsPage) { initQuestionBank(); }
@@ -115,19 +171,22 @@
     function initPracticeSets() {
         var data = { categories: [], sets: [] };
         var editingId = 0;
-        var toast = document.getElementById("psToast");
-        var filter = document.getElementById("psCategoryFilter");
-        var body = document.getElementById("psTableBody");
-        var tableWrap = document.getElementById("psTableWrap");
-        var empty = document.getElementById("psEmpty");
-        var form = document.getElementById("psFormView");
-        var formCategory = document.getElementById("psFormCategory");
-        var formNumber = document.getElementById("psFormNumber");
+        var toast = byId("psToast");
+        var filter = byId("psCategoryFilter");
+        var body = byId("psTableBody");
+        var tableWrap = byId("psTableWrap");
+        var empty = byId("psEmpty");
+        var form = byId("psFormView");
+        var formCategory = byId("psFormCategory");
+        var formNumber = byId("psFormNumber");
+        var categoryHint = byId("psCategoryHint");
+        var usedNumbers = byId("psUsedNumbers");
+        var errorIds = ["psCategoryError", "psNumberError"];
 
         function fail(e) { showMessage(toast, e.message, true); }
 
         function load() {
-            call("LoadData").then(function (result) {
+            return call("LoadData").then(function (result) {
                 data = result;
                 var selected = filter.value;
                 fillSelect(filter, data.categories, "All Categories");
@@ -151,12 +210,12 @@
             empty.hidden = rows.length > 0;
 
             // Nothing created yet: offer "Add". Nothing matches the filter: offer "Clear Filter".
-            setText(document.getElementById("psEmptyTitle"), data.sets.length === 0
+            setText(byId("psEmptyTitle"), data.sets.length === 0
                 ? "No practice sets have been created yet."
                 : "No practice sets match the selected filter.");
-            document.getElementById("psEmptyAdd").hidden = data.sets.length > 0;
-            document.getElementById("psEmptyClear").hidden = data.sets.length === 0;
-            document.getElementById("psClearFilter").hidden = !category;
+            byId("psEmptyAdd").hidden = data.sets.length > 0;
+            byId("psEmptyClear").hidden = data.sets.length === 0;
+            byId("psClearFilter").hidden = !category;
 
             rows.forEach(function (set) {
                 var tr = document.createElement("tr");
@@ -193,15 +252,38 @@
             });
         }
 
+        /** "Used Numbers: 1, 2, 4" for the selected category, as on the Chapters form. */
+        function showUsedNumbers() {
+            if (!usedNumbers || !window.UsedNumbers) { return; }
+            var category = toInt(formCategory.value);
+            var numbers = data.sets
+                .filter(function (s) { return s.categoryId === category; })
+                .map(function (s) { return s.number; });
+            setText(usedNumbers, window.UsedNumbers.format(numbers));
+        }
+
         function openForm(set) {
             editingId = set ? set.id : 0;
+            clearErrors(errorIds, [formCategory, formNumber]);
+
             formCategory.value = set ? set.categoryId : (toInt(filter.value) || (data.categories[0] && data.categories[0].id));
             formNumber.value = set ? set.number : "";
+
             // A set's category cannot change while it has questions (the server enforces this too).
-            formCategory.disabled = !!(set && set.questionCount);
-            setText(document.getElementById("psFormHeading"), set ? "Edit Practice Set" : "Add Practice Set");
+            var locked = !!(set && set.questionCount);
+            formCategory.disabled = locked;
+            categoryHint.hidden = !locked;
+
+            var heading = set ? "Edit Practice Set" : "Add Practice Set";
+            setText(byId("psFormHeading"), heading);
+            setText(byId("psFormCrumb"), heading);
+            byId("psStatusHint").hidden = !!set;
+            showUsedNumbers();
+
             form.hidden = false;
             setsPage.hidden = true;
+            window.scrollTo(0, 0);
+            formNumber.focus();
         }
 
         function closeForm() {
@@ -209,26 +291,61 @@
             setsPage.hidden = false;
         }
 
-        document.getElementById("psAddBtn").onclick = function () { openForm(null); };
-        document.getElementById("psEmptyAdd").onclick = function () { openForm(null); };
-        document.getElementById("psCancelBtn").onclick = closeForm;
-        filter.onchange = render;
+        function validate() {
+            var errors = createErrors();
+            var category = toInt(formCategory.value);
+            var number = formNumber.value.trim();
 
-        ["psClearFilter", "psEmptyClear"].forEach(function (id) {
-            var clear = document.getElementById(id);
-            if (clear) { clear.onclick = function () { filter.value = ""; render(); }; }
-        });
+            clearErrors(errorIds, [formCategory, formNumber]);
 
-        document.getElementById("psSaveBtn").onclick = function () {
+            if (!category) {
+                errors.add("psCategoryError", "Select a category.", formCategory);
+            }
+
+            if (!/^[1-9][0-9]{0,8}$/.test(number)) {
+                errors.add("psNumberError", number ? "Enter a whole number from 1 upwards." : "Practice Set number is required.", formNumber);
+            } else if (category && data.sets.some(function (s) { return s.id !== editingId && s.categoryId === category && s.number === toInt(number); })) {
+                errors.add("psNumberError", categoryTitle(category) + " already has Practice Set " + toInt(number) + ". Please choose a different number.", formNumber);
+            }
+
+            errors.focusFirst();
+            return !errors.any();
+        }
+
+        function save() {
+            if (!validate()) { return; }
+
             call("Save", { id: editingId, categoryId: toInt(formCategory.value), number: toInt(formNumber.value) })
-                .then(check)
-                .then(function () {
+                .then(function (result) {
+                    if (result && result.error) {
+                        // The server's answer belongs to a field: a duplicate/number problem or the category lock.
+                        var errors = createErrors();
+                        var isCategory = /category/i.test(result.error) && !/already has/i.test(result.error);
+                        errors.add(isCategory ? "psCategoryError" : "psNumberError", result.error, isCategory ? formCategory : formNumber);
+                        errors.focusFirst();
+                        return;
+                    }
+
                     closeForm();
                     load();
                     showMessage(toast, "Practice Set saved.");
                 })
                 .catch(fail);
-        };
+        }
+
+        byId("psAddBtn").onclick = function () { openForm(null); };
+        byId("psEmptyAdd").onclick = function () { openForm(null); };
+        byId("psCancelBtn").onclick = closeForm;
+        byId("psSaveBtn").onclick = save;
+        filter.onchange = render;
+        formCategory.addEventListener("change", showUsedNumbers);
+        clearOnInput(formCategory, "psCategoryError");
+        clearOnInput(formNumber, "psNumberError");
+
+        ["psClearFilter", "psEmptyClear"].forEach(function (id) {
+            var clear = byId(id);
+            if (clear) { clear.onclick = function () { filter.value = ""; render(); }; }
+        });
 
         load();
     }
@@ -240,23 +357,34 @@
         var data = { categories: [], sets: [], questions: [] };
         var editingId = 0;
         var image = null;      // null, the question's stored path, or a new upload as a data URL
-        var toast = document.getElementById("qbToast");
-        var body = document.getElementById("qbTableBody");
-        var form = document.getElementById("qbFormView");
-        var filterCategory = document.getElementById("qbCategoryFilter");
-        var filterSet = document.getElementById("qbSetFilter");
-        var filterStatus = document.getElementById("qbStatusFilter");
-        var search = document.getElementById("qbSearch");
-        var formCategory = document.getElementById("qbFormCategory");
-        var formSet = document.getElementById("qbFormSet");
-        var imageInput = document.getElementById("qbFormImage");
-        var altGroup = document.getElementById("qbAltGroup");
+        var appRoot = questionsPage.getAttribute("data-app-root") || "/";
+        var toast = byId("qbToast");
+        var body = byId("qbTableBody");
+        var form = byId("qbFormView");
+        var filterCategory = byId("qbCategoryFilter");
+        var filterSet = byId("qbSetFilter");
+        var filterStatus = byId("qbStatusFilter");
+        var search = byId("qbSearch");
+        var formCategory = byId("qbFormCategory");
+        var formSet = byId("qbFormSet");
+        var formText = byId("qbFormText");
+        var formExplanation = byId("qbFormExplanation");
+        var formAlt = byId("qbFormImageAlt");
+        var imageInput = byId("qbFormImage");
+        var altGroup = byId("qbAltGroup");
+        var previewWrap = byId("qbImagePreviewWrap");
+        var previewImg = byId("qbImagePreview");
+        var imageTools = byId("qbImageTools");
         var letters = ["A", "B", "C"];
+        var optionInputs = letters.map(function (letter) { return byId("qbFormOption" + letter); });
+        var errorIds = ["qbCategoryError", "qbSetError", "qbTextError", "qbImageError", "qbAltError", "qbOptionsError", "qbCorrectError", "qbExplanationError"];
+
+        function radios() { return document.querySelectorAll("input[name='qbCorrectAnswer']"); }
 
         function fail(e) { showMessage(toast, e.message, true); }
 
         function load() {
-            call("LoadData").then(function (result) {
+            return call("LoadData").then(function (result) {
                 data = result;
                 var selected = filterCategory.value;
                 fillSelect(filterCategory, data.categories, "All Categories");
@@ -281,15 +409,19 @@
             })), "All Practice Sets");
 
             filterSet.value = selected;
+            if (filterSet.value !== selected) { filterSet.value = ""; }
         }
 
         /** The form's set list: "mock exam only" first, then this category's sets. */
         function fillFormSets(selectedSetId) {
-            fillSelect(formSet, setsIn(toInt(formCategory.value)).map(function (s) {
+            var sets = setsIn(toInt(formCategory.value));
+
+            fillSelect(formSet, sets.map(function (s) {
                 return { id: s.id, title: "Practice Set " + s.number + (s.status === "Inactive" ? " (Inactive)" : "") };
             }), MOCK_EXAM_ONLY);
 
             formSet.value = selectedSetId ? String(selectedSetId) : "";
+            byId("qbNoSets").hidden = sets.length > 0;
         }
 
         function categoryTitle(id) {
@@ -316,16 +448,16 @@
             });
 
             body.innerHTML = "";
-            document.getElementById("qbTableWrap").hidden = rows.length === 0;
-            document.getElementById("qbEmpty").hidden = rows.length > 0;
+            byId("qbTableWrap").hidden = rows.length === 0;
+            byId("qbEmpty").hidden = rows.length > 0;
 
             // Nothing created yet: offer "Add". Nothing matches the filters: offer "Clear Filters".
-            setText(document.getElementById("qbEmptyTitle"), data.questions.length === 0
+            setText(byId("qbEmptyTitle"), data.questions.length === 0
                 ? "No questions have been created yet."
                 : "No questions match the selected filters.");
-            document.getElementById("qbEmptyAdd").hidden = data.questions.length > 0;
-            document.getElementById("qbEmptyClear").hidden = data.questions.length === 0;
-            document.getElementById("qbClearFilters").hidden = !(category || set || status || term);
+            byId("qbEmptyAdd").hidden = data.questions.length > 0;
+            byId("qbEmptyClear").hidden = data.questions.length === 0;
+            byId("qbClearFilters").hidden = !(category || set || status || term);
 
             rows.forEach(function (q) {
                 var tr = document.createElement("tr");
@@ -337,9 +469,9 @@
 
                 var statusCell = document.createElement("td");
                 statusCell.appendChild(makeStatusButton(q.status, function () {
-                    call("Toggle", { id: q.id, active: q.status !== "Active" }).then(check).then(function () {
+                    call("Toggle", { id: q.id, active: q.status !== "Active" }).then(check).then(function (result) {
                         load();
-                        showMessage(toast, "Question updated.");
+                        showMessage(toast, result.notice ? "Question updated. " + result.notice : "Question updated.");
                     }).catch(fail);
                 }));
                 tr.appendChild(statusCell);
@@ -352,9 +484,10 @@
                 }));
                 actions.appendChild(makeDeleteButton("Delete this question?", function () {
                     call("Delete", { id: q.id }).then(function (message) {
-                        if (message !== "Deleted") { throw new Error(message); }
+                        if (message.indexOf("Deleted") !== 0) { throw new Error(message); }
                         load();
-                        showMessage(toast, "Question deleted.");
+                        var notice = message.substring("Deleted".length).trim();
+                        showMessage(toast, notice ? "Question deleted. " + notice : "Question deleted.");
                     }).catch(fail);
                 }));
                 actionsCell.appendChild(actions);
@@ -364,29 +497,67 @@
             });
         }
 
+        /** Shows the current or newly chosen image with its Remove button, or hides both when there is none. */
+        function showImage() {
+            var hasImage = !!image;
+            previewWrap.hidden = !hasImage;
+            imageTools.hidden = !hasImage;
+            altGroup.hidden = !hasImage;
+
+            if (hasImage) {
+                previewImg.src = image.indexOf("data:") === 0 ? image : appRoot + image;
+                previewImg.alt = formAlt.value || "Question image";
+            } else {
+                previewImg.removeAttribute("src");
+            }
+        }
+
+        /** Live "n / 500" counters under the question and explanation boxes. */
+        function updateCounts() {
+            [[formText, "qbTextCount"], [formExplanation, "qbExplanationCount"]].forEach(function (pair) {
+                var count = byId(pair[1]);
+                if (!pair[0] || !count) { return; }
+                var length = pair[0].value.trim().length;
+                count.textContent = String(length);
+                if (count.parentNode) { count.parentNode.classList.toggle("char-counter--over", length > MAX_TEXT); }
+            });
+        }
+
+        function allInputs() {
+            return [formCategory, formSet, formText, imageInput, formAlt, formExplanation].concat(optionInputs);
+        }
+
         function openForm(q) {
             editingId = q ? q.id : 0;
+            clearErrors(errorIds, allInputs());
+
             formCategory.value = q ? q.categoryId : (toInt(filterCategory.value) || (data.categories[0] && data.categories[0].id));
             fillFormSets(q ? q.setId : null);
 
-            document.getElementById("qbFormText").value = q ? q.text : "";
-            document.getElementById("qbFormExplanation").value = q ? q.explanation : "";
+            formText.value = q ? q.text : "";
+            formExplanation.value = q ? q.explanation : "";
 
-            var radios = document.querySelectorAll("input[name='qbCorrectAnswer']");
-            letters.forEach(function (letter, i) {
-                document.getElementById("qbFormOption" + letter).value = q ? (q.options[i] || "") : "";
-                radios[i].checked = !!q && q.correctIndex === i;
+            var buttons = radios();
+            optionInputs.forEach(function (input, i) {
+                input.value = q ? (q.options[i] || "") : "";
+                buttons[i].checked = !!q && q.correctIndex === i;
             });
 
-            document.getElementById("qbFormImageAlt").value = q ? (q.imageAlt || "") : "";
+            formAlt.value = q ? (q.imageAlt || "") : "";
             image = q ? q.image : null;
             imageInput.value = "";
-            altGroup.hidden = !image;
-
+            showImage();
             updateCounts();
-            setText(document.getElementById("qbFormHeading"), q ? "Edit Question" : "Add Question");
+
+            var heading = q ? "Edit Question" : "Add Question";
+            setText(byId("qbFormHeading"), heading);
+            setText(byId("qbFormCrumb"), heading);
+            byId("qbStatusHint").hidden = !!q;
+
             form.hidden = false;
             questionsPage.hidden = true;
+            window.scrollTo(0, 0);
+            formText.focus();
         }
 
         function closeForm() {
@@ -394,57 +565,137 @@
             questionsPage.hidden = false;
         }
 
-        /** Live "n / 500" counters under the question and explanation boxes. */
-        function updateCounts() {
-            [["qbFormText", "qbTextCount"], ["qbFormExplanation", "qbExplanationCount"]].forEach(function (pair) {
-                var box = document.getElementById(pair[0]);
-                var count = document.getElementById(pair[1]);
-                if (!box || !count) { return; }
-                var length = box.value.trim().length;
-                count.textContent = String(length);
-                if (count.parentNode) { count.parentNode.classList.toggle("char-counter--over", length > 500); }
-            });
+        function correctIndex() {
+            var correct = -1;
+            Array.prototype.forEach.call(radios(), function (radio, i) { if (radio.checked) { correct = i; } });
+            return correct;
+        }
+
+        /** Mirrors QuestionRepository.Validate, with each message under its own field. */
+        function validate() {
+            var errors = createErrors();
+            var text = formText.value.trim();
+            var explanation = formExplanation.value.trim();
+            var options = optionInputs.map(function (input) { return input.value.trim(); });
+
+            clearErrors(errorIds, allInputs());
+
+            if (!toInt(formCategory.value)) {
+                errors.add("qbCategoryError", "Select a category.", formCategory);
+            }
+
+            if (!text) {
+                errors.add("qbTextError", "Question is required.", formText);
+            } else if (text.length > MAX_TEXT) {
+                errors.add("qbTextError", "Question must be 500 characters or fewer.", formText);
+            }
+
+            if (image && !formAlt.value.trim()) {
+                errors.add("qbAltError", "Describe the image for screen reader users.", formAlt);
+            } else if (formAlt.value.trim().length > MAX_ALT) {
+                errors.add("qbAltError", "Image description must be 200 characters or fewer.", formAlt);
+            }
+
+            var emptyIndex = options.indexOf("");
+            var longIndex = -1;
+            options.forEach(function (o, i) { if (longIndex < 0 && o.length > MAX_OPTION) { longIndex = i; } });
+            var lower = options.map(function (o) { return o.toLowerCase(); });
+            var duplicate = lower.some(function (o, i) { return o && lower.indexOf(o) !== i; });
+
+            if (emptyIndex >= 0) {
+                errors.add("qbOptionsError", "Options A, B and C are all required.", optionInputs[emptyIndex]);
+            } else if (longIndex >= 0) {
+                errors.add("qbOptionsError", "Each option must be 200 characters or fewer.", optionInputs[longIndex]);
+            } else if (duplicate) {
+                errors.add("qbOptionsError", "Each option must be different.", optionInputs[0]);
+            }
+
+            if (correctIndex() < 0) {
+                errors.add("qbCorrectError", "Select the correct answer.", radios()[0]);
+            }
+
+            if (!explanation) {
+                errors.add("qbExplanationError", "Explanation is required.", formExplanation);
+            } else if (explanation.length > MAX_TEXT) {
+                errors.add("qbExplanationError", "Explanation must be 500 characters or fewer.", formExplanation);
+            }
+
+            errors.focusFirst();
+            return !errors.any();
+        }
+
+        /** Places a server message under the field it is about, or in the image field when unsure. */
+        function showServerError(message) {
+            var rules = [
+                [/category|practice set/i, "qbSetError", formSet],
+                [/^question/i, "qbTextError", formText],
+                [/image description/i, "qbAltError", formAlt],
+                [/image|jpg|png|webp|2 mb/i, "qbImageError", imageInput],
+                [/option/i, "qbOptionsError", optionInputs[0]],
+                [/correct answer/i, "qbCorrectError", radios()[0]],
+                [/explanation/i, "qbExplanationError", formExplanation]
+            ];
+            var match = rules.filter(function (r) { return r[0].test(message); })[0];
+            var errors = createErrors();
+
+            if (match) {
+                errors.add(match[1], message, match[2]);
+                errors.focusFirst();
+            } else {
+                fail(new Error(message));
+                window.scrollTo(0, 0);
+            }
         }
 
         function save() {
-            var correct = -1;
-            Array.prototype.forEach.call(document.querySelectorAll("input[name='qbCorrectAnswer']"), function (radio, i) {
-                if (radio.checked) { correct = i; }
-            });
+            if (!validate()) { return; }
 
             var question = {
                 id: editingId,
                 categoryId: toInt(formCategory.value),
                 setId: toInt(formSet.value) || null,
-                text: document.getElementById("qbFormText").value,
-                explanation: document.getElementById("qbFormExplanation").value,
+                text: formText.value,
+                explanation: formExplanation.value,
                 image: image,
-                imageAlt: document.getElementById("qbFormImageAlt").value,
-                options: letters.map(function (letter) { return document.getElementById("qbFormOption" + letter).value; }),
-                correctIndex: correct
+                imageAlt: image ? formAlt.value : null,
+                options: optionInputs.map(function (input) { return input.value; }),
+                correctIndex: correctIndex()
             };
 
-            call("Save", { question: question }).then(check).then(function () {
+            call("Save", { question: question }).then(function (result) {
+                if (result && result.error) {
+                    showServerError(result.error);
+                    return;
+                }
+
                 closeForm();
                 load();
-                showMessage(toast, "Question saved.");
+                showMessage(toast, result.notice ? "Question saved. " + result.notice : "Question saved.");
             }).catch(fail);
         }
 
-        document.getElementById("qbAddBtn").onclick = function () { openForm(null); };
-        document.getElementById("qbEmptyAdd").onclick = function () { openForm(null); };
-        document.getElementById("qbCancelBtn").onclick = closeForm;
-        document.getElementById("qbSaveBtn").onclick = save;
+        byId("qbAddBtn").onclick = function () { openForm(null); };
+        byId("qbEmptyAdd").onclick = function () { openForm(null); };
+        byId("qbCancelBtn").onclick = closeForm;
+        byId("qbSaveBtn").onclick = save;
         filterCategory.onchange = function () { fillSetFilter(); render(); };
         filterSet.onchange = render;
         filterStatus.onchange = render;
         search.oninput = render;
-        formCategory.onchange = function () { fillFormSets(null); };
-        document.getElementById("qbFormText").addEventListener("input", updateCounts);
-        document.getElementById("qbFormExplanation").addEventListener("input", updateCounts);
+        formCategory.addEventListener("change", function () { fillFormSets(null); });
+        formText.addEventListener("input", updateCounts);
+        formExplanation.addEventListener("input", updateCounts);
+
+        clearOnInput(formCategory, "qbCategoryError");
+        clearOnInput(formSet, "qbSetError");
+        clearOnInput(formText, "qbTextError");
+        clearOnInput(formAlt, "qbAltError");
+        clearOnInput(formExplanation, "qbExplanationError");
+        optionInputs.forEach(function (input) { clearOnInput(input, "qbOptionsError"); });
+        Array.prototype.forEach.call(radios(), function (radio) { clearOnInput(radio, "qbCorrectError"); });
 
         ["qbClearFilters", "qbEmptyClear"].forEach(function (id) {
-            var clear = document.getElementById(id);
+            var clear = byId(id);
             if (!clear) { return; }
 
             clear.onclick = function () {
@@ -457,18 +708,27 @@
             };
         });
 
-        document.getElementById("qbRemoveImage").onclick = function () {
+        byId("qbRemoveImage").onclick = function () {
             image = null;
             imageInput.value = "";
-            altGroup.hidden = true;
+            formAlt.value = "";
+            showImage();
         };
 
         imageInput.onchange = function () {
             var file = imageInput.files[0];
+            var errors = createErrors();
+
+            clearErrors(["qbImageError"], [imageInput]);
             if (!file) { return; }
 
-            if (file.size > 2 * 1024 * 1024 || ["image/jpeg", "image/png", "image/webp"].indexOf(file.type) < 0) {
-                showMessage(toast, "Choose a JPG, PNG or WEBP image up to 2 MB.", true);
+            if (IMAGE_TYPES.indexOf(file.type) < 0) {
+                errors.add("qbImageError", "Choose a JPG, PNG or WEBP image.", imageInput);
+            } else if (file.size > MAX_IMAGE_BYTES) {
+                errors.add("qbImageError", "Image must be 2 MB or smaller.", imageInput);
+            }
+
+            if (errors.any()) {
                 imageInput.value = "";
                 return;
             }
@@ -476,7 +736,8 @@
             var reader = new FileReader();
             reader.onload = function () {
                 image = reader.result;
-                altGroup.hidden = false;
+                showImage();
+                formAlt.focus();
             };
             reader.readAsDataURL(file);
         };

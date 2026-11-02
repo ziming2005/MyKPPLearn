@@ -86,7 +86,7 @@
             <div class="form-group">
                 <label class="form-label" for="qbFormSet">Practice Set</label>
                 <select id="qbFormSet" class="form-input"></select>
-                <span id="qbNoSets" class="form-hint" hidden>This category has no practice sets yet. <a href="PracticeSets.aspx">Create one in Practice Sets</a> first.</span>
+                <span id="qbNoSets" class="form-hint" hidden>This category has no practice sets yet, so the question will be used in mock exams only. <a href="PracticeSets.aspx">Create a practice set</a> to use it in Practice too.</span>
                 <p id="qbSetError" class="field-error" role="alert" hidden></p>
             </div>
 
@@ -162,5 +162,5 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261102b"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261102c"></script>
 </asp:Content>

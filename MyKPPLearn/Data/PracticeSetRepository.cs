@@ -110,6 +110,21 @@ namespace MyKPPLearn.Data
         }
 
         /// <summary>
+        /// Keeps the rule "an Active set has at least one active question": when a question change leaves an Active set
+        /// with none, the set becomes Inactive. One atomic statement. Returns true when the set was deactivated.
+        /// </summary>
+        public static bool DeactivateIfNoActiveQuestions(int id)
+        {
+            const string sql = @"
+                UPDATE PracticeSets
+                SET IsActive = 0, UpdatedAt = SYSUTCDATETIME()
+                WHERE PracticeSetId = @Id AND IsActive = 1
+                  AND NOT EXISTS (SELECT 1 FROM Questions WHERE PracticeSetId = @Id AND IsActive = 1);";
+
+            return DatabaseHelper.ExecuteNonQuery(sql, new SqlParameter("@Id", id)) == 1;
+        }
+
+        /// <summary>
         /// Deletes a set only when nothing depends on it. The checks and the delete run in one transaction,
         /// with UPDLOCK/HOLDLOCK so a question or attempt cannot be added between the check and the delete.
         /// </summary>

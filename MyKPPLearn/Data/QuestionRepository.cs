@@ -60,6 +60,12 @@ namespace MyKPPLearn.Data
                 new SqlParameter("@Id", id));
         }
 
+        /// <summary>All options of all questions in one query, for the admin list (avoids one query per question).</summary>
+        public static DataTable GetAllOptions()
+        {
+            return DatabaseHelper.ExecuteQuery("SELECT QuestionId, OptionOrder, OptionText, IsCorrect FROM QuestionOptions ORDER BY QuestionId, OptionOrder");
+        }
+
         /// <summary>
         /// Every active question in an active Practice Set of an active category, one row per option (three per question),
         /// in a single query. Mock-exam-only questions (no Practice Set) are left out.

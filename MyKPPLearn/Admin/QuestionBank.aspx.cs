@@ -36,6 +36,7 @@ namespace MyKPPLearn.Admin
             public int attemptCount;
             public int mockExamUseCount;
             public string error;
+            public string notice;
         }
 
         public sealed class QuestionDataDto
@@ -50,6 +51,28 @@ namespace MyKPPLearn.Admin
         {
             PracticeSets.RequireAdmin();
 
+            // All options in one query, grouped by question, instead of one query per question.
+            Dictionary<int, DataRow[]> optionsByQuestion = new Dictionary<int, DataRow[]>();
+
+            foreach (DataRow option in QuestionRepository.GetAllOptions().Rows)
+            {
+                int questionId = Convert.ToInt32(option["QuestionId"]);
+                DataRow[] options;
+
+                if (!optionsByQuestion.TryGetValue(questionId, out options))
+                {
+                    options = new DataRow[3];
+                    optionsByQuestion[questionId] = options;
+                }
+
+                int index = Convert.ToInt32(option["OptionOrder"]) - 1;
+
+                if (index >= 0 && index < 3)
+                {
+                    options[index] = option;
+                }
+            }
+
             QuestionDataDto output = new QuestionDataDto
             {
                 categories = PracticeSets.LoadCategories(),
@@ -59,7 +82,9 @@ namespace MyKPPLearn.Admin
 
             foreach (DataRow row in QuestionRepository.GetAllForAdmin().Rows)
             {
-                output.questions.Add(ToQuestion(row));
+                DataRow[] options;
+                optionsByQuestion.TryGetValue(Convert.ToInt32(row["QuestionId"]), out options);
+                output.questions.Add(ToQuestion(row, options ?? new DataRow[3]));
             }
 
             return output;
@@ -85,6 +110,7 @@ namespace MyKPPLearn.Admin
 
             string oldPath = null;
             string newPath = null;
+            int? oldSetId = null;
             bool uploaded = false;
 
             try
@@ -104,6 +130,7 @@ namespace MyKPPLearn.Admin
                     }
 
                     oldPath = previous.IsNull("ImagePath") ? null : Convert.ToString(previous["ImagePath"]);
+                    oldSetId = previous.IsNull("PracticeSetId") ? (int?)null : Convert.ToInt32(previous["PracticeSetId"]);
                 }
 
                 if (!string.IsNullOrEmpty(question.image) && question.image.StartsWith("data:image/", StringComparison.Ordinal))
@@ -142,7 +169,15 @@ namespace MyKPPLearn.Admin
                     QuestionImageStorage.DeleteIfUnreferenced(oldPath);
                 }
 
-                return ToQuestion(QuestionRepository.GetById(id));
+                QuestionDto saved = ToQuestion(QuestionRepository.GetById(id));
+
+                // Moving the question out of a set may leave that set Active with no active questions.
+                if (oldSetId.HasValue && oldSetId != question.setId)
+                {
+                    saved.notice = DeactivatedNotice(oldSetId.Value);
+                }
+
+                return saved;
             }
             catch (ArgumentException ex)
             {
@@ -174,18 +209,32 @@ namespace MyKPPLearn.Admin
                 return new QuestionDto { error = "Question not found." };
             }
 
-            return ToQuestion(QuestionRepository.GetById(id));
+            QuestionDto question = ToQuestion(QuestionRepository.GetById(id));
+
+            if (!active && question.setId.HasValue)
+            {
+                question.notice = DeactivatedNotice(question.setId.Value);
+            }
+
+            return question;
         }
 
+        /// <summary>Returns "Deleted" (optionally followed by a notice) or a message explaining why it was not deleted.</summary>
         [WebMethod(EnableSession = true)]
         public static string Delete(int id)
         {
             PracticeSets.RequireAdmin();
 
+            DataRow existing = QuestionRepository.GetById(id);
+            string imagePath = existing == null || existing.IsNull("ImagePath") ? null : Convert.ToString(existing["ImagePath"]);
+            int? setId = existing == null || existing.IsNull("PracticeSetId") ? (int?)null : Convert.ToInt32(existing["PracticeSetId"]);
+
             switch (QuestionRepository.Delete(id))
             {
                 case QuestionDeleteResult.Deleted:
-                    return "Deleted";
+                    QuestionImageStorage.DeleteIfUnreferenced(imagePath);
+                    string notice = setId.HasValue ? DeactivatedNotice(setId.Value) : null;
+                    return notice == null ? "Deleted" : "Deleted " + notice;
                 case QuestionDeleteResult.HasAttempts:
                     return "This question is protected because it appears in completed learner attempts.";
                 case QuestionDeleteResult.UsedByMockExam:
@@ -195,26 +244,59 @@ namespace MyKPPLearn.Admin
             }
         }
 
+        /// <summary>Deactivates the set if it has no active question left, and says so; otherwise null.</summary>
+        private static string DeactivatedNotice(int setId)
+        {
+            if (!PracticeSetRepository.DeactivateIfNoActiveQuestions(setId))
+            {
+                return null;
+            }
+
+            DataRow set = PracticeSetRepository.GetById(setId);
+            string name = set == null ? "Its Practice Set" : "Practice Set " + set["SetNumber"] + " (" + set["CategoryTitle"] + ")";
+            return name + " is now Inactive because it has no active questions.";
+        }
+
         private static QuestionDto ToQuestion(DataRow row)
         {
-            int id = Convert.ToInt32(row["QuestionId"]);
-            string[] options = new string[3];
-            int correct = -1;
+            DataRow[] options = new DataRow[3];
 
-            foreach (DataRow option in QuestionRepository.GetOptions(id).Rows)
+            foreach (DataRow option in QuestionRepository.GetOptions(Convert.ToInt32(row["QuestionId"])).Rows)
             {
                 int index = Convert.ToInt32(option["OptionOrder"]) - 1;
-                options[index] = Convert.ToString(option["OptionText"]);
 
-                if (Convert.ToBoolean(option["IsCorrect"]))
+                if (index >= 0 && index < 3)
                 {
-                    correct = index;
+                    options[index] = option;
+                }
+            }
+
+            return ToQuestion(row, options);
+        }
+
+        private static QuestionDto ToQuestion(DataRow row, DataRow[] options)
+        {
+            string[] texts = new string[3];
+            int correct = -1;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (options[i] == null)
+                {
+                    continue;
+                }
+
+                texts[i] = Convert.ToString(options[i]["OptionText"]);
+
+                if (Convert.ToBoolean(options[i]["IsCorrect"]))
+                {
+                    correct = i;
                 }
             }
 
             return new QuestionDto
             {
-                id = id,
+                id = Convert.ToInt32(row["QuestionId"]),
                 categoryId = Convert.ToInt32(row["QuestionCategoryId"]),
                 setId = row.IsNull("PracticeSetId") ? (int?)null : Convert.ToInt32(row["PracticeSetId"]),
                 text = Convert.ToString(row["QuestionText"]),
@@ -222,7 +304,7 @@ namespace MyKPPLearn.Admin
                 image = row.IsNull("ImagePath") ? null : Convert.ToString(row["ImagePath"]),
                 imageAlt = row.IsNull("ImageAltText") ? null : Convert.ToString(row["ImageAltText"]),
                 status = Convert.ToBoolean(row["IsActive"]) ? "Active" : "Inactive",
-                options = options,
+                options = texts,
                 correctIndex = correct,
                 attemptCount = Convert.ToInt32(row["AttemptCount"]),
                 mockExamUseCount = Convert.ToInt32(row["MockExamUseCount"])

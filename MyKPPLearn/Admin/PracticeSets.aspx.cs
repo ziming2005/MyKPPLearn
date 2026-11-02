@@ -66,7 +66,7 @@ namespace MyKPPLearn.Admin
 
             if (number < 1)
             {
-                return new SetDto { error = "Practice Set number must be greater than zero." };
+                return new SetDto { error = "Enter a whole number from 1 upwards." };
             }
 
             if (!QuestionCategoryRepository.Exists(categoryId))
