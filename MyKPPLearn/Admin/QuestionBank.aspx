@@ -152,20 +152,6 @@
 
             <p id="qbStatusHint" class="form-hint">A new question starts as Active. Use the Status button in the list to deactivate it.</p>
 
-            <div class="form-group">
-                <span class="form-label">Preview</span>
-                <span class="form-hint">How this question appears to learners. The correct option is highlighted for you.</span>
-                <div class="card qb-preview" aria-hidden="true">
-                    <div id="pvImageWrap" class="qb-preview__image" hidden><img id="pvImage" alt="" /></div>
-                    <h3 id="pvQuestion" class="qb-preview__question">Question text</h3>
-                    <div id="pvOptions" class="qb-preview__options"></div>
-                    <div id="pvExplanation" class="qb-preview__explanation" hidden>
-                        <p class="qb-preview__explanation-label">Explanation <span>(shown after a wrong answer)</span></p>
-                        <p id="pvExplanationText" class="qb-preview__explanation-text"></p>
-                    </div>
-                </div>
-            </div>
-
             <div class="form-actions">
                 <button type="button" id="qbSaveBtn" class="btn btn-primary">Save</button>
                 <button type="button" id="qbCancelBtn" class="btn btn-secondary">Cancel</button>
@@ -176,5 +162,5 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261102"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261102b"></script>
 </asp:Content>

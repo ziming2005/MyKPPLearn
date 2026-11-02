@@ -106,20 +106,6 @@
                 <asp:CustomValidator ID="cvDescriptionLength" runat="server" ControlToValidate="txtDescription" CssClass="field-error" Display="Dynamic" ErrorMessage="Description must be 1000 characters or fewer." ValidationGroup="ChapterForm" OnServerValidate="cvDescriptionLength_ServerValidate" />
             </div>
 
-            <div class="form-group">
-                <span class="form-label">Preview</span>
-                <span class="form-hint">How this chapter appears to learners on the Learning page.</span>
-                <div class="card chapter-preview" aria-hidden="true">
-                    <div class="chapter-preview__top">
-                        <span class="dash-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M20 17v4H6.5A2.5 2.5 0 0 1 4 19.5"/></svg></span>
-                        <span class="badge">Chapter <span id="pvNumber">&mdash;</span></span>
-                    </div>
-                    <h3 id="pvTitle" class="chapter-preview__title">Chapter title</h3>
-                    <p id="pvDescription" class="chapter-preview__text">Chapter description</p>
-                    <div class="progress-track"><div class="progress-track__fill" style="width: 0%;"></div></div>
-                </div>
-            </div>
-
             <div class="form-actions">
                 <asp:Button ID="btnSave" runat="server" Text="Save Chapter" CssClass="btn btn-primary" ValidationGroup="ChapterForm" OnClick="btnSave_Click" />
                 <asp:Button ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-secondary" CausesValidation="false" OnClick="btnCancel_Click" />
@@ -127,30 +113,20 @@
         </div>
         <script>
             (function () {
-                var number = document.getElementById("<%= txtChapterNumber.ClientID %>");
-                var title = document.getElementById("<%= txtTitle.ClientID %>");
                 var desc = document.getElementById("<%= txtDescription.ClientID %>");
-                var pvNumber = document.getElementById("pvNumber");
-                var pvTitle = document.getElementById("pvTitle");
-                var pvDesc = document.getElementById("pvDescription");
                 var count = document.getElementById("descCount");
                 var counter = document.getElementById("descCounter");
 
-                if (!number || !title || !desc) { return; }
+                if (!desc || !count || !counter) { return; }
 
-                // textContent only: typed text is never interpreted as HTML.
+                // Live character count for the description.
                 function update() {
-                    var n = number.value.trim();
-                    var t = title.value.trim();
                     var d = desc.value.trim();
-                    pvNumber.textContent = /^[1-9][0-9]{0,8}$/.test(n) ? n : "—";
-                    pvTitle.textContent = t || "Chapter title";
-                    pvDesc.textContent = d || "Chapter description";
                     count.textContent = String(d.length);
                     counter.classList.toggle("char-counter--over", d.length > 1000);
                 }
 
-                [number, title, desc].forEach(function (input) { input.addEventListener("input", update); });
+                desc.addEventListener("input", update);
                 update();
             })();
         </script>

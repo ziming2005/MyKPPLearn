@@ -80,17 +80,6 @@
 
             <p id="psStatusHint" class="form-hint">A new set starts as Inactive. Add its questions in the Question Bank, then activate it from the list.</p>
 
-            <div class="form-group">
-                <span class="form-label">Preview</span>
-                <span class="form-hint">How this set appears to learners.</span>
-                <div class="card ps-preview" aria-hidden="true">
-                    <span class="ps-preview__category"><span id="pvCategoryDot" class="ps-cat__dot"></span><span id="pvCategory">Category</span></span>
-                    <h3 id="pvSetTitle" class="ps-preview__title">Set</h3>
-                    <p id="pvQuestionCount" class="ps-preview__count">0 Questions</p>
-                    <span class="btn btn-primary btn-block">Start Practice</span>
-                </div>
-            </div>
-
             <div class="form-actions">
                 <button type="button" id="psSaveBtn" class="btn btn-primary">Save</button>
                 <button type="button" id="psCancelBtn" class="btn btn-secondary">Cancel</button>
@@ -102,5 +91,5 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script src="<%= ResolveUrl("~/Scripts/used-numbers.js") %>?v=20261010"></script>
-    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261102"></script>
+    <script src="<%= ResolveUrl("~/Scripts/practice-admin-db.js") %>?v=20261102b"></script>
 </asp:Content>

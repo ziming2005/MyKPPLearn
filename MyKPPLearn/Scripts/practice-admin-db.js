@@ -383,6 +383,7 @@
             imageInput.value = "";
             altGroup.hidden = !image;
 
+            updateCounts();
             setText(document.getElementById("qbFormHeading"), q ? "Edit Question" : "Add Question");
             form.hidden = false;
             questionsPage.hidden = true;
@@ -391,6 +392,18 @@
         function closeForm() {
             form.hidden = true;
             questionsPage.hidden = false;
+        }
+
+        /** Live "n / 500" counters under the question and explanation boxes. */
+        function updateCounts() {
+            [["qbFormText", "qbTextCount"], ["qbFormExplanation", "qbExplanationCount"]].forEach(function (pair) {
+                var box = document.getElementById(pair[0]);
+                var count = document.getElementById(pair[1]);
+                if (!box || !count) { return; }
+                var length = box.value.trim().length;
+                count.textContent = String(length);
+                if (count.parentNode) { count.parentNode.classList.toggle("char-counter--over", length > 500); }
+            });
         }
 
         function save() {
@@ -427,6 +440,8 @@
         filterStatus.onchange = render;
         search.oninput = render;
         formCategory.onchange = function () { fillFormSets(null); };
+        document.getElementById("qbFormText").addEventListener("input", updateCounts);
+        document.getElementById("qbFormExplanation").addEventListener("input", updateCounts);
 
         ["qbClearFilters", "qbEmptyClear"].forEach(function (id) {
             var clear = document.getElementById(id);
