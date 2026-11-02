@@ -50,6 +50,12 @@ namespace MyKPPLearn.Security
             return session == null ? null : session["Role"] as string;
         }
 
+        /// <summary>True when someone is signed in with exactly this role. Used by page methods, which cannot redirect.</summary>
+        public static bool IsInRole(HttpSessionState session, string role)
+        {
+            return IsAuthenticated(session) && string.Equals(CurrentRole(session), role, StringComparison.Ordinal);
+        }
+
         public static void SignIn(HttpSessionState session, int userId, string fullName, string role)
         {
             SignIn(session, userId, fullName, role, null);

@@ -8,17 +8,14 @@ using MyKPPLearn.Security;
 namespace MyKPPLearn.Learner
 {
     /// <summary>
-    /// Phase 5 UI prototype. The actual attempt — questions, options, progress, scoring,
-    /// result and review — is entirely frontend state driven by the mock data in
-    /// Scripts/practice.js. Nothing here touches a database, Session or
-    /// LearningProgress; a page refresh resets the in-progress attempt, which is expected
-    /// for this prototype. This code-behind only validates the "category"/"set" query
-    /// string, the same validate-and-redirect pattern used by the Learning module.
+    /// Learner practice attempt. The questions come from the database through window.PracticeDatabaseData
+    /// (written by Learner.Master); answering, scoring, the result and the review run in Scripts/practice.js.
+    /// Attempts are not saved yet: PracticeAttemptRepository is still to be implemented, so a page refresh
+    /// starts the set again. This code-behind only validates the "category"/"set" query string.
     /// </summary>
     public partial class PracticeAttempt : System.Web.UI.Page
     {
-        // Mirrors the four category ids defined in Scripts/practice.js, for
-        // query-string validation only.
+        // The four fixed QuestionCategories codes, for query-string validation only.
         private static readonly Dictionary<string, string> KnownCategories = new Dictionary<string, string>
         {
             { "colour-recognition", "Colour Recognition" },
@@ -30,7 +27,7 @@ namespace MyKPPLearn.Learner
         public string CategoryId { get; private set; }
         public int SetNumber { get; private set; }
 
-        public string PracticeDemoScriptVersion
+        public string PracticeScriptVersion
         {
             get
             {

@@ -117,9 +117,7 @@
     <Content Include="Scripts\practice.js" />
     <Content Include="Scripts\confirm-modal.js" />
     <Content Include="Scripts\table-labels.js" />
-    <Content Include="Scripts\practice-admin.js" />
     <Content Include="Scripts\practice-admin-db.js" />
-    <Content Include="Scripts\practice-learner-db.js" />
     <Content Include="Scripts\mock-exam.js" />
     <Content Include="Scripts\mock-exam-admin.js" />
     <Content Include="Scripts\image-preview.js" />

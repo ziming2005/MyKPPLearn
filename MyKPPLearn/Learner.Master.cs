@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Web.Script.Serialization;
 using System.Web.UI.HtmlControls;
 using MyKPPLearn.Common;
+using MyKPPLearn.Data;
 using MyKPPLearn.Security;
 
 namespace MyKPPLearn
@@ -30,28 +34,95 @@ namespace MyKPPLearn
             }
         }
 
-        protected string PracticeDataJson() {
+        /// <summary>
+        /// The Standard Practice data the learner practice pages (Scripts/practice.js) need, as JSON for
+        /// window.PracticeDatabaseData: active sets and their active questions with options. Other pages get "null".
+        /// </summary>
+        protected string PracticeDataJson()
+        {
             string page = System.IO.Path.GetFileName(Request.Path);
-            if (!IsPage(page, "Practice.aspx") && !IsPage(page, "PracticeSets.aspx") && !IsPage(page, "PracticeAttempt.aspx")) return "null";
-            SessionHelper.RequireLearner(Page);
-            var questions = new System.Collections.Generic.List<object>();
-            var sets = new System.Collections.Generic.List<object>();
-            foreach (System.Data.DataRow r in MyKPPLearn.Data.DatabaseHelper.ExecuteQuery(@"SELECT p.PracticeSetId,p.SetNumber,p.IsActive,c.Code AS CategoryCode,(SELECT COUNT(*) FROM Questions q WHERE q.PracticeSetId=p.PracticeSetId AND q.IsActive=1) AS ActiveQuestionCount FROM PracticeSets p JOIN QuestionCategories c ON c.QuestionCategoryId=p.QuestionCategoryId WHERE c.IsActive=1 ORDER BY c.DisplayOrder,p.SetNumber").Rows) {
-                if (Convert.ToBoolean(r["IsActive"]) && Convert.ToInt32(r["ActiveQuestionCount"]) > 0)
-                    sets.Add(new { id=Convert.ToInt32(r["PracticeSetId"]), categoryId=Convert.ToString(r["CategoryCode"]), number=Convert.ToInt32(r["SetNumber"]), questionCount=Convert.ToInt32(r["ActiveQuestionCount"]), status="Active" });
+
+            if (!IsPage(page, "Practice.aspx") && !IsPage(page, "PracticeSets.aspx") && !IsPage(page, "PracticeAttempt.aspx"))
+            {
+                return "null";
             }
-            foreach (System.Data.DataRow q in MyKPPLearn.Data.DatabaseHelper.ExecuteQuery(@"SELECT q.*, c.Code FROM Questions q JOIN PracticeSets p ON p.PracticeSetId=q.PracticeSetId JOIN QuestionCategories c ON c.QuestionCategoryId=p.QuestionCategoryId WHERE q.IsActive=1 AND p.IsActive=1 AND c.IsActive=1 ORDER BY q.QuestionId").Rows) {
-                var options = new System.Collections.Generic.List<string>();
-                int correct = -1;
-                foreach (System.Data.DataRow o in MyKPPLearn.Data.QuestionRepository.GetOptions(Convert.ToInt32(q["QuestionId"])).Rows) {
-                    if (Convert.ToBoolean(o["IsCorrect"])) correct=options.Count;
-                    options.Add(Convert.ToString(o["OptionText"]));
+
+            var sets = new List<object>();
+
+            foreach (DataRow row in PracticeSetRepository.GetActiveForLearner().Rows)
+            {
+                sets.Add(new
+                {
+                    id = Convert.ToInt32(row["PracticeSetId"]),
+                    categoryId = Convert.ToString(row["CategoryCode"]),
+                    number = Convert.ToInt32(row["SetNumber"]),
+                    questionCount = Convert.ToInt32(row["ActiveQuestionCount"]),
+                    status = "Active"
+                });
+            }
+
+            // One row per option (three per question), already ordered by question then option.
+            var questions = new List<object>();
+            int currentId = -1;
+            List<string> options = null;
+            int correctIndex = -1;
+            DataRow first = null;
+
+            foreach (DataRow row in QuestionRepository.GetActiveForLearnerPractice().Rows)
+            {
+                int questionId = Convert.ToInt32(row["QuestionId"]);
+
+                if (questionId != currentId)
+                {
+                    if (first != null)
+                    {
+                        questions.Add(ToPracticeQuestion(first, options, correctIndex));
+                    }
+
+                    currentId = questionId;
+                    first = row;
+                    options = new List<string>();
+                    correctIndex = -1;
                 }
-                string image=Convert.ToString(q["ImagePath"]);
-                questions.Add(new { id=Convert.ToInt32(q["QuestionId"]), setId=Convert.ToInt32(q["PracticeSetId"]), categoryId=Convert.ToString(q["Code"]), text=Convert.ToString(q["QuestionText"]), options=options, correctIndex=correct, explanation=Convert.ToString(q["Explanation"]), image=string.IsNullOrEmpty(image) ? "" : ResolveUrl(image), imageAlt=Convert.ToString(q["ImageAltText"]), status="Active" });
+
+                if (Convert.ToBoolean(row["IsCorrect"]))
+                {
+                    correctIndex = options.Count;
+                }
+
+                options.Add(Convert.ToString(row["OptionText"]));
             }
-            return new System.Web.Script.Serialization.JavaScriptSerializer { MaxJsonLength = int.MaxValue }.Serialize(new { sets=sets, questions=questions }).Replace("<", "\\u003c");
+
+            if (first != null)
+            {
+                questions.Add(ToPracticeQuestion(first, options, correctIndex));
+            }
+
+            // "<" is escaped so question text can never close the inline <script> block.
+            return new JavaScriptSerializer { MaxJsonLength = int.MaxValue }
+                .Serialize(new { sets = sets, questions = questions })
+                .Replace("<", "\\u003c");
         }
+
+        private object ToPracticeQuestion(DataRow row, List<string> options, int correctIndex)
+        {
+            string image = row.IsNull("ImagePath") ? null : Convert.ToString(row["ImagePath"]);
+
+            return new
+            {
+                id = Convert.ToInt32(row["QuestionId"]),
+                setId = Convert.ToInt32(row["PracticeSetId"]),
+                categoryId = Convert.ToString(row["CategoryCode"]),
+                text = Convert.ToString(row["QuestionText"]),
+                options = options,
+                correctIndex = correctIndex,
+                explanation = Convert.ToString(row["Explanation"]),
+                image = string.IsNullOrEmpty(image) ? "" : ResolveUrl("~/" + image),
+                imageAlt = row.IsNull("ImageAltText") ? "" : Convert.ToString(row["ImageAltText"]),
+                status = "Active"
+            };
+        }
+
         private void SetActiveNav()
         {
             string currentPage = System.IO.Path.GetFileName(Request.Path);
@@ -85,6 +156,3 @@ namespace MyKPPLearn
         }
     }
 }
-
-
-

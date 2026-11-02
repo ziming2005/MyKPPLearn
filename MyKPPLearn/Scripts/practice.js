@@ -1,16 +1,13 @@
 /*
  * ============================================================================
- * Standard Practice: category configuration and Learner UI logic (UI prototype).
+ * Standard Practice: category configuration and Learner UI logic.
  *
- * Nothing here is persisted to SQL Server and no sample content is preloaded: the practice set and question collections
- * below start EMPTY. The Learner pages therefore show their existing empty states, and the Admin pages start with no rows.
- * A later phase replaces the SETS / QUESTIONS collections with database-backed data; the UI functions only talk to the
- * PracticeDemoData object, so they stay unchanged.
+ * Practice sets and questions come from the database: Learner.Master writes the active sets and their active questions
+ * into window.PracticeDatabaseData on the Practice pages. The UI functions only talk to the PracticeDemoData object
+ * below, which reads those collections.
  *
  * What is real configuration here (and must stay): the four question categories (ids, titles, descriptions, icons, colours).
- *
- * window.PracticeDemoData exposes read access to this data for both the Learner pages (this file) and the Admin prototype
- * (practice-admin.js).
+ * The admin pages do not use this file; they use practice-admin-db.js.
  * ============================================================================
  */
 (function (global) {
