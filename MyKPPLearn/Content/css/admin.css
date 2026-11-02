@@ -1375,7 +1375,8 @@ body.hrs-modal-open {
   cursor: pointer;
 }
 
-.lr-pager__btn:hover:not(:disabled) {
+/* Not the current page: its white text would vanish on the pale hover background. */
+.lr-pager__btn:hover:not(:disabled):not(.is-active) {
   border-color: var(--color-primary);
   background-color: var(--color-primary-light);
 }
