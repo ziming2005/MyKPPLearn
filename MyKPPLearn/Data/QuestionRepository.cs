@@ -13,7 +13,6 @@ namespace MyKPPLearn.Data
         public string QuestionText;
         public string Explanation;
         public string ImagePath;
-        public string ImageAltText;
         public string[] Options;
         public int CorrectOption;
     }
@@ -29,11 +28,10 @@ namespace MyKPPLearn.Data
         public const int MaxQuestionLength = 500;
         public const int MaxOptionLength = 200;
         public const int MaxExplanationLength = 500;
-        public const int MaxAltTextLength = 200;
 
         private const string SelectSql = @"
             SELECT q.QuestionId, q.QuestionCategoryId, q.PracticeSetId, q.QuestionText, q.Explanation,
-                   q.ImagePath, q.ImageAltText, q.IsActive,
+                   q.ImagePath, q.IsActive,
                    c.Code AS CategoryCode, c.Title AS CategoryTitle, p.SetNumber,
                    (SELECT COUNT(*) FROM PracticeAttemptQuestions x WHERE x.QuestionId = q.QuestionId)
                  + (SELECT COUNT(*) FROM MockExamAttemptQuestions x WHERE x.QuestionId = q.QuestionId) AS AttemptCount,
@@ -76,7 +74,7 @@ namespace MyKPPLearn.Data
         {
             return DatabaseHelper.ExecuteQuery(@"
                 SELECT q.QuestionId, q.PracticeSetId, c.Code AS CategoryCode, q.QuestionText, q.Explanation,
-                       q.ImagePath, q.ImageAltText, o.OptionOrder, o.OptionText, o.IsCorrect
+                       q.ImagePath, o.OptionOrder, o.OptionText, o.IsCorrect
                 FROM Questions q
                 INNER JOIN PracticeSets p ON p.PracticeSetId = q.PracticeSetId
                 INNER JOIN QuestionCategories c ON c.QuestionCategoryId = p.QuestionCategoryId
@@ -129,12 +127,6 @@ namespace MyKPPLearn.Data
                 return "Select exactly one correct answer.";
             }
 
-            if (!string.IsNullOrEmpty(input.ImagePath)
-                && (string.IsNullOrWhiteSpace(input.ImageAltText) || input.ImageAltText.Trim().Length > MaxAltTextLength))
-            {
-                return "Provide an image description (up to 200 characters).";
-            }
-
             return null;
         }
 
@@ -169,9 +161,9 @@ namespace MyKPPLearn.Data
                         if (id == 0)
                         {
                             const string insertSql = @"
-                                INSERT INTO Questions (QuestionCategoryId, PracticeSetId, QuestionText, Explanation, ImagePath, ImageAltText, IsActive, CreatedAt, UpdatedAt)
+                                INSERT INTO Questions (QuestionCategoryId, PracticeSetId, QuestionText, Explanation, ImagePath, IsActive, CreatedAt, UpdatedAt)
                                 OUTPUT INSERTED.QuestionId
-                                VALUES (@CategoryId, @PracticeSetId, @Text, @Explanation, @ImagePath, @ImageAlt, 1, SYSUTCDATETIME(), SYSUTCDATETIME());";
+                                VALUES (@CategoryId, @PracticeSetId, @Text, @Explanation, @ImagePath, 1, SYSUTCDATETIME(), SYSUTCDATETIME());";
 
                             using (SqlCommand command = new SqlCommand(insertSql, connection, transaction))
                             {
@@ -184,7 +176,7 @@ namespace MyKPPLearn.Data
                             const string updateSql = @"
                                 UPDATE Questions
                                 SET QuestionCategoryId = @CategoryId, PracticeSetId = @PracticeSetId, QuestionText = @Text, Explanation = @Explanation,
-                                    ImagePath = @ImagePath, ImageAltText = @ImageAlt, UpdatedAt = SYSUTCDATETIME()
+                                    ImagePath = @ImagePath, UpdatedAt = SYSUTCDATETIME()
                                 WHERE QuestionId = @Id;";
 
                             using (SqlCommand command = new SqlCommand(updateSql, connection, transaction))
@@ -308,9 +300,6 @@ namespace MyKPPLearn.Data
             command.Parameters.AddWithValue("@Text", input.QuestionText.Trim());
             command.Parameters.AddWithValue("@Explanation", input.Explanation.Trim());
             command.Parameters.AddWithValue("@ImagePath", (object)input.ImagePath ?? DBNull.Value);
-            command.Parameters.AddWithValue("@ImageAlt", string.IsNullOrEmpty(input.ImagePath) || input.ImageAltText == null
-                ? (object)DBNull.Value
-                : input.ImageAltText.Trim());
         }
 
         private static bool SetMatchesCategory(SqlConnection connection, SqlTransaction transaction, int setId, int categoryId)

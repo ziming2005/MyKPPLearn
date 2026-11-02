@@ -476,15 +476,13 @@ BEGIN
         QuestionText    NVARCHAR(500)      NOT NULL,
         Explanation     NVARCHAR(500)      NOT NULL,
         ImagePath       NVARCHAR(500)      NULL,
-        ImageAltText    NVARCHAR(200)      NULL,
         IsActive        BIT                NOT NULL CONSTRAINT DF_Questions_IsActive DEFAULT 1,
         CreatedAt       DATETIME2          NOT NULL,
         UpdatedAt       DATETIME2          NOT NULL,
         CONSTRAINT FK_Questions_QuestionCategories FOREIGN KEY (QuestionCategoryId) REFERENCES QuestionCategories (QuestionCategoryId),
         CONSTRAINT FK_Questions_PracticeSets FOREIGN KEY (PracticeSetId, QuestionCategoryId) REFERENCES PracticeSets (PracticeSetId, QuestionCategoryId),
         CONSTRAINT CK_Questions_Text CHECK (LEN(LTRIM(RTRIM(QuestionText))) > 0),
-        CONSTRAINT CK_Questions_Explanation CHECK (LEN(LTRIM(RTRIM(Explanation))) > 0),
-        CONSTRAINT CK_Questions_ImageAlt CHECK (ImagePath IS NULL OR (ImageAltText IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltText))) > 0))
+        CONSTRAINT CK_Questions_Explanation CHECK (LEN(LTRIM(RTRIM(Explanation))) > 0)
     );
 END
 GO
@@ -550,7 +548,6 @@ BEGIN
         SelectedOptionSnapshot CHAR(1)     NULL,
         SelectedOptionTextSnapshot NVARCHAR(200) NULL,
         ImagePathSnapshot NVARCHAR(500)    NULL,
-        ImageAltTextSnapshot NVARCHAR(200) NULL,
         CONSTRAINT FK_PracticeAttemptQuestions_Attempts FOREIGN KEY (PracticeAttemptId) REFERENCES PracticeAttempts (PracticeAttemptId),
         CONSTRAINT FK_PracticeAttemptQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
         CONSTRAINT FK_PracticeAttemptQuestions_QuestionOptions FOREIGN KEY (SelectedOptionId) REFERENCES QuestionOptions (QuestionOptionId),
@@ -568,8 +565,7 @@ BEGIN
         (
             SelectedOptionSnapshot IS NULL
             OR IsCorrect = CASE WHEN SelectedOptionSnapshot = CorrectOptionSnapshot THEN 1 ELSE 0 END
-        ),
-        CONSTRAINT CK_PracticeAttemptQuestions_ImageAlt CHECK (ImagePathSnapshot IS NULL OR (ImageAltTextSnapshot IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltTextSnapshot))) > 0))
+        )
     );
 END
 GO
@@ -660,7 +656,6 @@ BEGIN
         SelectedOptionSnapshot CHAR(1)     NULL,
         SelectedOptionTextSnapshot NVARCHAR(200) NULL,
         ImagePathSnapshot NVARCHAR(500)    NULL,
-        ImageAltTextSnapshot NVARCHAR(200) NULL,
         QuestionCategoryCodeSnapshot NVARCHAR(40) NOT NULL,
         CONSTRAINT FK_MockExamAttemptQuestions_Attempts FOREIGN KEY (MockExamAttemptId) REFERENCES MockExamAttempts (MockExamAttemptId),
         CONSTRAINT FK_MockExamAttemptQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
@@ -680,7 +675,6 @@ BEGIN
             SelectedOptionSnapshot IS NULL
             OR IsCorrect = CASE WHEN SelectedOptionSnapshot = CorrectOptionSnapshot THEN 1 ELSE 0 END
         ),
-        CONSTRAINT CK_MockExamAttemptQuestions_ImageAlt CHECK (ImagePathSnapshot IS NULL OR (ImageAltTextSnapshot IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltTextSnapshot))) > 0)),
         CONSTRAINT CK_MockExamAttemptQuestions_CategoryCode CHECK (LEN(LTRIM(RTRIM(QuestionCategoryCodeSnapshot))) > 0)
     );
 END
@@ -728,4 +722,24 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_MockExamAttemptQuestio
 GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_MockExamAttemptQuestions_SelectedOptionId' AND object_id = OBJECT_ID('MockExamAttemptQuestions'))
     CREATE INDEX IX_MockExamAttemptQuestions_SelectedOptionId ON MockExamAttemptQuestions (SelectedOptionId) WHERE SelectedOptionId IS NOT NULL;
+GO
+
+-- Questions no longer have an image description: remove the old column (and its check) from earlier databases.
+IF COL_LENGTH('Questions', 'ImageAltText') IS NOT NULL
+BEGIN
+    IF OBJECT_ID('CK_Questions_ImageAlt', 'C') IS NOT NULL ALTER TABLE Questions DROP CONSTRAINT CK_Questions_ImageAlt;
+    ALTER TABLE Questions DROP COLUMN ImageAltText;
+END
+GO
+IF COL_LENGTH('PracticeAttemptQuestions', 'ImageAltTextSnapshot') IS NOT NULL
+BEGIN
+    IF OBJECT_ID('CK_PracticeAttemptQuestions_ImageAlt', 'C') IS NOT NULL ALTER TABLE PracticeAttemptQuestions DROP CONSTRAINT CK_PracticeAttemptQuestions_ImageAlt;
+    ALTER TABLE PracticeAttemptQuestions DROP COLUMN ImageAltTextSnapshot;
+END
+GO
+IF COL_LENGTH('MockExamAttemptQuestions', 'ImageAltTextSnapshot') IS NOT NULL
+BEGIN
+    IF OBJECT_ID('CK_MockExamAttemptQuestions_ImageAlt', 'C') IS NOT NULL ALTER TABLE MockExamAttemptQuestions DROP CONSTRAINT CK_MockExamAttemptQuestions_ImageAlt;
+    ALTER TABLE MockExamAttemptQuestions DROP COLUMN ImageAltTextSnapshot;
+END
 GO

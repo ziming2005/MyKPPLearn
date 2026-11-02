@@ -66,7 +66,7 @@
     }
 
     var types = MockExamData.getExamTypes();
-    var bank = [];          // { id, sectionId, text, image, imageAlt, status } from the Question Bank
+    var bank = [];          // { id, sectionId, text, image, status } from the Question Bank
     var bankById = {};
     var sets = [];          // { id, typeId, number, status, attemptCount, selected: [questionId] }
 
@@ -131,24 +131,19 @@
 
     var listView = byId("mxListView");
     var formView = byId("mxFormView");
-    var questionsView = byId("mxQuestionsView");
 
     var formHeading = byId("mxFormHeading");
     var formType = byId("mxFormType");
-    var typeChangeHint = byId("mxTypeChangeHint");
+    var typeHint = byId("mxTypeHint");
     var typeError = byId("mxTypeError");
-    var formNumber = byId("mxFormNumber");
-    var numberError = byId("mxNumberError");
-    var usedNumbers = byId("mxUsedNumbers");
+    var numberInfo = byId("mxNumberInfo");
     var formRules = byId("mxFormRules");
-    var statusHint = byId("mxStatusHint");
     var saveBtn = byId("mxSaveBtn");
     var cancelBtn = byId("mxCancelBtn");
+    var crumbLink = formView.querySelector(".breadcrumb a");
 
-    var editingId = null;
-    var lastAuto = null;           // the number suggested automatically (so typing your own is never overwritten)
-    var questionSet = null;
-    var questionSelection = null;  // Set-like object: id -> true
+    var editingSet = null;         // the set being edited, or null when adding
+    var questionSelection = {};    // Set-like object: questionId -> true
     var busy = false;
 
     function populateSelect(select, items, valueField, textField) {
@@ -167,7 +162,6 @@
     function showView(name) {
         listView.hidden = name !== "list";
         formView.hidden = name !== "form";
-        questionsView.hidden = name !== "questions";
         window.scrollTo(0, 0);
     }
 
@@ -182,7 +176,7 @@
         }).catch(function (e) { showToast(toast, e.message, "error"); });
     }
 
-    /** Puts a set returned by the server into the local list (after save, toggle or a new selection). */
+    /** Puts a set returned by the server into the local list (after save or toggle). */
     function storeSet(set) {
         if (!set) { return; }
         var existing = findSet(set.id);
@@ -210,13 +204,16 @@
         return button;
     }
 
+    // Each label and value pair sits in its own <div> so the rules can be laid out as a grid.
     function appendDetail(dl, label, value) {
+        var pair = document.createElement("div");
         var dt = document.createElement("dt");
         dt.textContent = label;
         var dd = document.createElement("dd");
         dd.textContent = value;
-        dl.appendChild(dt);
-        dl.appendChild(dd);
+        pair.appendChild(dt);
+        pair.appendChild(dd);
+        dl.appendChild(pair);
     }
 
     function appendRules(dl, type) {
@@ -270,7 +267,7 @@
             var progress = document.createElement("span");
             progress.className = "mx-qcount" + (isComplete(set) ? " mx-qcount--ok" : "");
             progress.textContent = chosen + " / " + total;
-            progress.title = isComplete(set) ? "All sections have the required number of active questions." : "Incomplete: open Questions to finish the selection.";
+            progress.title = isComplete(set) ? "All sections have the required number of active questions." : "Incomplete: Edit the set to finish the selection.";
             questionsCell.appendChild(progress);
             row.appendChild(questionsCell);
 
@@ -285,8 +282,7 @@
             var actionsCell = document.createElement("td");
             var actions = document.createElement("div");
             actions.className = "row-actions";
-            actions.appendChild(actionButton("Edit", function () { openForm(set); }));
-            actions.appendChild(actionButton("Questions", function () { openQuestions(set); }));
+            actions.appendChild(actionButton("Edit", function () { openEditor(set); }));
             actions.appendChild(deleteButton(set));
             actionsCell.appendChild(actions);
             row.appendChild(actionsCell);
@@ -339,7 +335,7 @@
         // An incomplete set would give learners an exam with missing questions (the server refuses it too).
         if (activate && !isComplete(set)) {
             showToast(toast, label + " can't be activated until every section has the required number of active questions ("
-                + selectedTotal(set) + " / " + MockExamData.totalQuestions(typeById(set.typeId)) + " selected). Use Questions to finish the selection.", "error");
+                + selectedTotal(set) + " / " + MockExamData.totalQuestions(typeById(set.typeId)) + " selected). Edit the set to finish the selection.", "error");
             return;
         }
 
@@ -357,179 +353,53 @@
         }).catch(function (e) { showToast(toast, e.message, "error"); });
     }
 
-    // ---- add / edit ----
-    function usedInType() {
-        return sets.filter(function (s) { return s.typeId === formType.value; }).map(function (s) { return s.number; });
-    }
-
-    // "Used Numbers" for the CURRENT Exam Type only; informational, the duplicate check below is unchanged.
-    function renderUsedNumbers() {
-        if (!usedNumbers || !window.UsedNumbers) { return; }
-        usedNumbers.textContent = UsedNumbers.format(usedInType());
-    }
-
-    function renderFormRules() {
-        formRules.innerHTML = "";
-        appendRules(formRules, typeById(formType.value));
-    }
-
-    // Adding: suggest the next free number for the chosen exam type, unless the admin typed their own.
-    function suggestNumber() {
-        if (editingId) { return; }
-        if (formNumber.value !== "" && formNumber.value !== lastAuto) { return; }
-
-        var max = 0;
-        usedInType().forEach(function (n) { if (n > max) { max = n; } });
-        lastAuto = String(max + 1);
-        formNumber.value = lastAuto;
-    }
-
-    function updateTypeChangeHint() {
-        var original = editingId ? findSet(editingId) : null;
-        typeChangeHint.hidden = !(original && original.typeId !== formType.value);
-    }
-
-    function clearErrors() {
-        typeError.hidden = true;
-        numberError.hidden = true;
-        formType.removeAttribute("aria-invalid");
-        formNumber.removeAttribute("aria-invalid");
-    }
-
-    function fail(errorEl, message, field) {
-        errorEl.textContent = message;
-        errorEl.hidden = false;
-        field.setAttribute("aria-invalid", "true");
-        field.focus();
-    }
-
-    function openForm(set) {
-        clearErrors();
-        editingId = set ? set.id : null;
-        lastAuto = null;
-
-        if (set) {
-            formHeading.textContent = "Edit Mock Exam Set";
-            setCrumb("mxFormCrumb", "Edit Mock Exam Set");
-            formType.value = set.typeId;
-            formNumber.value = String(set.number);
-            statusHint.hidden = true;
-        } else {
-            formHeading.textContent = "Add Mock Exam Set";
-            setCrumb("mxFormCrumb", "Add Mock Exam Set");
-            formType.value = typeFilter.value || types[0].id;       // start in the exam type being filtered, if any
-            formNumber.value = "";
-            statusHint.hidden = false;
-            suggestNumber();
-        }
-
-        renderFormRules();
-        renderUsedNumbers();
-        updateTypeChangeHint();
-        showView("form");
-        formType.focus();
-    }
-
-    function backToList() {
-        showView("list");
-        addBtn.focus();
-    }
-
-    formType.addEventListener("change", function () {
-        clearErrors();
-        renderFormRules();
-        renderUsedNumbers();
-        suggestNumber();
-        updateTypeChangeHint();
-    });
-
-    formNumber.addEventListener("input", function () {
-        numberError.hidden = true;
-        formNumber.removeAttribute("aria-invalid");
-    });
-
-    // Enter saves the form instead of posting the whole ASP.NET page back.
-    [formType, formNumber].forEach(function (field) {
-        field.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                saveBtn.click();
-            }
-        });
-    });
-
-    saveBtn.addEventListener("click", function () {
-        if (busy) { return; }
-        clearErrors();
-
-        var raw = formNumber.value.trim();
-
-        if (!formType.value) {
-            fail(typeError, "Please select an exam type.", formType);
-            return;
-        }
-
-        if (!/^[1-9][0-9]{0,8}$/.test(raw)) {
-            fail(numberError, raw ? "Mock Exam Set number must be a whole number greater than 0 (for example 1, 2, 3)." : "Mock Exam Set number is required.", formNumber);
-            return;
-        }
-
-        var number = parseInt(raw, 10);
-
-        var duplicate = sets.some(function (s) {
-            return s.id !== editingId && s.typeId === formType.value && s.number === number;
-        });
-
-        if (duplicate) {
-            fail(numberError, typeById(formType.value).title + " already has " + MockExamData.setLabel(number) + ". Please choose a different number.", formNumber);
-            return;
-        }
-
-        busy = true;
-        saveBtn.disabled = true;
-
-        call("Save", { id: editingId || 0, typeId: formType.value, number: number }).then(function (result) {
-            if (result.error) {
-                if (result.field === "type") { fail(typeError, result.error, formType); }
-                else if (result.field === "number") { fail(numberError, result.error, formNumber); }
-                else { showToast(toast, result.error, "error"); }
-                return;
-            }
-
-            storeSet(result.set);
-            renderTable();
-            backToList();
-            showToast(toast, result.notice || "Mock exam set updated.", result.notice && editingId ? "warning" : "success");
-        }).catch(function (e) {
-            showToast(toast, e.message, "error");
-        }).then(function () {
-            busy = false;
-            saveBtn.disabled = false;
-        });
-    });
-
-    cancelBtn.addEventListener("click", backToList);
-
-    // The breadcrumb behaves like Cancel (no page reload).
-    formView.querySelector(".breadcrumb a").addEventListener("click", function (event) {
-        event.preventDefault();
-        backToList();
-    });
-
-    // ---- manage questions ----
-    // One group per exam section (Colour Blind Test, Road Signs, Rules of the Road, KEJARA & Safety),
-    // each with its own required count, taken from the exam type.
+    // ------------------------------------------------------------------
+    // Add / Edit Mock Exam Set: the exam type and the questions, saved together.
+    // One group per exam section (Colour Blind Test, Road Signs, Rules of the Road, KEJARA & Safety), each with its
+    // own required count from the exam type. Section ids are the same in both types, so a type change keeps the ticks.
+    // ------------------------------------------------------------------
     var qSection = byId("mxQSection");
     var qSearch = byId("mxQSearch");
     var qGroups = byId("mxQGroups");
     var qMessage = byId("mxQMessage");
-    var qBackBtn = byId("mxQBackBtn");
-    var qSaveBtn = byId("mxQSaveBtn");
-    var qCrumbLink = questionsView.querySelector(".breadcrumb a");
     var countEls = {};
 
+    function currentType() {
+        return typeById(formType.value);
+    }
+
+    /** The lowest number not used by another set of the exam type (what the server gives a new or moved set). */
+    function nextFreeNumber(typeId) {
+        var used = sets
+            .filter(function (s) { return s.typeId === typeId && (!editingSet || s.id !== editingSet.id); })
+            .map(function (s) { return s.number; });
+        var next = 1;
+        while (used.indexOf(next) >= 0) { next++; }
+        return next;
+    }
+
+    function renderNumberInfo() {
+        var type = currentType();
+
+        if (!editingSet) {
+            numberInfo.textContent = "This set will be " + MockExamData.setLabel(nextFreeNumber(type.id)) + " of " + type.title
+                + ". The number is given automatically.";
+        } else if (editingSet.typeId === type.id) {
+            numberInfo.textContent = "This is " + setLabel(editingSet) + " of " + type.title + ".";
+        } else {
+            var over = type.sections.some(function (section) { return selectedCount(section.id) > section.count; });
+            numberInfo.textContent = "Saving moves this set to " + type.title + " as " + MockExamData.setLabel(nextFreeNumber(type.id))
+                + "." + (over ? " Untick questions in the sections that now have too many." : "");
+        }
+    }
+
+    function renderFormRules() {
+        formRules.innerHTML = "";
+        appendRules(formRules, currentType());
+    }
+
     function requiredFor(sectionId) {
-        var section = typeById(questionSet.typeId).sections.filter(function (x) { return x.id === sectionId; })[0];
+        var section = currentType().sections.filter(function (x) { return x.id === sectionId; })[0];
         return section ? section.count : 0;
     }
 
@@ -544,9 +414,7 @@
 
     // A full section cannot take more questions until one is unticked. Inactive questions can only be unticked.
     function updateCounts() {
-        var type = typeById(questionSet.typeId);
-
-        type.sections.forEach(function (section) {
+        currentType().sections.forEach(function (section) {
             if (countEls[section.id]) { setCount(countEls[section.id], selectedCount(section.id), section.count); }
         });
 
@@ -555,21 +423,26 @@
             input.disabled = !input.checked && (full || input._inactive);
             input.parentNode.classList.toggle("mx-qitem--disabled", input.disabled);
         });
+
+        renderNumberInfo();   // its "too many" note follows the ticks
     }
 
     function isDirty() {
         var saved = {};
-        questionSet.selected.forEach(function (id) { saved[id] = true; });
+        var savedIds = editingSet ? editingSet.selected : [];
+        savedIds.forEach(function (id) { saved[id] = true; });
         var current = Object.keys(questionSelection);
 
-        return current.length !== questionSet.selected.length || current.some(function (id) { return !saved[id]; });
+        return (editingSet ? editingSet.typeId !== formType.value : current.length > 0)
+            || current.length !== savedIds.length
+            || current.some(function (id) { return !saved[id]; });
     }
 
     // Leaving with unsaved changes asks first, through the shared confirm dialog (it reads these attributes).
     function syncLeaveConfirm() {
-        [qBackBtn, qCrumbLink].forEach(function (el) {
+        [cancelBtn, crumbLink].forEach(function (el) {
             if (isDirty()) {
-                el.setAttribute("data-confirm", "You have unsaved changes to the question selection. Leave without saving?");
+                el.setAttribute("data-confirm", "You have unsaved changes to this Mock Exam Set. Leave without saving?");
                 el.setAttribute("data-confirm-title", "Discard changes?");
                 el.setAttribute("data-confirm-label", "Discard");
             } else {
@@ -647,13 +520,12 @@
     }
 
     function renderQuestionLists() {
-        var type = typeById(questionSet.typeId);
         var only = qSection.value;
 
         qGroups.innerHTML = "";
         countEls = {};
 
-        type.sections.forEach(function (section) {
+        currentType().sections.forEach(function (section) {
             if (only && only !== section.id) { return; }
 
             var group = document.createElement("section");
@@ -702,7 +574,8 @@
         updateCounts();
     }
 
-    function fillSectionFilter(type) {
+    function fillSectionFilter() {
+        var selected = qSection.value;
         qSection.innerHTML = "";
 
         var all = document.createElement("option");
@@ -710,35 +583,141 @@
         all.textContent = "All Sections";
         qSection.appendChild(all);
 
-        type.sections.forEach(function (section) {
+        currentType().sections.forEach(function (section) {
             var option = document.createElement("option");
             option.value = section.id;
             option.textContent = section.label;
             qSection.appendChild(option);
         });
+
+        qSection.value = selected;
+        if (qSection.value !== selected) { qSection.value = ""; }
     }
 
-    function openQuestions(set) {
-        questionSet = set;
-        questionSelection = {};
-        set.selected.forEach(function (id) { questionSelection[id] = true; });
+    /** Shows the exam type, number, rules and question lists for the current exam type. */
+    function renderEditor() {
+        renderNumberInfo();
+        renderFormRules();
+        fillSectionFilter();
+        renderQuestionLists();
+        syncLeaveConfirm();
+    }
 
-        var type = typeById(set.typeId);
-        byId("mxQuestionsSubtitle").textContent = type.title + " — " + setLabel(set);
-        fillSectionFilter(type);
+    function openEditor(set) {
+        editingSet = set || null;
+        questionSelection = {};
+        toast.hidden = true;
+        if (set) { set.selected.forEach(function (id) { questionSelection[id] = true; }); }
+
+        var heading = set ? "Edit Mock Exam Set" : "Add Mock Exam Set";
+        formHeading.textContent = heading;
+        setCrumb("mxFormCrumb", heading);
+
+        // The type is fixed once learners have taken the set (their results would change meaning).
+        var locked = !!(set && set.attemptCount > 0);
+        formType.value = set ? set.typeId : (typeFilter.value || types[0].id);
+        formType.disabled = locked;
+        typeHint.hidden = !locked;
+        typeHint.textContent = locked ? "The exam type can't be changed because learners have already taken this set." : "";
+        typeError.hidden = true;
+
         qSection.value = "";
         qSearch.value = "";
         qMessage.hidden = true;
 
-        renderQuestionLists();
-        syncLeaveConfirm();
-        showView("questions");
-        qSection.focus();
+        renderEditor();
+        showView("form");
+        formType.focus();
     }
+
+    function backToList() {
+        showView("list");
+        addBtn.focus();
+    }
+
+    formType.addEventListener("change", function () {
+        typeError.hidden = true;
+        qMessage.hidden = true;
+        renderEditor();
+    });
 
     qSection.addEventListener("change", renderQuestionLists);
     qSearch.addEventListener("input", renderQuestionLists);
-    qSearch.addEventListener("keydown", function (event) { if (event.key === "Enter") { event.preventDefault(); } });
+    [formType, qSection, qSearch].forEach(function (field) {
+        field.addEventListener("keydown", function (event) { if (event.key === "Enter") { event.preventDefault(); } });
+    });
+
+    saveBtn.addEventListener("click", function () {
+        if (busy) { return; }
+
+        var type = currentType();
+        var over = type.sections.filter(function (section) { return selectedCount(section.id) > section.count; });
+        var inactive = Object.keys(questionSelection).filter(function (id) { return !isActiveQuestion(id); }).length;
+
+        if (over.length || inactive) {
+            qMessage.textContent = over.length
+                ? "Too many questions selected for " + type.title + ": " + over.map(function (section) {
+                    return section.label + " " + selectedCount(section.id) + " of " + section.count;
+                }).join("; ") + ". Untick some before saving."
+                : "Untick the inactive questions (or activate them in the Question Bank) before saving.";
+            qMessage.hidden = false;
+            qMessage.scrollIntoView({ block: "center" });
+            return;
+        }
+
+        // In section order, so the exam paper runs Colour Blind Test, Road Signs, Rules of the Road, KEJARA & Safety.
+        var ordered = [];
+        type.sections.forEach(function (section) {
+            bankForSection(section.id).forEach(function (q) { if (questionSelection[q.id]) { ordered.push(q.id); } });
+        });
+
+        busy = true;
+        saveBtn.disabled = true;
+
+        call("Save", { id: editingSet ? editingSet.id : 0, typeId: type.id, questionIds: ordered }).then(function (result) {
+            if (result.error) {
+                if (result.field === "type") {
+                    typeError.textContent = result.error;
+                    typeError.hidden = false;
+                    formType.focus();
+                } else {
+                    qMessage.textContent = result.error;
+                    qMessage.hidden = false;
+                    qMessage.scrollIntoView({ block: "center" });
+                }
+                return;
+            }
+
+            storeSet(result.set);
+            renderTable();
+            backToList();
+            showToast(toast, result.notice, result.set.status === "Active" ? "success" : "warning");
+        }).catch(function (e) {
+            qMessage.textContent = e.message;
+            qMessage.hidden = false;
+        }).then(function () {
+            busy = false;
+            saveBtn.disabled = false;
+        });
+    });
+
+    /**
+     * With unsaved changes the shared confirm dialog asks first: the first click only opens it, and its confirm
+     * repeats the click with data-confirmed="1". Without changes there is no data-confirm and the click leaves at once.
+     */
+    function confirmedLeave(el) {
+        return !el.hasAttribute("data-confirm") || el.getAttribute("data-confirmed") === "1";
+    }
+
+    cancelBtn.addEventListener("click", function () {
+        if (confirmedLeave(cancelBtn)) { backToList(); }
+    });
+
+    // The breadcrumb behaves like Cancel (no page reload).
+    crumbLink.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (confirmedLeave(crumbLink)) { backToList(); }
+    });
 
     // ------------------------------------------------------------------
     // Image viewer for the Image badges.
@@ -752,7 +731,7 @@
         imageOpener = document.activeElement;
         byId("mxImageTitle").textContent = "Q" + q.id + ": " + q.text;
         imagePicture.src = q.image;
-        imagePicture.alt = q.imageAlt || "";
+        imagePicture.alt = "Question image";
         imageOverlay.hidden = false;
         imageCloseBtn.focus();
     }
@@ -768,85 +747,6 @@
     imageOverlay.addEventListener("click", function (event) { if (event.target === imageOverlay) { closeImage(); } });
     document.addEventListener("keydown", function (event) { if (event.key === "Escape") { closeImage(); } });
 
-    qSaveBtn.addEventListener("click", function () {
-        if (busy) { return; }
-
-        var type = typeById(questionSet.typeId);
-        var problems = [];
-
-        type.sections.forEach(function (section) {
-            var chosen = selectedCount(section.id);
-
-            if (chosen !== section.count) {
-                problems.push(section.label + ": " + chosen + " of " + section.count);
-            }
-        });
-
-        var inactive = Object.keys(questionSelection).filter(function (id) { return !isActiveQuestion(id); }).length;
-
-        if (problems.length || inactive) {
-            qMessage.textContent = problems.length
-                ? "Selection incomplete. Select exactly the required number in every section: " + problems.join("; ") + "."
-                : "Untick the inactive questions (or activate them in the Question Bank) before saving.";
-            qMessage.hidden = false;
-            return;
-        }
-
-        // In section order, so the exam paper runs Colour Blind Test, Road Signs, Rules of the Road, KEJARA & Safety.
-        var ordered = [];
-        type.sections.forEach(function (section) {
-            bankForSection(section.id).forEach(function (q) { if (questionSelection[q.id]) { ordered.push(q.id); } });
-        });
-
-        busy = true;
-        qSaveBtn.disabled = true;
-
-        call("SaveQuestions", { id: questionSet.id, questionIds: ordered }).then(function (result) {
-            if (result.error) {
-                qMessage.textContent = result.error;
-                qMessage.hidden = false;
-                return;
-            }
-
-            storeSet(result.set);
-            renderTable();
-            showView("list");
-            addBtn.focus();
-
-            showToast(toast, "Questions saved for " + setLabel(result.set) + ". The selection is complete"
-                + (result.set.status === "Active" ? "." : ", so you can activate the set from the list."));
-        }).catch(function (e) {
-            qMessage.textContent = e.message;
-            qMessage.hidden = false;
-        }).then(function () {
-            busy = false;
-            qSaveBtn.disabled = false;
-        });
-    });
-
-    function leaveQuestions() {
-        showView("list");
-        addBtn.focus();
-    }
-
-    /**
-     * With unsaved changes the shared confirm dialog asks first: the first click only opens it, and its confirm
-     * repeats the click with data-confirmed="1". Without changes there is no data-confirm and the click leaves at once.
-     */
-    function confirmedLeave(el) {
-        return !el.hasAttribute("data-confirm") || el.getAttribute("data-confirmed") === "1";
-    }
-
-    qBackBtn.addEventListener("click", function () {
-        if (confirmedLeave(qBackBtn)) { leaveQuestions(); }
-    });
-
-    // The breadcrumb behaves like Back (no page reload).
-    qCrumbLink.addEventListener("click", function (event) {
-        event.preventDefault();
-        if (confirmedLeave(qCrumbLink)) { leaveQuestions(); }
-    });
-
     // ---- wiring ----
     function clearFilters() {
         typeFilter.value = "";
@@ -858,8 +758,8 @@
     statusFilter.addEventListener("change", renderTable);
     clearFiltersBtn.addEventListener("click", clearFilters);
     emptyClearBtn.addEventListener("click", clearFilters);
-    addBtn.addEventListener("click", function () { openForm(null); });
-    emptyAddBtn.addEventListener("click", function () { openForm(null); });
+    addBtn.addEventListener("click", function () { openEditor(null); });
+    emptyAddBtn.addEventListener("click", function () { openEditor(null); });
 
     load();
 })();

@@ -15,7 +15,6 @@ namespace MyKPPLearn.Data
         public string Text;
         public string Explanation;
         public string ImagePath;
-        public string ImageAltText;
         public bool IsActive;
         public int[] OptionIds = new int[3];
         public string[] Options = new string[3];
@@ -63,7 +62,6 @@ namespace MyKPPLearn.Data
                         Text = Convert.ToString(row["QuestionText"]),
                         Explanation = Convert.ToString(row["Explanation"]),
                         ImagePath = row.IsNull("ImagePath") ? null : Convert.ToString(row["ImagePath"]),
-                        ImageAltText = row.IsNull("ImageAltText") ? null : Convert.ToString(row["ImageAltText"]),
                         IsActive = Convert.ToBoolean(row["IsActive"])
                     };
                     paper.Add(current);
@@ -134,11 +132,11 @@ namespace MyKPPLearn.Data
             const string questionSql = @"
                 INSERT INTO MockExamAttemptQuestions (MockExamAttemptId, QuestionId, QuestionNumber, SelectedOptionId, IsCorrect, IsFlagged,
                     QuestionTextSnapshot, ExplanationSnapshot, OptionATextSnapshot, OptionBTextSnapshot, OptionCTextSnapshot,
-                    CorrectOptionSnapshot, SelectedOptionSnapshot, SelectedOptionTextSnapshot, ImagePathSnapshot, ImageAltTextSnapshot,
+                    CorrectOptionSnapshot, SelectedOptionSnapshot, SelectedOptionTextSnapshot, ImagePathSnapshot,
                     QuestionCategoryCodeSnapshot)
                 VALUES (@AttemptId, @QuestionId, @Number, @SelectedOptionId, @IsCorrect, @IsFlagged,
                     @Text, @Explanation, @OptionA, @OptionB, @OptionC,
-                    @Correct, @Selected, @SelectedText, @ImagePath, @ImageAlt,
+                    @Correct, @Selected, @SelectedText, @ImagePath,
                     @Category);";
 
             using (SqlConnection connection = DatabaseHelper.GetConnection())
@@ -191,7 +189,6 @@ namespace MyKPPLearn.Data
                                 command.Parameters.AddWithValue("@Selected", answered ? (object)Letter(answer) : DBNull.Value);
                                 command.Parameters.AddWithValue("@SelectedText", answered ? (object)(q.Options[answer] ?? string.Empty) : DBNull.Value);
                                 command.Parameters.AddWithValue("@ImagePath", hasImage ? (object)q.ImagePath : DBNull.Value);
-                                command.Parameters.AddWithValue("@ImageAlt", hasImage ? (object)q.ImageAltText : DBNull.Value);
                                 command.Parameters.AddWithValue("@Category", q.CategoryCode);
                                 command.ExecuteNonQuery();
                             }

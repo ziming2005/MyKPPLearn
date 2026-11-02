@@ -56,7 +56,6 @@ namespace MyKPPLearn.Admin
             public string sectionId;   // colourBlind, roadSigns, rulesOfTheRoad or kejaraSafety
             public string text;
             public string image;       // site-absolute URL of the question's picture, or null
-            public string imageAlt;
             public string status;
         }
 
@@ -66,7 +65,7 @@ namespace MyKPPLearn.Admin
             public List<BankQuestionDto> bank;
         }
 
-        /// <summary>A problem for one field ("type" or "number"), a general error, or the saved set with an optional notice.</summary>
+        /// <summary>A problem with the exam type (field "type"), a general error, or the saved set with its notice.</summary>
         public sealed class ResultDto
         {
             public string field;
@@ -108,7 +107,6 @@ namespace MyKPPLearn.Admin
                     sectionId = sectionId,
                     text = Convert.ToString(row["QuestionText"]),
                     image = row.IsNull("ImagePath") ? null : VirtualPathUtility.ToAbsolute("~/" + Convert.ToString(row["ImagePath"]).TrimStart('~', '/')),
-                    imageAlt = row.IsNull("ImageAltText") ? null : Convert.ToString(row["ImageAltText"]),
                     status = Convert.ToBoolean(row["IsActive"]) ? "Active" : "Inactive"
                 });
             }
@@ -116,53 +114,49 @@ namespace MyKPPLearn.Admin
             return data;
         }
 
+        /// <summary>
+        /// Add or Edit Mock Exam Set: saves the exam type and the chosen questions together (id 0 adds a new set, which
+        /// gets the next free number). The selection may be incomplete; such a set is saved as Inactive.
+        /// </summary>
         [WebMethod(EnableSession = true)]
-        public static ResultDto Save(int id, string typeId, int number)
+        public static ResultDto Save(int id, string typeId, List<int> questionIds)
         {
             SessionHelper.DemandAdministrator();
 
-            MockExamType type = MockExamRules.Find(typeId);
+            bool isNew = id == 0;
+            bool complete;
+            bool deactivated;
+            string error = MockExamSetRepository.Save(ref id, typeId, questionIds, out complete, out deactivated);
 
-            if (type == null)
+            if (error != null)
             {
-                return new ResultDto { field = "type", error = "Please select an exam type." };
+                return new ResultDto { field = error.StartsWith("Please select an exam type") || error.Contains("exam type can't") ? "type" : null, error = error };
             }
 
-            if (number < 1)
+            SetDto set = LoadSet(id);
+            string name = "Mock Exam Set " + set.number;
+            string notice;
+
+            if (isNew)
             {
-                return new ResultDto { field = "number", error = "Mock Exam Set number must be a whole number greater than 0 (for example 1, 2, 3)." };
+                notice = complete
+                    ? name + " created and Active."
+                    : name + " saved as Inactive because its selection is incomplete. Edit it to finish choosing questions, then activate it.";
             }
-
-            string notice = null;
-            MockExamSetSaveResult result;
-
-            if (id == 0)
+            else if (deactivated)
             {
-                result = MockExamSetRepository.Create(type.Code, number, out id);
-                notice = "Mock exam set created as Inactive. Use Questions to select its questions, then activate it.";
+                notice = name + " saved. It is now Inactive because its selection is incomplete.";
+            }
+            else if (complete && set.status != "Active")
+            {
+                notice = name + " saved. Its selection is complete, so you can activate it from the list.";
             }
             else
             {
-                bool deactivated;
-                result = MockExamSetRepository.Update(id, type.Code, number, out deactivated);
-
-                if (deactivated)
-                {
-                    notice = "Exam type changed. Questions that no longer fit were removed and the set is now Inactive. Use Questions to complete the selection.";
-                }
+                notice = name + " saved.";
             }
 
-            switch (result)
-            {
-                case MockExamSetSaveResult.DuplicateNumber:
-                    return new ResultDto { field = "number", error = type.Title + " already has Mock Exam Set " + number + ". Please choose a different number." };
-                case MockExamSetSaveResult.TypeLocked:
-                    return new ResultDto { field = "type", error = "The exam type can't be changed because learners have already taken this set." };
-                case MockExamSetSaveResult.NotFound:
-                    return new ResultDto { error = "Mock Exam Set not found." };
-            }
-
-            return new ResultDto { set = LoadSet(id), notice = notice };
+            return new ResultDto { set = set, notice = notice };
         }
 
         [WebMethod(EnableSession = true)]
@@ -175,7 +169,7 @@ namespace MyKPPLearn.Admin
                 return new ResultDto
                 {
                     error = active
-                        ? "This set can't be activated until every section has the required number of active questions. Use Questions to finish the selection."
+                        ? "This set can't be activated until every section has the required number of active questions. Edit the set to finish the selection."
                         : "Mock Exam Set not found."
                 };
             }
@@ -197,15 +191,6 @@ namespace MyKPPLearn.Admin
                 default:
                     return "Mock Exam Set not found.";
             }
-        }
-
-        [WebMethod(EnableSession = true)]
-        public static ResultDto SaveQuestions(int id, List<int> questionIds)
-        {
-            SessionHelper.DemandAdministrator();
-
-            string error = MockExamSetRepository.SaveQuestions(id, questionIds);
-            return error != null ? new ResultDto { error = error } : new ResultDto { set = LoadSet(id) };
         }
 
         private static SetDto LoadSet(int id)

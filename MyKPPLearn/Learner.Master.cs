@@ -118,7 +118,6 @@ namespace MyKPPLearn
                 correctIndex = correctIndex,
                 explanation = Convert.ToString(row["Explanation"]),
                 image = string.IsNullOrEmpty(image) ? "" : ResolveUrl("~/" + image),
-                imageAlt = row.IsNull("ImageAltText") ? "" : Convert.ToString(row["ImageAltText"]),
                 status = "Active"
             };
         }

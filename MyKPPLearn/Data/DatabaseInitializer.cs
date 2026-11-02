@@ -23,6 +23,29 @@ namespace MyKPPLearn.Data
             EnsureLessonImagePositionColumnExists();
             EnsureHiddenRoadSignTablesExist();
             EnsureQuestionBankAndExamTablesExist();
+            EnsureImageAltTextColumnsRemoved();
+        }
+
+        // Questions no longer have an image description. Databases created before that change still have the column
+        // (and its check constraint) on Questions and on both attempt-question snapshot tables: drop them once.
+        private static void EnsureImageAltTextColumnsRemoved()
+        {
+            string[][] columns =
+            {
+                new[] { "Questions", "ImageAltText", "CK_Questions_ImageAlt" },
+                new[] { "PracticeAttemptQuestions", "ImageAltTextSnapshot", "CK_PracticeAttemptQuestions_ImageAlt" },
+                new[] { "MockExamAttemptQuestions", "ImageAltTextSnapshot", "CK_MockExamAttemptQuestions_ImageAlt" }
+            };
+
+            foreach (string[] c in columns)
+            {
+                DatabaseHelper.ExecuteNonQuery(@"
+                    IF COL_LENGTH('" + c[0] + "', '" + c[1] + @"') IS NOT NULL
+                    BEGIN
+                        IF OBJECT_ID('" + c[2] + "', 'C') IS NOT NULL EXEC('ALTER TABLE " + c[0] + " DROP CONSTRAINT " + c[2] + @"');
+                        EXEC('ALTER TABLE " + c[0] + " DROP COLUMN " + c[1] + @"');
+                    END");
+            }
         }
 
         // Shared Question Bank, Standard Practice and Mock Exam schema (SCHEMA ONLY: no repositories or pages use these
@@ -103,15 +126,13 @@ namespace MyKPPLearn.Data
                         QuestionText NVARCHAR(500) NOT NULL,
                         Explanation NVARCHAR(500) NOT NULL,
                         ImagePath NVARCHAR(500) NULL,
-                        ImageAltText NVARCHAR(200) NULL,
                         IsActive BIT NOT NULL CONSTRAINT DF_Questions_IsActive DEFAULT 1,
                         CreatedAt DATETIME2 NOT NULL,
                         UpdatedAt DATETIME2 NOT NULL,
                         CONSTRAINT FK_Questions_QuestionCategories FOREIGN KEY (QuestionCategoryId) REFERENCES QuestionCategories (QuestionCategoryId),
                         CONSTRAINT FK_Questions_PracticeSets FOREIGN KEY (PracticeSetId, QuestionCategoryId) REFERENCES PracticeSets (PracticeSetId, QuestionCategoryId),
                         CONSTRAINT CK_Questions_Text CHECK (LEN(LTRIM(RTRIM(QuestionText))) > 0),
-                        CONSTRAINT CK_Questions_Explanation CHECK (LEN(LTRIM(RTRIM(Explanation))) > 0),
-                        CONSTRAINT CK_Questions_ImageAlt CHECK (ImagePath IS NULL OR (ImageAltText IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltText))) > 0))
+                        CONSTRAINT CK_Questions_Explanation CHECK (LEN(LTRIM(RTRIM(Explanation))) > 0)
                     );
                 END";
 
@@ -178,7 +199,6 @@ namespace MyKPPLearn.Data
                         SelectedOptionSnapshot CHAR(1) NULL,
                         SelectedOptionTextSnapshot NVARCHAR(200) NULL,
                         ImagePathSnapshot NVARCHAR(500) NULL,
-                        ImageAltTextSnapshot NVARCHAR(200) NULL,
                         CONSTRAINT FK_PracticeAttemptQuestions_Attempts FOREIGN KEY (PracticeAttemptId) REFERENCES PracticeAttempts (PracticeAttemptId),
                         CONSTRAINT FK_PracticeAttemptQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
                         CONSTRAINT FK_PracticeAttemptQuestions_QuestionOptions FOREIGN KEY (SelectedOptionId) REFERENCES QuestionOptions (QuestionOptionId),
@@ -196,8 +216,7 @@ namespace MyKPPLearn.Data
                         (
                             SelectedOptionSnapshot IS NULL
                             OR IsCorrect = CASE WHEN SelectedOptionSnapshot = CorrectOptionSnapshot THEN 1 ELSE 0 END
-                        ),
-                        CONSTRAINT CK_PracticeAttemptQuestions_ImageAlt CHECK (ImagePathSnapshot IS NULL OR (ImageAltTextSnapshot IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltTextSnapshot))) > 0))
+                        )
                     );
                 END";
 
@@ -288,7 +307,6 @@ namespace MyKPPLearn.Data
                         SelectedOptionSnapshot CHAR(1) NULL,
                         SelectedOptionTextSnapshot NVARCHAR(200) NULL,
                         ImagePathSnapshot NVARCHAR(500) NULL,
-                        ImageAltTextSnapshot NVARCHAR(200) NULL,
                         QuestionCategoryCodeSnapshot NVARCHAR(40) NOT NULL,
                         CONSTRAINT FK_MockExamAttemptQuestions_Attempts FOREIGN KEY (MockExamAttemptId) REFERENCES MockExamAttempts (MockExamAttemptId),
                         CONSTRAINT FK_MockExamAttemptQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
@@ -308,7 +326,6 @@ namespace MyKPPLearn.Data
                             SelectedOptionSnapshot IS NULL
                             OR IsCorrect = CASE WHEN SelectedOptionSnapshot = CorrectOptionSnapshot THEN 1 ELSE 0 END
                         ),
-                        CONSTRAINT CK_MockExamAttemptQuestions_ImageAlt CHECK (ImagePathSnapshot IS NULL OR (ImageAltTextSnapshot IS NOT NULL AND LEN(LTRIM(RTRIM(ImageAltTextSnapshot))) > 0)),
                         CONSTRAINT CK_MockExamAttemptQuestions_CategoryCode CHECK (LEN(LTRIM(RTRIM(QuestionCategoryCodeSnapshot))) > 0)
                     );
                 END";

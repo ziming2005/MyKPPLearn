@@ -29,7 +29,6 @@ namespace MyKPPLearn.Admin
             public string text;
             public string explanation;
             public string image;
-            public string imageAlt;
             public string status;
             public string[] options;
             public int correctIndex;
@@ -173,7 +172,6 @@ namespace MyKPPLearn.Admin
                     QuestionText = question.text,
                     Explanation = question.explanation,
                     ImagePath = newPath,
-                    ImageAltText = question.imageAlt,
                     Options = question.options,
                     CorrectOption = question.correctIndex + 1
                 };
@@ -348,7 +346,6 @@ namespace MyKPPLearn.Admin
                 text = Convert.ToString(row["QuestionText"]),
                 explanation = Convert.ToString(row["Explanation"]),
                 image = row.IsNull("ImagePath") ? null : Convert.ToString(row["ImagePath"]),
-                imageAlt = row.IsNull("ImageAltText") ? null : Convert.ToString(row["ImageAltText"]),
                 status = Convert.ToBoolean(row["IsActive"]) ? "Active" : "Inactive",
                 options = texts,
                 correctIndex = correct,

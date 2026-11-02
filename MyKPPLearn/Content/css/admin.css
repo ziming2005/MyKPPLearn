@@ -1863,3 +1863,39 @@ body.hrs-modal-open {
   padding: 16px 20px;
   margin: 0;
 }
+
+/* ---------- Question form: image preview, kept small instead of stretched to the form's width ---------- */
+.qb-image-preview {
+  margin-top: 12px;
+}
+
+.qb-image-preview img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+}
+
+/* ---------- Add / Edit Mock Exam Set: rules in a compact grid, then the questions ---------- */
+.mx-rules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px 24px;
+}
+
+.mx-rules dt {
+  margin-top: 0;
+}
+
+.mx-rules dd {
+  margin: 0;
+}
+
+.mx-questions__title {
+  margin: 24px 0 4px;
+}

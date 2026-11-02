@@ -15,7 +15,6 @@
     var MOCK_EXAM_ONLY = "No practice set (mock exam only)";
     var MAX_TEXT = 500;
     var MAX_OPTION = 200;
-    var MAX_ALT = 200;
     var MAX_IMAGE_BYTES = 10 * 1024 * 1024;
     var IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
     var QUESTIONS_PER_PAGE = 20;
@@ -223,29 +222,26 @@
         var image = null;      // null, the question's stored path, or a new upload as a data URL
         var formText = byId("qbFormText");
         var formExplanation = byId("qbFormExplanation");
-        var formAlt = byId("qbFormImageAlt");
         var imageInput = byId("qbFormImage");
-        var altGroup = byId("qbAltGroup");
         var previewWrap = byId("qbImagePreviewWrap");
         var previewImg = byId("qbImagePreview");
         var imageTools = byId("qbImageTools");
         var optionInputs = ["A", "B", "C"].map(function (letter) { return byId("qbFormOption" + letter); });
-        var errorIds = ["qbTextError", "qbImageError", "qbAltError", "qbOptionsError", "qbCorrectError", "qbExplanationError"];
+        var errorIds = ["qbTextError", "qbImageError", "qbOptionsError", "qbCorrectError", "qbExplanationError"];
 
         function radios() { return document.querySelectorAll("input[name='qbCorrectAnswer']"); }
 
-        function inputs() { return [formText, imageInput, formAlt, formExplanation].concat(optionInputs); }
+        function inputs() { return [formText, imageInput, formExplanation].concat(optionInputs); }
 
         /** Shows the current or newly chosen image with its Remove button, or hides both when there is none. */
         function showImage() {
             var hasImage = !!image;
             previewWrap.hidden = !hasImage;
             imageTools.hidden = !hasImage;
-            altGroup.hidden = !hasImage;
 
             if (hasImage) {
                 previewImg.src = image.indexOf("data:") === 0 ? image : appRoot + image;
-                previewImg.alt = formAlt.value || "Question image";
+                previewImg.alt = "Question image";
             } else {
                 previewImg.removeAttribute("src");
             }
@@ -271,7 +267,6 @@
         formText.addEventListener("input", updateCounts);
         formExplanation.addEventListener("input", updateCounts);
         clearOnInput(formText, "qbTextError");
-        clearOnInput(formAlt, "qbAltError");
         clearOnInput(formExplanation, "qbExplanationError");
         optionInputs.forEach(function (input) { clearOnInput(input, "qbOptionsError"); });
         Array.prototype.forEach.call(radios(), function (radio) { clearOnInput(radio, "qbCorrectError"); });
@@ -279,7 +274,6 @@
         byId("qbRemoveImage").onclick = function () {
             image = null;
             imageInput.value = "";
-            formAlt.value = "";
             showImage();
         };
 
@@ -305,7 +299,6 @@
             reader.onload = function () {
                 image = reader.result;
                 showImage();
-                formAlt.focus();
             };
             reader.readAsDataURL(file);
         };
@@ -326,7 +319,6 @@
                     buttons[i].checked = !!q && q.correctIndex === i;
                 });
 
-                formAlt.value = q ? (q.imageAlt || "") : "";
                 image = q ? q.image : null;
                 imageInput.value = "";
                 showImage();
@@ -351,12 +343,6 @@
                     errors.add("qbTextError", "Question is required.", formText);
                 } else if (text.length > MAX_TEXT) {
                     errors.add("qbTextError", "Question must be 500 characters or fewer.", formText);
-                }
-
-                if (image && !formAlt.value.trim()) {
-                    errors.add("qbAltError", "Describe the image for screen reader users.", formAlt);
-                } else if (formAlt.value.trim().length > MAX_ALT) {
-                    errors.add("qbAltError", "Image description must be 200 characters or fewer.", formAlt);
                 }
 
                 var emptyIndex = options.indexOf("");
@@ -390,7 +376,6 @@
                     text: formText.value,
                     explanation: formExplanation.value,
                     image: image,
-                    imageAlt: image ? formAlt.value : null,
                     options: optionInputs.map(function (input) { return input.value; }),
                     correctIndex: correctIndex()
                 };
@@ -400,7 +385,6 @@
             serverRules: function () {
                 return [
                     [/^question/i, "qbTextError", formText],
-                    [/image description/i, "qbAltError", formAlt],
                     [/image|jpg|png|webp|\d+ mb/i, "qbImageError", imageInput],
                     [/option/i, "qbOptionsError", optionInputs[0]],
                     [/correct answer/i, "qbCorrectError", radios()[0]],

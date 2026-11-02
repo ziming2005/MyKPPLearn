@@ -1,6 +1,6 @@
 <%@ Control Language="C#" %>
 <%--
-    The fields of one question: text, optional image with its description, options A-C with the correct answer,
+    The fields of one question: text, optional image, options A-C with the correct answer,
     and explanation. Shared by Admin/QuestionBank.aspx and Admin/PracticeSets.aspx (one per page, so the ids are
     plain HTML ids); Scripts/practice-admin-db.js (createQuestionFields) fills, validates and reads them.
 --%>
@@ -15,24 +15,16 @@
 <div class="form-group">
     <label class="form-label" for="qbFormImage">Image (optional)</label>
     <input type="file" id="qbFormImage" class="form-input" accept=".jpg,.jpeg,.png,.webp" />
-    <span class="form-hint">JPG, PNG or WEBP, up to 10 MB. The image is validated and stored when the question is saved.</span>
+    <span class="form-hint">JPG, PNG or WEBP, up to 10 MB.</span>
     <p id="qbImageError" class="field-error" role="alert" hidden></p>
 
-    <div id="qbImagePreviewWrap" class="image-position-preview__image-slot" hidden>
+    <div id="qbImagePreviewWrap" class="qb-image-preview" hidden>
         <img id="qbImagePreview" alt="" />
     </div>
     <div id="qbImageTools" class="qb-image-tools" hidden>
         <button type="button" id="qbRemoveImage" class="btn btn-secondary btn-small btn-danger">Remove image</button>
     </div>
 </div>
-
-<div id="qbAltGroup" class="form-group" hidden>
-    <label class="form-label" for="qbFormImageAlt">Image description</label>
-    <input id="qbFormImageAlt" type="text" class="form-input" maxlength="200" autocomplete="off" />
-    <span class="form-hint">Describe the image for learners who use a screen reader.</span>
-    <p id="qbAltError" class="field-error" role="alert" hidden></p>
-</div>
-
 <div class="form-group">
     <span class="form-label" id="qbOptionsLabel">Options</span>
     <span class="form-hint">Enter three different options (A, B and C) and choose the correct one.</span>
@@ -61,6 +53,5 @@
     <label class="form-label" for="qbFormExplanation">Explanation</label>
     <textarea id="qbFormExplanation" class="form-input" rows="3" maxlength="500"></textarea>
     <span class="char-counter"><span id="qbExplanationCount">0</span> / 500</span>
-    <span class="form-hint">Shown to learners when they answer incorrectly, or review an incorrect/unanswered question.</span>
     <p id="qbExplanationError" class="field-error" role="alert" hidden></p>
 </div>

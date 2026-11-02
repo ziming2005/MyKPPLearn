@@ -55,7 +55,7 @@
         </div>
     </div>
 
-    <!-- ================= ADD / EDIT ================= -->
+    <!-- ================= ADD / EDIT: THE SET AND ITS QUESTIONS ================= -->
     <div id="mxFormView" hidden>
         <nav class="breadcrumb" aria-label="Breadcrumb">
             <a href="~/Admin/MockExam.aspx" runat="server">Mock Exam</a>
@@ -69,50 +69,21 @@
             </div>
         </div>
 
-        <div class="card form-card">
+        <div class="card form-card mx-questions">
 
             <div class="form-group">
                 <label class="form-label" for="mxFormType">Exam Type</label>
                 <select id="mxFormType" class="form-input"></select>
-                <span id="mxTypeChangeHint" class="form-hint" hidden>Changing the exam type changes the required questions. Questions that no longer fit are removed, and the set becomes Inactive until its selection is complete again.</span>
+                <span id="mxTypeHint" class="form-hint" hidden></span>
                 <p id="mxTypeError" class="field-error" role="alert" hidden></p>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="mxFormNumber">Mock Exam Set Number</label>
-                <input id="mxFormNumber" type="text" inputmode="numeric" maxlength="9" autocomplete="off" class="form-input form-input--short" />
-                <span id="mxUsedNumbers" class="used-numbers"></span>
-                <span class="form-hint">The Mock Exam Set number (1, 2, 3...). Each number must be unique within its exam type.</span>
-                <p id="mxNumberError" class="field-error" role="alert" hidden></p>
-            </div>
+            <p id="mxNumberInfo" class="form-hint"></p>
 
             <dl class="detail-list mx-rules" id="mxFormRules" aria-label="Exam rules (set automatically from Exam Type)"></dl>
 
-            <p id="mxStatusHint" class="form-hint">A new set starts as Inactive. Select its questions with Questions, then activate it from the list.</p>
-
-            <div class="form-actions">
-                <button type="button" id="mxSaveBtn" class="btn btn-primary">Save</button>
-                <button type="button" id="mxCancelBtn" class="btn btn-secondary">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= MANAGE QUESTIONS ================= -->
-    <div id="mxQuestionsView" hidden>
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a href="~/Admin/MockExam.aspx" runat="server">Mock Exam</a>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">Manage Questions</span>
-        </nav>
-
-        <div class="page-toolbar">
-            <div>
-                <h2>Manage Questions</h2>
-                <p id="mxQuestionsSubtitle" class="mx-questions__subtitle"></p>
-            </div>
-        </div>
-
-        <div class="card form-card mx-questions">
+            <h3 class="mx-questions__title">Questions</h3>
+            <p class="form-hint">Tick the required number of active questions in every section. Questions come from the Question Bank: the Colour Blind Test uses Colour Recognition questions. A new set becomes Active when it is saved with every section complete; an incomplete set is saved as Inactive so you can finish it later.</p>
 
             <div class="filter-bar">
                 <label class="form-label" for="mxQSection">Section</label>
@@ -126,8 +97,8 @@
             <p id="mxQMessage" class="field-error" hidden role="alert"></p>
 
             <div class="form-actions">
-                <button type="button" id="mxQSaveBtn" class="btn btn-primary">Save Selection</button>
-                <button type="button" id="mxQBackBtn" class="btn btn-secondary">Back to Mock Exam</button>
+                <button type="button" id="mxSaveBtn" class="btn btn-primary">Save</button>
+                <button type="button" id="mxCancelBtn" class="btn btn-secondary">Cancel</button>
             </div>
         </div>
     </div>
@@ -146,7 +117,6 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/used-numbers.js") %>?v=20261010"></script>
     <script src="<%= ResolveUrl("~/Scripts/mock-exam.js") + "?v=" + MockExamScriptVersion %>"></script>
     <script src="<%= ResolveUrl("~/Scripts/mock-exam-admin.js") + "?v=" + MockExamAdminScriptVersion %>"></script>
 </asp:Content>

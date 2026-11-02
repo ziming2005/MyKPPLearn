@@ -438,7 +438,7 @@
         function setImage(wrap, img, question) {
             if (question.image) {
                 img.src = question.image.indexOf("data:") === 0 ? question.image : appRoot + question.image;
-                img.alt = question.imageAlt || "";
+                img.alt = "Question image";
                 wrap.hidden = false;
             } else {
                 wrap.hidden = true;
@@ -748,7 +748,7 @@
                     var img = document.createElement("img");
                     img.className = "lesson-image";
                     img.src = q.image.indexOf("data:") === 0 ? q.image : appRoot + q.image;
-                    img.alt = q.imageAlt || "";
+                    img.alt = "Question image";
                     item.appendChild(img);
                 }
 

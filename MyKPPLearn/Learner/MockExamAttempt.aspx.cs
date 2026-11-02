@@ -87,7 +87,6 @@ namespace MyKPPLearn.Learner
             public string sectionLabel;
             public string text;
             public string image;
-            public string imageAlt;
             public string[] options;
         }
 
@@ -154,7 +153,6 @@ namespace MyKPPLearn.Learner
                     sectionLabel = q.Section.Label,
                     text = q.Text,
                     image = q.ImagePath,
-                    imageAlt = q.ImageAltText,
                     options = q.Options
                 }).ToList()
             };
