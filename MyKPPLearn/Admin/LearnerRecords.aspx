@@ -4,10 +4,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="alert alert-warning">
-        UI prototype. The learners shown here are mock data; nothing is read from or written to the database.
-    </div>
-
     <div id="lrToast" class="alert alert-success" role="status" hidden></div>
 
     <div id="lrList">
@@ -16,6 +12,7 @@
                 <h2>Learner Records</h2>
                 <p>View learner accounts and learning activity.</p>
             </div>
+            <button type="button" id="lrAddBtn" class="btn btn-primary">Add Learner</button>
         </div>
 
         <div class="lr-filters">
@@ -30,7 +27,8 @@
         </div>
 
         <div id="lrEmpty" class="empty-state" hidden>
-            <div class="empty-state__title">No learners found.</div>
+            <div id="lrEmptyTitle" class="empty-state__title">No learners found.</div>
+            <button type="button" id="lrEmptyClear" class="btn btn-secondary" hidden>Clear Search</button>
         </div>
 
         <div id="lrTableWrap" class="card table-card">
@@ -50,13 +48,13 @@
             </div>
         </div>
 
-        <div id="lrFooter" class="lr-footer">
+        <div id="lrFooter" class="lr-footer" hidden>
             <p id="lrSummary" class="lr-footer__summary" aria-live="polite"></p>
             <nav id="lrPager" class="lr-pager" aria-label="Learner pages"></nav>
         </div>
     </div>
 
-    <!-- ================= EDIT LEARNER (mock) ================= -->
+    <!-- ================= ADD / EDIT LEARNER ================= -->
     <div id="lrEditModal" class="modal-overlay" hidden>
         <div class="modal-panel card" role="dialog" aria-modal="true" aria-labelledby="lrEditTitle">
             <h3 id="lrEditTitle">Edit Learner</h3>
@@ -64,11 +62,20 @@
             <div class="form-group">
                 <label class="form-label" for="lrEditName">Full Name</label>
                 <input id="lrEditName" type="text" class="form-input" maxlength="150" autocomplete="off" />
+                <p id="lrNameError" class="field-error" role="alert" hidden></p>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="lrEditEmail">Email</label>
-                <input id="lrEditEmail" type="text" class="form-input" maxlength="254" autocomplete="off" />
+                <input id="lrEditEmail" type="email" class="form-input" maxlength="254" autocomplete="off" />
+                <p id="lrEmailError" class="field-error" role="alert" hidden></p>
+            </div>
+
+            <div id="lrPasswordGroup" class="form-group" hidden>
+                <label class="form-label" for="lrEditPassword">Password</label>
+                <input id="lrEditPassword" type="password" class="form-input" maxlength="100" autocomplete="new-password" />
+                <span class="form-hint">At least 8 characters with an uppercase letter, a lowercase letter and a number. Share it with the learner; they can change it in Profile.</span>
+                <p id="lrPasswordError" class="field-error" role="alert" hidden></p>
             </div>
 
             <p id="lrEditError" class="field-error" role="alert" hidden></p>
@@ -80,7 +87,7 @@
         </div>
     </div>
 
-    <!-- ================= CONFIRM (Disable / Enable / Delete, mock) ================= -->
+    <!-- ================= CONFIRM (Disable / Enable / Delete) ================= -->
     <div id="lrConfirmModal" class="modal-overlay" hidden>
         <div class="modal-panel card" role="alertdialog" aria-modal="true" aria-labelledby="lrConfirmTitle" aria-describedby="lrConfirmText">
             <h3 id="lrConfirmTitle"></h3>
@@ -95,6 +102,6 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/learner-records-data.js") + "?v=20261020-b" %>"></script>
-    <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261019r" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/learner-records-data.js") + "?v=20261102-db" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261102-db" %>"></script>
 </asp:Content>

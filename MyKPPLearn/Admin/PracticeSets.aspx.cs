@@ -169,10 +169,7 @@ namespace MyKPPLearn.Admin
 
         internal static void RequireAdmin()
         {
-            if (!SessionHelper.IsInRole(HttpContext.Current.Session, SessionHelper.RoleAdministrator))
-            {
-                throw new HttpException(403, "Administrator access is required.");
-            }
+            SessionHelper.DemandAdministrator();
         }
 
         private static SetDto ToSet(DataRow row)

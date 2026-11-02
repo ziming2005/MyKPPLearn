@@ -4,10 +4,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="alert alert-warning">
-        UI prototype. This learner record is mock data; nothing is read from or written to the database.
-    </div>
-
     <div id="lrNotFound" hidden>
         <div class="alert alert-error">Learner not found. The learner may have been removed, or the link is not valid.</div>
         <div class="form-actions lr-back">
@@ -15,7 +11,7 @@
         </div>
     </div>
 
-    <div id="lrDetail">
+    <div id="lrDetail" hidden>
 
         <div class="lr-topback">
             <a class="btn btn-secondary btn-small" href="~/Admin/LearnerRecords.aspx" runat="server">&larr; Back to Learner Records</a>
@@ -87,11 +83,11 @@
         </div>
     </div>
 
-    <noscript><p class="alert alert-error">JavaScript is required to view this prototype.</p></noscript>
+    <noscript><p class="alert alert-error">JavaScript is required to view learner records.</p></noscript>
 
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/learner-records-data.js") + "?v=20261020-b" %>"></script>
-    <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261019t" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/learner-records-data.js") + "?v=20261102-db" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261102-db" %>"></script>
 </asp:Content>

@@ -56,6 +56,18 @@ namespace MyKPPLearn.Security
             return IsAuthenticated(session) && string.Equals(CurrentRole(session), role, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// For page methods ([WebMethod]), which skip Page_Load and cannot redirect: refuses the call unless an
+        /// Administrator is signed in.
+        /// </summary>
+        public static void DemandAdministrator()
+        {
+            if (!IsInRole(System.Web.HttpContext.Current.Session, RoleAdministrator))
+            {
+                throw new System.Web.HttpException(403, "Administrator access is required.");
+            }
+        }
+
         public static void SignIn(HttpSessionState session, int userId, string fullName, string role)
         {
             SignIn(session, userId, fullName, role, null);
