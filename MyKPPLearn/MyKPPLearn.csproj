@@ -393,6 +393,7 @@
     <Compile Include="Data\QuestionRepository.cs" />
     <Compile Include="Common\QuestionImageStorage.cs" />
     <Compile Include="Data\MockExamSetRepository.cs" />
+    <Compile Include="Data\MockExamRules.cs" />
     <Compile Include="Data\PracticeAttemptRepository.cs" />
     <Compile Include="Data\MockExamAttemptRepository.cs" />
     <Compile Include="Learner\Game.aspx.cs">

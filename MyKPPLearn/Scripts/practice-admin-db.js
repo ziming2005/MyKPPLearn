@@ -728,7 +728,7 @@
         function showServerError(message) {
             var rules = [
                 [/not found|try again|question data/i, null, null],
-                [/^select a category/i, "qbCategoryError", formCategory],
+                [/^select a category|category can't change/i, "qbCategoryError", formCategory],
                 [/practice set/i, "qbSetError", formSet],
                 [/^question/i, "qbTextError", formText],
                 [/image description/i, "qbAltError", formAlt],

@@ -131,6 +131,12 @@ namespace MyKPPLearn.Admin
 
                     oldPath = previous.IsNull("ImagePath") ? null : Convert.ToString(previous["ImagePath"]);
                     oldSetId = previous.IsNull("PracticeSetId") ? (int?)null : Convert.ToInt32(previous["PracticeSetId"]);
+
+                    // A Mock Exam section takes its questions from one category, so a question in a Mock Exam Set keeps its category.
+                    if (Convert.ToInt32(previous["QuestionCategoryId"]) != question.categoryId && Convert.ToInt32(previous["MockExamUseCount"]) > 0)
+                    {
+                        return new QuestionDto { error = "This question's category can't change while it is used in a Mock Exam Set. Remove it from those sets first." };
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(question.image) && question.image.StartsWith("data:image/", StringComparison.Ordinal))
@@ -211,9 +217,24 @@ namespace MyKPPLearn.Admin
 
             QuestionDto question = ToQuestion(QuestionRepository.GetById(id));
 
-            if (!active && question.setId.HasValue)
+            if (!active)
             {
-                question.notice = DeactivatedNotice(question.setId.Value);
+                List<string> notices = new List<string>();
+
+                if (question.setId.HasValue)
+                {
+                    string practiceNotice = DeactivatedNotice(question.setId.Value);
+                    if (practiceNotice != null) { notices.Add(practiceNotice); }
+                }
+
+                // An Active Mock Exam Set must keep a complete paper of active questions.
+                List<string> mockSets = MockExamSetRepository.DeactivateSetsUsingQuestion(id);
+                if (mockSets.Count > 0)
+                {
+                    notices.Add(string.Join(", ", mockSets) + (mockSets.Count == 1 ? " is" : " are") + " now Inactive because it uses this question.");
+                }
+
+                question.notice = notices.Count > 0 ? string.Join(" ", notices) : null;
             }
 
             return question;

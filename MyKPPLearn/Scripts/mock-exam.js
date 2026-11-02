@@ -1,17 +1,19 @@
 /*
  * ============================================================================
- * Mock Examination: exam rules and Learner UI logic (UI prototype).
+ * Mock Examination: exam rules and Learner UI logic.
  *
- * Nothing is persisted: there are no Mock Exam repositories or attempt records, and all exam state (answers, flags, timer,
- * result) lives in memory in this script and is discarded on refresh. No sample content is preloaded: the Mock Exam Sets and
- * the question bank below start EMPTY, so the Learner pages show their existing empty states.
- * A later phase replaces EXAM_SETS / BANK (and buildExam) with database-backed data.
+ * EXAM_TYPES holds the two fixed exam types with their section counts, durations and pass marks, for display.
+ * The server enforces the same rules (Data/MockExamRules.cs); keep both in step.
  *
- * What is real configuration here (and must stay): EXAM_TYPES, the two fixed exam types with their section counts,
- * durations and pass marks.
+ * Data comes from the database:
+ *   - window.MockExamDatabaseData (written by Learner/MockExamSets.aspx and MockExamAttempt.aspx) lists the sets a
+ *     learner can start;
+ *   - the attempt page calls its page methods: Start returns the paper WITHOUT the correct answers and starts the
+ *     server's clock; Submit marks the answers on the server, saves the attempt and returns the result, the correct
+ *     answers and the explanations for the review.
  *
- * window.MockExamData exposes the exam-type rules, sets and question bank to the Learner attempt UI (this file) and to the
- * Admin prototype (mock-exam-admin.js).
+ * window.MockExamData exposes the exam-type rules and the sets to the Learner pages (this file) and the Admin page
+ * (mock-exam-admin.js).
  * ============================================================================
  */
 (function (global) {
@@ -70,11 +72,8 @@
         "kpp-standard": []
     };
 
-    // ------------------------------------------------------------------
-    // Question bank: none are preloaded. Question shape: { id, section: "colourBlind" | "theory", topic (theory only: the
-    // section id roadSigns / rulesOfTheRoad / kejaraSafety), text, image, imageAlt, options[], correctIndex, explanation }.
-    // ------------------------------------------------------------------
-    var BANK = [];
+    var serverSets = (global.MockExamDatabaseData || {}).sets || {};
+    Object.keys(serverSets).forEach(function (typeId) { EXAM_SETS[typeId] = serverSets[typeId]; });
 
     function clone(value) {
         return JSON.parse(JSON.stringify(value));
@@ -85,27 +84,6 @@
             if (EXAM_TYPES[t].id === id) { return EXAM_TYPES[t]; }
         }
         return null;
-    }
-
-    function bankBySection(section) {
-        return BANK.filter(function (q) { return q.section === section; });
-    }
-
-    function bankByTopic(topic) {
-        return BANK.filter(function (q) { return q.topic === topic; });
-    }
-
-    /** Takes `count` items starting at `offset`, wrapping around the end of the array. */
-    function takeCircular(source, offset, count) {
-        var picked = [];
-
-        if (!source.length) { return picked; }     // an empty bank yields no questions (never an index into nothing)
-
-        for (var k = 0; k < count; k++) {
-            picked.push(source[(offset + k) % source.length]);
-        }
-
-        return picked;
     }
 
     function findSet(typeId, setNumber) {
@@ -139,43 +117,6 @@
         getSet: function (typeId, setNumber) {
             var set = findSet(typeId, setNumber);
             return set ? clone(set) : null;
-        },
-        getQuestionBank: function () { return clone(BANK); },
-        /**
-         * Ordered exam questions for a type with continuous numbering (1..total).
-         * setNumber (default 1) picks which slice of the demo bank the set uses, so
-         * different sets show different demo questions with the same structure.
-         */
-        buildExam: function (typeId, setNumber) {
-            var type = findType(typeId);
-            if (!type) { return null; }
-
-            var setIndex = Math.max(1, parseInt(setNumber, 10) || 1) - 1;
-            var colourBlindBank = bankBySection("colourBlind");
-            var colourBlindOffset = colourBlindBank.length ? (setIndex * 8) % colourBlindBank.length : 0;
-            var questions = [];
-
-            type.sections.forEach(function (section) {
-                var source;
-
-                if (section.id === "colourBlind") {
-                    source = takeCircular(colourBlindBank, colourBlindOffset, section.count);
-                } else {
-                    // Theory sections draw only from their own topic, so "Road Signs" holds road sign questions.
-                    var topicBank = bankByTopic(section.id);
-                    source = takeCircular(topicBank, topicBank.length ? (setIndex * section.count) % topicBank.length : 0, section.count);
-                }
-
-                source = clone(source);
-                source.forEach(function (q) {
-                    q.section = section.id;
-                    q.sectionLabel = section.label;
-                    questions.push(q);
-                });
-            });
-
-            questions.forEach(function (q, index) { q.number = index + 1; });
-            return questions;
         }
     };
 
@@ -199,6 +140,27 @@
         var minutes = Math.floor(totalSeconds / 60);
         var seconds = totalSeconds % 60;
         return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    }
+
+    /** Calls a page method on the current page and resolves with its return value ("d"). */
+    function callPageMethod(name, data) {
+        return fetch(location.pathname + "/" + name, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json; charset=utf-8" },
+            body: JSON.stringify(data || {})
+        }).then(function (response) {
+            return response.text().then(function (raw) {
+                var json = null;
+                try { json = JSON.parse(raw); } catch (ignore) { }
+
+                if (!response.ok) {
+                    throw new Error((json && json.Message) || "The request could not be completed. Please check your connection and try again.");
+                }
+
+                return json.d;
+            });
+        });
     }
 
     function questionCountLabel(count) {
@@ -227,15 +189,12 @@
 
         var setName = MockExamData.setLabel(setInfo.setNumber);
         var examLabel = type.name + " \u2014 " + setName;
-        var questions = MockExamData.buildExam(type.id, setInfo.setNumber);
 
-        // A set whose questions are not available cannot be started: send the learner back to the set list.
-        if (!questions.length) {
-            window.location.replace(setsUrl);
-            return;
-        }
-
-        var total = questions.length;
+        // The paper arrives from the server when the exam starts (Start); the correct answers only after Submit.
+        var questions = [];
+        var total = MockExamData.totalQuestions(type);
+        var examSeconds = type.minutes * 60;
+        var busy = false;
 
         // ---- attempt state (frontend only) ----
         var state = null;
@@ -349,7 +308,7 @@
                 currentIndex: 0,
                 answers: questions.map(function () { return null; }),
                 flags: questions.map(function () { return false; }),
-                remainingSeconds: type.minutes * 60,
+                remainingSeconds: examSeconds,
                 isSubmitted: false,
                 autoSubmitted: false,
                 result: null
@@ -584,6 +543,10 @@
             if (unanswered > 0) {
                 var flagged = state.flags.filter(function (f) { return f; }).length;
 
+                confirmTitle.textContent = "Submit Mock Exam?";
+                confirmSubmitBtn.textContent = "Submit Anyway";
+                confirmContinueBtn.hidden = false;
+
                 confirmText.textContent = "You still have " + unanswered + " unanswered " + (unanswered === 1 ? "question" : "questions") + "." +
                     (flagged ? " " + flagged + " flagged " + (flagged === 1 ? "question is" : "questions are") + " also marked for review." : "");
                 confirmOverlay.hidden = false;
@@ -594,48 +557,51 @@
             finalizeExam(false);
         }
 
-        function gradeExam() {
-            var cb = 0;
-            var th = 0;
-            var answered = 0;
-            var sectionCorrect = {};
-
-            questions.forEach(function (q, index) {
-                var answer = state.answers[index];
-                if (answer !== null) { answered++; }
-                if (answer === q.correctIndex) {
-                    sectionCorrect[q.section] = (sectionCorrect[q.section] || 0) + 1;
-                    if (q.section === "colourBlind") { cb++; } else { th++; }
-                }
-            });
-
-            var cbPass = cb >= type.colourBlindPass;
-            var thPass = th >= type.theoryPass;
-
-            return {
-                colourBlindScore: cb,
-                theoryScore: th,
-                colourBlindPass: cbPass,
-                theoryPass: thPass,
-                overallPass: cbPass && thPass,
-                answered: answered,
-                unanswered: total - answered,
-                sections: type.sections.map(function (section) {
-                    return { id: section.id, label: section.label, score: sectionCorrect[section.id] || 0, total: section.count };
-                })
-            };
-        }
-
+        /** Sends the answers to the server, which marks and saves them, then shows the result. */
         function finalizeExam(auto) {
-            if (state.isSubmitted) { return; }
+            if (state.isSubmitted || busy) { return; }
 
             stopTimer();
-            confirmOverlay.hidden = true;
+            busy = true;
             state.isSubmitted = true;
-            state.autoSubmitted = !!auto;
-            state.result = gradeExam();
-            renderResult();
-            setView("result");
+            confirmOverlay.hidden = true;
+
+            callPageMethod("Submit", {
+                answers: state.answers.map(function (a) { return a === null ? -1 : a; }),
+                flags: state.flags,
+                auto: !!auto
+            }).then(function (result) {
+                if (result.error) { throw new Error(result.error); }
+
+                // The review needs the correct answers and explanations, which only the server knows.
+                result.review.forEach(function (item, index) {
+                    questions[index].correctIndex = item.correctIndex;
+                    questions[index].explanation = item.explanation;
+                });
+
+                state.autoSubmitted = result.autoSubmitted;
+                state.result = result;
+                renderResult();
+                setView("result");
+            }).catch(function (e) {
+                // Nothing was saved: keep the answers (and the clock, unless time is up) and let the learner try again.
+                state.isSubmitted = false;
+                if (!auto && state.remainingSeconds > 0) { startTimer(); }
+                showSubmitError(e.message, auto);
+            }).then(function () {
+                busy = false;
+            });
+        }
+
+        var confirmTitle = byId("mxConfirmTitle");
+
+        function showSubmitError(message, auto) {
+            confirmTitle.textContent = "Your exam was not submitted";
+            confirmText.textContent = message + " Your answers are still here. Press Submit to try again.";
+            confirmSubmitBtn.textContent = "Submit";
+            confirmContinueBtn.hidden = !!auto;
+            confirmOverlay.hidden = false;
+            confirmSubmitBtn.focus();
         }
 
         // ---- result ----
@@ -692,8 +658,8 @@
                 scoreList.appendChild(item);
             });
 
-            // Time taken (a timed-out exam used all of its time).
-            var elapsed = state.autoSubmitted ? type.minutes * 60 : (type.minutes * 60 - state.remainingSeconds);
+            // Time taken, as measured by the server.
+            var elapsed = r.timeTakenSeconds;
             byId("mxResultTime").textContent = "Time taken: " + formatClock(elapsed) + " of " + type.minutes + " minutes";
 
             // Where the most points were lost.
@@ -832,12 +798,35 @@
         }
 
         function startExam() {
-            state = freshState();
-            buildNavigator();
-            renderTimer();
-            renderQuestion();
-            startTimer();
-            setView("attempt");
+            if (busy) { return; }
+
+            var startBtn = byId("mxStartBtn");
+            var startError = byId("mxStartError");
+
+            busy = true;
+            startBtn.disabled = true;
+            startError.hidden = true;
+
+            callPageMethod("Start", { type: type.id, set: setInfo.setNumber }).then(function (paper) {
+                if (paper.error) { throw new Error(paper.error); }
+
+                questions = paper.questions;
+                total = questions.length;
+                examSeconds = paper.seconds;
+
+                state = freshState();
+                buildNavigator();
+                renderTimer();
+                renderQuestion();
+                startTimer();
+                setView("attempt");
+            }).catch(function (e) {
+                startError.textContent = e.message;
+                startError.hidden = false;
+            }).then(function () {
+                busy = false;
+                startBtn.disabled = false;
+            });
         }
 
         byId("mxStartBtn").addEventListener("click", startExam);

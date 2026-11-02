@@ -2,34 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Web;
+using System.Web.Script.Serialization;
+using MyKPPLearn.Data;
 using MyKPPLearn.Security;
 
 namespace MyKPPLearn.Learner
 {
     /// <summary>
-    /// Phase 6 UI prototype. The Mock Exam Sets listed here come from the frontend-only mock
-    /// data in Scripts/mock-exam.js (only Active sets are rendered). Nothing here touches
-    /// a database. This code-behind only validates the "type" query string and fills the
-    /// heading, the same validate-and-redirect pattern used by PracticeSets.aspx.
+    /// Learner Mock Exam Sets for one exam type. Only sets a learner can start now are listed: Active, with a complete
+    /// paper of active questions (MockExamSetRepository.GetStartableSetNumbers). The list is written into
+    /// window.MockExamDatabaseData and drawn by Scripts/mock-exam.js. An unknown "type" goes back to the Mock Exam page.
     /// </summary>
     public partial class MockExamSets : System.Web.UI.Page
     {
-        private sealed class ExamTypeInfo
-        {
-            public string Name;
-            public string Description;
-        }
-
-        // Mirrors the exam type ids defined in Scripts/mock-exam.js, for
-        // query-string validation and headings only.
-        private static readonly Dictionary<string, ExamTypeInfo> KnownTypes = new Dictionary<string, ExamTypeInfo>
-        {
-            { "combined", new ExamTypeInfo { Name = "KPP Combined", Description = "Car & Motorcycle" } },
-            { "kpp-standard", new ExamTypeInfo { Name = "KPP Standard", Description = "Car or Motorcycle Only" } }
-        };
-
         public string TypeId { get; private set; }
+
+        /// <summary>window.MockExamDatabaseData for mock-exam.js.</summary>
+        public string DataJson { get; private set; }
 
         public string MockExamScriptVersion
         {
@@ -45,19 +36,32 @@ namespace MyKPPLearn.Learner
             SessionHelper.RequireLearner(this);
             ((LearnerMaster)Master).PageHeading = "Mock Exam";
 
-            string requestedType = Request.QueryString["type"];
-            ExamTypeInfo info;
+            MockExamType type = MockExamRules.Find(Request.QueryString["type"]);
 
-            if (string.IsNullOrEmpty(requestedType) || !KnownTypes.TryGetValue(requestedType, out info))
+            if (type == null)
             {
                 Response.Redirect("~/Learner/MockExam.aspx", true);
                 return;
             }
 
-            TypeId = requestedType;
-            litTypeName.Text = HttpUtility.HtmlEncode(info.Name);
-            litHeading.Text = HttpUtility.HtmlEncode(info.Name + " \u2014 Mock Exam Sets");
-            litSubtitle.Text = HttpUtility.HtmlEncode(info.Description);
+            TypeId = type.Code;
+            DataJson = BuildDataJson(type.Code, MockExamSetRepository.GetStartableSetNumbers(type.Code));
+
+            string description = type.Title.Substring(type.Name.Length).Trim().Trim('(', ')');
+            litTypeName.Text = HttpUtility.HtmlEncode(type.Name);
+            litHeading.Text = HttpUtility.HtmlEncode(type.Name + " — Mock Exam Sets");
+            litSubtitle.Text = HttpUtility.HtmlEncode(description);
+        }
+
+        /// <summary>{ "sets": { "&lt;type&gt;": [ { setNumber, status: "Active" } ] } }, safe to place inside a script block.</summary>
+        internal static string BuildDataJson(string typeCode, IEnumerable<int> setNumbers)
+        {
+            var sets = new Dictionary<string, object>
+            {
+                { typeCode, setNumbers.Select(n => new { setNumber = n, status = "Active" }).ToList() }
+            };
+
+            return new JavaScriptSerializer().Serialize(new { sets = sets }).Replace("<", "\\u003c");
         }
     }
 }

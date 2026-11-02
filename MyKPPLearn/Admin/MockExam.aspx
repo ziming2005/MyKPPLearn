@@ -4,10 +4,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="alert alert-warning">
-        UI prototype. Mock Exam Sets shown here are frontend-only mock data; nothing is read from or written to the database.
-    </div>
-
     <div id="mxToast" class="alert alert-success" hidden role="status"></div>
 
     <!-- ================= LIST ================= -->
@@ -92,18 +88,7 @@
 
             <dl class="detail-list mx-rules" id="mxFormRules" aria-label="Exam rules (set automatically from Exam Type)"></dl>
 
-            <p id="mxStatusHint" class="form-hint">A new set starts as Inactive. Select its questions with Manage Questions, then activate it from the list.</p>
-
-            <div class="form-group">
-                <span class="form-label">Preview</span>
-                <span class="form-hint">How this set appears to learners.</span>
-                <div class="card mx-preview" aria-hidden="true">
-                    <span id="pvType" class="mx-preview__type">Exam type</span>
-                    <h3 id="pvSetTitle" class="mx-preview__title">Mock Exam Set</h3>
-                    <p id="pvMeta" class="mx-preview__meta"></p>
-                    <span class="btn btn-primary btn-block">Start Mock Exam</span>
-                </div>
-            </div>
+            <p id="mxStatusHint" class="form-hint">A new set starts as Inactive. Select its questions with Questions, then activate it from the list.</p>
 
             <div class="form-actions">
                 <button type="button" id="mxSaveBtn" class="btn btn-primary">Save</button>
@@ -133,10 +118,10 @@
                 <label class="form-label" for="mxQSection">Section</label>
                 <select id="mxQSection" class="form-input form-input--auto"></select>
                 <label class="form-label" for="mxQSearch">Search</label>
-                <input id="mxQSearch" type="text" class="form-input form-input--auto" placeholder="Search questions" autocomplete="off" />
+                <input id="mxQSearch" type="search" class="form-input form-input--auto" placeholder="Search questions" autocomplete="off" />
             </div>
 
-            <p class="form-hint">Select exactly the required number of questions in every section. A section that is full cannot take more until you untick one.</p>
+            <p class="form-hint">Select exactly the required number of active questions in every section. A section that is full cannot take more until you untick one. Questions come from the Question Bank: the Colour Blind Test uses Colour Recognition questions.</p>
 
             <div id="mxQGroups"></div>
 

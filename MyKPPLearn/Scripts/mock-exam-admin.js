@@ -1,18 +1,11 @@
 /*
  * ============================================================================
- * Phase 6 frontend-only Admin UI prototype for Mock Exam Sets.
+ * Admin Mock Exam: Mock Exam Sets and their questions (Admin/MockExam.aspx).
  *
- * // Phase 6 frontend-only Mock Examination data.
- * // Replace with database-backed Mock Exam data in a later phase.
- * // Demo content is not official JPJ/KPP examination content.
- *
- * This file performs NO server calls and NO database operations. Exam types,
- * the sets and the demo question bank come from window.MockExamData
- * (Scripts/mock-exam.js, which must be loaded first), so the sets and
- * their questions here are the same ones the learner exam is built from.
- * The state below is local and in memory: Add/Edit/Delete, status toggles and
- * question selection are UI-only, and a page refresh resets everything back to
- * the original mock data.
+ * Data comes from the database through the page's page methods (Admin/MockExam.aspx.cs). The two exam types and their
+ * section counts, time limits and pass marks come from window.MockExamData (Scripts/mock-exam.js, loaded first); the
+ * server enforces the same rules (MockExamRules). Questions are chosen from the Question Bank: a section's questions
+ * come from its category (the Colour Blind Test uses Colour Recognition). Only ACTIVE questions count towards a section.
  * ============================================================================
  */
 (function () {
@@ -21,8 +14,6 @@
     var root = document.getElementById("mxListView");
 
     if (!root || !window.MockExamData) { return; }
-
-    var NOTE = " (Prototype only: not saved.)";
 
     function byId(id) { return document.getElementById(id); }
 
@@ -37,24 +28,54 @@
         el.className = "alert alert-" + (type || "success");
         el.hidden = false;
         window.clearTimeout(el._hideTimer);
-        el._hideTimer = window.setTimeout(function () { el.hidden = true; }, 6000);
+        el._hideTimer = window.setTimeout(function () { el.hidden = true; }, type === "error" ? 9000 : 6000);
+        window.scrollTo(0, 0);
+    }
+
+    /** Calls a page method on this page and resolves with its return value ("d"). */
+    function call(name, data) {
+        return fetch(location.pathname + "/" + name, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json; charset=utf-8" },
+            body: JSON.stringify(data || {})
+        }).then(function (response) {
+            return response.text().then(function (raw) {
+                var json = null;
+                try { json = JSON.parse(raw); } catch (ignore) { }
+
+                if (!response.ok) {
+                    return checkSignedIn().then(function () {
+                        throw new Error((json && json.Message) || "The request could not be completed. Please try again.");
+                    });
+                }
+
+                return json.d;
+            });
+        });
+    }
+
+    /** After a failed call: if the page itself now redirects (to Login), the session has ended, so reload. */
+    function checkSignedIn() {
+        return fetch(location.pathname, { credentials: "same-origin", redirect: "manual" }).then(function (r) {
+            if (r.type === "opaqueredirect" || r.status === 302) {
+                location.reload();
+                throw new Error("Your session has ended. Please sign in again.");
+            }
+        }, function () { /* network problem: keep the original error */ });
     }
 
     var types = MockExamData.getExamTypes();
-    var bank = MockExamData.getQuestionBank();
-
-    // The bank grouped by exam section: Colour Blind, then one list per theory topic.
-    function sectionOf(q) { return q.section === "colourBlind" ? "colourBlind" : q.topic; }
+    var bank = [];          // { id, sectionId, text, hasImage, status } from the Question Bank
+    var bankById = {};
+    var sets = [];          // { id, typeId, number, status, attemptCount, selected: [questionId] }
 
     function bankForSection(sectionId) {
-        return bank.filter(function (q) { return sectionOf(q) === sectionId; });
+        return bank.filter(function (q) { return q.sectionId === sectionId; });
     }
 
-    var sectionById = {};
-    bank.forEach(function (q) { sectionById[q.id] = sectionOf(q); });
-
-    function questionPrefix(q) {
-        return q.section === "colourBlind" ? "CB-" : "TH-";
+    function isActiveQuestion(id) {
+        return !!bankById[id] && bankById[id].status === "Active";
     }
 
     function typeById(id) {
@@ -65,29 +86,14 @@
         return types.indexOf(typeById(id));
     }
 
-    // ---- mock sets (local mutable state) ----
-    // Same sets and statuses the learner side uses, each with the questions the learner exam is actually built from.
-    var sets = [];
-    var nextLocalId = 1;
-
-    types.forEach(function (type) {
-        MockExamData.getSets(type.id).forEach(function (seed) {
-            sets.push({
-                id: "demo-mock-" + (nextLocalId++),
-                typeId: type.id,
-                number: seed.setNumber,
-                status: seed.status,
-                selected: MockExamData.buildExam(type.id, seed.setNumber).map(function (q) { return q.id; })
-            });
-        });
-    });
-
-    // ---- completeness of a set's question selection ----
+    // ---- completeness of a set's question selection (active questions only, as on the server) ----
     function sectionCounts(set) {
         var counts = {};
         set.selected.forEach(function (id) {
-            var sectionId = sectionById[id];
-            if (sectionId) { counts[sectionId] = (counts[sectionId] || 0) + 1; }
+            if (isActiveQuestion(id)) {
+                var sectionId = bankById[id].sectionId;
+                counts[sectionId] = (counts[sectionId] || 0) + 1;
+            }
         });
         return counts;
     }
@@ -101,7 +107,8 @@
 
     function isComplete(set) {
         var counts = sectionCounts(set);
-        return typeById(set.typeId).sections.every(function (section) { return (counts[section.id] || 0) === section.count; });
+        return set.selected.length === MockExamData.totalQuestions(typeById(set.typeId))
+            && typeById(set.typeId).sections.every(function (section) { return (counts[section.id] || 0) === section.count; });
     }
 
     function setLabel(set) { return MockExamData.setLabel(set.number); }
@@ -138,14 +145,11 @@
     var saveBtn = byId("mxSaveBtn");
     var cancelBtn = byId("mxCancelBtn");
 
-    var pvType = byId("pvType");
-    var pvSetTitle = byId("pvSetTitle");
-    var pvMeta = byId("pvMeta");
-
     var editingId = null;
     var lastAuto = null;           // the number suggested automatically (so typing your own is never overwritten)
     var questionSet = null;
     var questionSelection = null;  // Set-like object: id -> true
+    var busy = false;
 
     function populateSelect(select, items, valueField, textField) {
         select.innerHTML = "";
@@ -164,6 +168,25 @@
         listView.hidden = name !== "list";
         formView.hidden = name !== "form";
         questionsView.hidden = name !== "questions";
+        window.scrollTo(0, 0);
+    }
+
+    /** Loads (or reloads) sets and the question bank from the database, then redraws the list. */
+    function load() {
+        return call("LoadData").then(function (data) {
+            bank = data.bank || [];
+            bankById = {};
+            bank.forEach(function (q) { bankById[q.id] = q; });
+            sets = data.sets || [];
+            renderTable();
+        }).catch(function (e) { showToast(toast, e.message, "error"); });
+    }
+
+    /** Puts a set returned by the server into the local list (after save, toggle or a new selection). */
+    function storeSet(set) {
+        if (!set) { return; }
+        var existing = findSet(set.id);
+        if (existing) { sets[sets.indexOf(existing)] = set; } else { sets.push(set); }
     }
 
     // ---- shared helpers ----
@@ -232,16 +255,14 @@
 
             var setCell = document.createElement("td");
             setCell.className = "data-table__nowrap";
-            var strong = document.createElement("strong");
-            strong.textContent = String(set.number);
-            setCell.appendChild(strong);
+            setCell.textContent = String(set.number);
             row.appendChild(setCell);
 
             var typeCell = document.createElement("td");
             typeCell.textContent = type.title;
             row.appendChild(typeCell);
 
-            // Questions actually chosen for this set, against what the exam type requires.
+            // Active questions chosen for this set, against what the exam type requires.
             var total = MockExamData.totalQuestions(type);
             var chosen = selectedTotal(set);
             var questionsCell = document.createElement("td");
@@ -249,7 +270,7 @@
             var progress = document.createElement("span");
             progress.className = "mx-qcount" + (isComplete(set) ? " mx-qcount--ok" : "");
             progress.textContent = chosen + " / " + total;
-            progress.title = isComplete(set) ? "All sections have the required number of questions." : "Incomplete: open Manage Questions to finish the selection.";
+            progress.title = isComplete(set) ? "All sections have the required number of active questions." : "Incomplete: open Questions to finish the selection.";
             questionsCell.appendChild(progress);
             row.appendChild(questionsCell);
 
@@ -274,7 +295,10 @@
         });
     }
 
-    // The shared confirm dialog (confirm-modal.js) asks first; the click handler only runs once it is confirmed.
+    /**
+     * Delete uses the shared confirm dialog (confirm-modal.js): the first click only opens it; its confirm repeats the
+     * click with data-confirmed="1", and only that click deletes.
+     */
     function deleteButton(set) {
         var button = document.createElement("button");
         button.type = "button";
@@ -284,15 +308,22 @@
             + (set.status === "Active" ? " It is Active, so learners will no longer be able to start it." : ""));
         button.setAttribute("data-confirm-title", "Delete Mock Exam Set?");
         button.addEventListener("click", function () {
-            var wasActive = set.status === "Active";
-            sets = sets.filter(function (s) { return s.id !== set.id; });
-            renderTable();
+            if (button.getAttribute("data-confirmed") !== "1") { return; }
 
-            if (wasActive && noActiveSetsLeft(set.typeId)) {
-                showToast(toast, setLabel(set) + " deleted. " + typeById(set.typeId).title + " has no active sets now, so learners can't start this exam." + NOTE, "warning");
-            } else {
-                showToast(toast, "Mock exam set deleted." + NOTE);
-            }
+            var wasActive = set.status === "Active";
+
+            call("Delete", { id: set.id }).then(function (message) {
+                if (message !== "Deleted") { throw new Error(message); }
+
+                sets = sets.filter(function (s) { return s.id !== set.id; });
+                renderTable();
+
+                if (wasActive && noActiveSetsLeft(set.typeId)) {
+                    showToast(toast, setLabel(set) + " deleted. " + typeById(set.typeId).title + " has no active sets now, so learners can't start this exam.", "warning");
+                } else {
+                    showToast(toast, "Mock exam set deleted.");
+                }
+            }).catch(function (e) { showToast(toast, e.message, "error"); });
         });
         return button;
     }
@@ -303,29 +334,27 @@
 
     function toggleStatus(set) {
         var label = setLabel(set);
+        var activate = set.status !== "Active";
 
-        if (set.status === "Active") {
-            set.status = "Inactive";
+        // An incomplete set would give learners an exam with missing questions (the server refuses it too).
+        if (activate && !isComplete(set)) {
+            showToast(toast, label + " can't be activated until every section has the required number of active questions ("
+                + selectedTotal(set) + " / " + MockExamData.totalQuestions(typeById(set.typeId)) + " selected). Use Questions to finish the selection.", "error");
+            return;
+        }
+
+        call("Toggle", { id: set.id, active: activate }).then(function (result) {
+            if (result.error) { throw new Error(result.error); }
+
+            storeSet(result.set);
             renderTable();
 
-            if (noActiveSetsLeft(set.typeId)) {
-                showToast(toast, label + " deactivated. " + typeById(set.typeId).title + " has no active sets now, so learners can't start this exam." + NOTE, "warning");
+            if (!activate && noActiveSetsLeft(set.typeId)) {
+                showToast(toast, label + " deactivated. " + typeById(set.typeId).title + " has no active sets now, so learners can't start this exam.", "warning");
             } else {
-                showToast(toast, label + " deactivated." + NOTE);
+                showToast(toast, label + (activate ? " activated." : " deactivated."));
             }
-            return;
-        }
-
-        // An incomplete set would give learners an exam with missing questions.
-        if (!isComplete(set)) {
-            showToast(toast, label + " can't be activated until every section has the required number of questions ("
-                + selectedTotal(set) + " / " + MockExamData.totalQuestions(typeById(set.typeId)) + " selected). Use Manage Questions to finish the selection.", "error");
-            return;
-        }
-
-        set.status = "Active";
-        renderTable();
-        showToast(toast, label + " activated." + NOTE);
+        }).catch(function (e) { showToast(toast, e.message, "error"); });
     }
 
     // ---- add / edit ----
@@ -355,17 +384,6 @@
         formNumber.value = lastAuto;
     }
 
-    // Same look as the learner's mock exam set card; only the type and the number are live.
-    function updatePreview() {
-        var type = typeById(formType.value);
-        var raw = formNumber.value.trim();
-        var valid = /^[1-9][0-9]{0,8}$/.test(raw);
-
-        pvType.textContent = type.title;
-        pvSetTitle.textContent = valid ? MockExamData.setLabel(parseInt(raw, 10)) : "Mock Exam Set";
-        pvMeta.textContent = MockExamData.totalQuestions(type) + " Questions · " + type.minutes + " minutes";
-    }
-
     function updateTypeChangeHint() {
         var original = editingId ? findSet(editingId) : null;
         typeChangeHint.hidden = !(original && original.typeId !== formType.value);
@@ -374,11 +392,14 @@
     function clearErrors() {
         typeError.hidden = true;
         numberError.hidden = true;
+        formType.removeAttribute("aria-invalid");
+        formNumber.removeAttribute("aria-invalid");
     }
 
     function fail(errorEl, message, field) {
         errorEl.textContent = message;
         errorEl.hidden = false;
+        field.setAttribute("aria-invalid", "true");
         field.focus();
     }
 
@@ -405,7 +426,6 @@
         renderFormRules();
         renderUsedNumbers();
         updateTypeChangeHint();
-        updatePreview();
         showView("form");
         formType.focus();
     }
@@ -421,36 +441,25 @@
         renderUsedNumbers();
         suggestNumber();
         updateTypeChangeHint();
-        updatePreview();
     });
 
     formNumber.addEventListener("input", function () {
         numberError.hidden = true;
-        updatePreview();
+        formNumber.removeAttribute("aria-invalid");
     });
 
-    formNumber.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            saveBtn.click();
-        }
-    });
-
-    function trimSelection(ids, type) {
-        var used = {};
-
-        return ids.filter(function (id) {
-            var sectionId = sectionById[id];
-            var section = type.sections.filter(function (x) { return x.id === sectionId; })[0];
-
-            if (!section) { return false; }
-
-            used[sectionId] = (used[sectionId] || 0) + 1;
-            return used[sectionId] <= section.count;
+    // Enter saves the form instead of posting the whole ASP.NET page back.
+    [formType, formNumber].forEach(function (field) {
+        field.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                saveBtn.click();
+            }
         });
-    }
+    });
 
     saveBtn.addEventListener("click", function () {
+        if (busy) { return; }
         clearErrors();
 
         var raw = formNumber.value.trim();
@@ -461,7 +470,7 @@
         }
 
         if (!/^[1-9][0-9]{0,8}$/.test(raw)) {
-            fail(numberError, "Mock Exam Set number must be a whole number greater than 0 (for example 1, 2, 3).", formNumber);
+            fail(numberError, raw ? "Mock Exam Set number must be a whole number greater than 0 (for example 1, 2, 3)." : "Mock Exam Set number is required.", formNumber);
             return;
         }
 
@@ -476,55 +485,38 @@
             return;
         }
 
-        var message;
-        var type = "success";
+        busy = true;
+        saveBtn.disabled = true;
 
-        if (editingId) {
-            var existing = findSet(editingId);
-            message = "Mock exam set updated.";
-
-            if (existing.typeId !== formType.value) {
-                // Different exam type means different required counts: keep what still fits, and
-                // never leave a half-filled set Active.
-                existing.selected = trimSelection(existing.selected, typeById(formType.value));
-                existing.typeId = formType.value;
-
-                if (!isComplete(existing)) {
-                    var wasActive = existing.status === "Active";
-                    existing.status = "Inactive";
-                    message = "Exam type changed. Questions that no longer fit were removed" + (wasActive ? " and the set is now Inactive" : "")
-                        + ". Use Manage Questions to complete the selection.";
-                    type = "warning";
-                }
+        call("Save", { id: editingId || 0, typeId: formType.value, number: number }).then(function (result) {
+            if (result.error) {
+                if (result.field === "type") { fail(typeError, result.error, formType); }
+                else if (result.field === "number") { fail(numberError, result.error, formNumber); }
+                else { showToast(toast, result.error, "error"); }
+                return;
             }
 
-            existing.number = number;
-        } else {
-            // Inactive until its questions are selected (see the hint on the form).
-            sets.push({
-                id: "demo-mock-" + (nextLocalId++),
-                typeId: formType.value,
-                number: number,
-                status: "Inactive",
-                selected: []
-            });
-            message = "Mock exam set created as Inactive. Use Manage Questions to select its questions, then activate it.";
-        }
-
-        renderTable();
-        backToList();
-        showToast(toast, message + NOTE, type);
+            storeSet(result.set);
+            renderTable();
+            backToList();
+            showToast(toast, result.notice || "Mock exam set updated.", result.notice && editingId ? "warning" : "success");
+        }).catch(function (e) {
+            showToast(toast, e.message, "error");
+        }).then(function () {
+            busy = false;
+            saveBtn.disabled = false;
+        });
     });
 
     cancelBtn.addEventListener("click", backToList);
 
-    // The breadcrumb behaves like Cancel (a normal link would reload the page and throw away every unsaved mock edit).
+    // The breadcrumb behaves like Cancel (no page reload).
     formView.querySelector(".breadcrumb a").addEventListener("click", function (event) {
         event.preventDefault();
         backToList();
     });
 
-    // ---- manage questions (selection UI only) ----
+    // ---- manage questions ----
     // One group per exam section (Colour Blind Test, Road Signs, Rules of the Road, KEJARA & Safety),
     // each with its own required count, taken from the exam type.
     var qSection = byId("mxQSection");
@@ -532,6 +524,7 @@
     var qGroups = byId("mxQGroups");
     var qMessage = byId("mxQMessage");
     var qBackBtn = byId("mxQBackBtn");
+    var qSaveBtn = byId("mxQSaveBtn");
     var qCrumbLink = questionsView.querySelector(".breadcrumb a");
     var countEls = {};
 
@@ -549,7 +542,7 @@
         el.className = "mx-qcount" + (selected === required ? " mx-qcount--ok" : (selected > required ? " mx-qcount--over" : ""));
     }
 
-    // A full section cannot take more questions until one is unticked.
+    // A full section cannot take more questions until one is unticked. Inactive questions can only be unticked.
     function updateCounts() {
         var type = typeById(questionSet.typeId);
 
@@ -559,7 +552,7 @@
 
         Array.prototype.forEach.call(qGroups.querySelectorAll("input[type='checkbox']"), function (input) {
             var full = selectedCount(input._sectionId) >= requiredFor(input._sectionId);
-            input.disabled = !input.checked && full;
+            input.disabled = !input.checked && (full || input._inactive);
             input.parentNode.classList.toggle("mx-qitem--disabled", input.disabled);
         });
     }
@@ -591,55 +584,58 @@
         var term = qSearch.value.trim().toLowerCase();
         container.innerHTML = "";
 
-        bankForSection(sectionId).filter(function (q) { return !term || q.text.toLowerCase().indexOf(term) !== -1; }).forEach(function (q) {
-            var label = document.createElement("label");
-            label.className = "mx-qitem";
+        // Inactive questions are listed only when already chosen, so they can be unticked.
+        bankForSection(sectionId)
+            .filter(function (q) { return q.status === "Active" || questionSelection[q.id]; })
+            .filter(function (q) { return !term || q.text.toLowerCase().indexOf(term) !== -1; })
+            .forEach(function (q) {
+                var label = document.createElement("label");
+                label.className = "mx-qitem";
 
-            var input = document.createElement("input");
-            input.type = "checkbox";
-            input.checked = !!questionSelection[q.id];
-            input._sectionId = sectionId;
-            input.addEventListener("change", function () {
-                if (input.checked) { questionSelection[q.id] = true; } else { delete questionSelection[q.id]; }
-                qMessage.hidden = true;
-                updateCounts();
-                syncLeaveConfirm();
+                var input = document.createElement("input");
+                input.type = "checkbox";
+                input.checked = !!questionSelection[q.id];
+                input._sectionId = sectionId;
+                input._inactive = q.status !== "Active";
+                input.addEventListener("change", function () {
+                    if (input.checked) { questionSelection[q.id] = true; } else { delete questionSelection[q.id]; }
+                    qMessage.hidden = true;
+                    updateCounts();
+                    syncLeaveConfirm();
+                });
+                label.appendChild(input);
+
+                var num = document.createElement("span");
+                num.className = "mx-qitem__id";
+                num.textContent = "Q" + q.id;
+                label.appendChild(num);
+
+                var text = document.createElement("span");
+                text.className = "mx-qitem__text";
+                text.textContent = q.text;
+                label.appendChild(text);
+
+                if (q.hasImage) {
+                    var imageBadge = document.createElement("span");
+                    imageBadge.className = "badge";
+                    imageBadge.textContent = "Image";
+                    label.appendChild(imageBadge);
+                }
+
+                if (q.status !== "Active") {
+                    var inactiveBadge = document.createElement("span");
+                    inactiveBadge.className = "badge";
+                    inactiveBadge.textContent = "Inactive";
+                    label.appendChild(inactiveBadge);
+                }
+
+                container.appendChild(label);
             });
-            label.appendChild(input);
-
-            var num = document.createElement("span");
-            num.className = "mx-qitem__id";
-            num.textContent = questionPrefix(q) + q.id.split("-")[1];
-            label.appendChild(num);
-
-            // Colour test images are small inline pictures; other images are only flagged.
-            if (q.image && q.image.indexOf("data:") === 0) {
-                var thumb = document.createElement("img");
-                thumb.className = "mx-qitem__thumb";
-                thumb.src = q.image;
-                thumb.alt = "";
-                label.appendChild(thumb);
-            }
-
-            var text = document.createElement("span");
-            text.className = "mx-qitem__text";
-            text.textContent = q.text;
-            label.appendChild(text);
-
-            if (q.image && q.image.indexOf("data:") !== 0) {
-                var imageBadge = document.createElement("span");
-                imageBadge.className = "badge";
-                imageBadge.textContent = "Image";
-                label.appendChild(imageBadge);
-            }
-
-            container.appendChild(label);
-        });
 
         if (!container.children.length) {
             var none = document.createElement("p");
             none.className = "form-hint";
-            none.textContent = bankForSection(sectionId).length ? "No questions match the search." : "No questions are available in this section yet.";
+            none.textContent = bankForSection(sectionId).length ? "No questions match the search." : "No questions are available in this section yet. Add them in the Question Bank.";
             container.appendChild(none);
         }
     }
@@ -736,8 +732,11 @@
 
     qSection.addEventListener("change", renderQuestionLists);
     qSearch.addEventListener("input", renderQuestionLists);
+    qSearch.addEventListener("keydown", function (event) { if (event.key === "Enter") { event.preventDefault(); } });
 
-    byId("mxQSaveBtn").addEventListener("click", function () {
+    qSaveBtn.addEventListener("click", function () {
+        if (busy) { return; }
+
         var type = typeById(questionSet.typeId);
         var problems = [];
 
@@ -749,20 +748,46 @@
             }
         });
 
-        if (problems.length) {
-            qMessage.textContent = "Selection incomplete. Select exactly the required number in every section — " + problems.join("; ") + ".";
+        var inactive = Object.keys(questionSelection).filter(function (id) { return !isActiveQuestion(id); }).length;
+
+        if (problems.length || inactive) {
+            qMessage.textContent = problems.length
+                ? "Selection incomplete. Select exactly the required number in every section: " + problems.join("; ") + "."
+                : "Untick the inactive questions (or activate them in the Question Bank) before saving.";
             qMessage.hidden = false;
             return;
         }
 
-        // Prototype: kept in memory only so the screen stays consistent until refresh.
-        questionSet.selected = Object.keys(questionSelection);
-        renderTable();
-        showView("list");
-        addBtn.focus();
+        // In section order, so the exam paper runs Colour Blind Test, Road Signs, Rules of the Road, KEJARA & Safety.
+        var ordered = [];
+        type.sections.forEach(function (section) {
+            bankForSection(section.id).forEach(function (q) { if (questionSelection[q.id]) { ordered.push(q.id); } });
+        });
 
-        showToast(toast, "Questions saved for " + setLabel(questionSet) + ". The selection is complete"
-            + (questionSet.status === "Active" ? "." : ", so you can activate the set from the list.") + NOTE);
+        busy = true;
+        qSaveBtn.disabled = true;
+
+        call("SaveQuestions", { id: questionSet.id, questionIds: ordered }).then(function (result) {
+            if (result.error) {
+                qMessage.textContent = result.error;
+                qMessage.hidden = false;
+                return;
+            }
+
+            storeSet(result.set);
+            renderTable();
+            showView("list");
+            addBtn.focus();
+
+            showToast(toast, "Questions saved for " + setLabel(result.set) + ". The selection is complete"
+                + (result.set.status === "Active" ? "." : ", so you can activate the set from the list."));
+        }).catch(function (e) {
+            qMessage.textContent = e.message;
+            qMessage.hidden = false;
+        }).then(function () {
+            busy = false;
+            qSaveBtn.disabled = false;
+        });
     });
 
     function leaveQuestions() {
@@ -770,12 +795,22 @@
         addBtn.focus();
     }
 
-    qBackBtn.addEventListener("click", leaveQuestions);
+    /**
+     * With unsaved changes the shared confirm dialog asks first: the first click only opens it, and its confirm
+     * repeats the click with data-confirmed="1". Without changes there is no data-confirm and the click leaves at once.
+     */
+    function confirmedLeave(el) {
+        return !el.hasAttribute("data-confirm") || el.getAttribute("data-confirmed") === "1";
+    }
 
-    // The breadcrumb behaves like Back (a normal link would reload the page and throw away every unsaved mock edit).
+    qBackBtn.addEventListener("click", function () {
+        if (confirmedLeave(qBackBtn)) { leaveQuestions(); }
+    });
+
+    // The breadcrumb behaves like Back (no page reload).
     qCrumbLink.addEventListener("click", function (event) {
         event.preventDefault();
-        leaveQuestions();
+        if (confirmedLeave(qCrumbLink)) { leaveQuestions(); }
     });
 
     // ---- wiring ----
@@ -792,5 +827,5 @@
     addBtn.addEventListener("click", function () { openForm(null); });
     emptyAddBtn.addEventListener("click", function () { openForm(null); });
 
-    renderTable();
+    load();
 })();

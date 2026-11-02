@@ -54,6 +54,7 @@
 
             <div class="mx-intro__block mx-intro__actions">
                 <button type="button" id="mxStartBtn" class="btn btn-primary">Start Mock Exam</button>
+                <p id="mxStartError" class="field-error" role="alert" hidden></p>
                 <a class="btn btn-secondary mx-back-to-sets" href="~/Learner/MockExam.aspx" runat="server">Back to Exam Sets</a>
             </div>
         </section>
@@ -208,5 +209,6 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
+    <script>window.MockExamDatabaseData = <%= DataJson %>;</script>
     <script src="<%= ResolveUrl("~/Scripts/mock-exam.js") + "?v=" + MockExamScriptVersion %>"></script>
 </asp:Content>
