@@ -365,6 +365,7 @@
     <Compile Include="Data\DatabaseHelper.cs" />
     <Compile Include="Data\AppUser.cs" />
     <Compile Include="Data\UserRepository.cs" />
+    <Compile Include="Data\ActivityRepository.cs" />
     <Compile Include="Data\AdminDashboardRepository.cs" />
     <Compile Include="Data\DatabaseInitializer.cs" />
     <Compile Include="Data\LearningChapterRepository.cs" />

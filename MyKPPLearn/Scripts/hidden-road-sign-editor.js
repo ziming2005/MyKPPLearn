@@ -38,8 +38,6 @@
     var assets = readJson("data-assets");
     var stateField = root.querySelector('input[id$="hfState"]');
     var fileInput = document.querySelector('input[type="file"][id$="fuScene"]');
-    var setNumberInput = document.querySelector('input[id$="txtSetNumber"]');
-    var statusInputs = document.querySelectorAll('input[name$="rblStatus"]');
     var isEditMode = root.getAttribute("data-mode") === "edit";
 
     // ------------------------------------------------------------------
@@ -148,14 +146,14 @@
         return "";
     }
 
-    /** Complete = question, options A/B/C (all different), exactly one correct answer and an explanation. */
+    /** Complete = question, options A/B/C (all different), exactly one correct answer; the explanation is optional. */
     function isComplete(item) {
         return item.question.trim().length > 0 && item.question.trim().length <= MAX_QUESTION
             && item.a.trim().length > 0 && item.b.trim().length > 0 && item.c.trim().length > 0
             && item.a.trim().length <= MAX_OPTION && item.b.trim().length <= MAX_OPTION && item.c.trim().length <= MAX_OPTION
             && duplicateOptionMessage(item) === ""
             && item.correct >= 1 && item.correct <= 3
-            && item.explanation.trim().length > 0 && item.explanation.trim().length <= MAX_EXPLANATION;
+            && item.explanation.trim().length <= MAX_EXPLANATION;
     }
 
     function incompleteItems() { return items.filter(function (item) { return !isComplete(item); }); }
@@ -866,8 +864,6 @@
         });
     });
 
-    if (setNumberInput) { setNumberInput.addEventListener("input", markDirty); }
-    Array.prototype.forEach.call(statusInputs, function (el) { el.addEventListener("change", markDirty); });
 
     // Reloading, closing the tab or navigating away with unsaved work asks first.
     window.addEventListener("beforeunload", function (e) {

@@ -15,7 +15,7 @@
         <p>Choose a Practice Set to begin. Each set is a short, self-contained round of questions.</p>
     </div>
 
-    <div id="practiceSetsContainer" class="card-grid card-grid--2" data-category='<%= CategoryId %>' aria-live="polite"></div>
+    <div id="practiceSetsContainer" class="card-grid card-grid--3" data-category='<%= CategoryId %>' aria-live="polite"></div>
 
 </asp:Content>
 

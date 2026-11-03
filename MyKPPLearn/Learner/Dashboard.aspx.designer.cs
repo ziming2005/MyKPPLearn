@@ -22,5 +22,50 @@ namespace MyKPPLearn.Learner
         protected global::System.Web.UI.WebControls.Panel pnlContinueNone;
         protected global::System.Web.UI.WebControls.Panel pnlGameCount;
         protected global::System.Web.UI.WebControls.Literal litGameCount;
+
+        /// <summary>
+        /// litPracticeAverage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litPracticeAverage;
+
+        /// <summary>
+        /// litMockBest control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litMockBest;
+
+        /// <summary>
+        /// pnlNoActivity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoActivity;
+
+        /// <summary>
+        /// pnlActivity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlActivity;
+
+        /// <summary>
+        /// rptActivity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptActivity;
     }
 }

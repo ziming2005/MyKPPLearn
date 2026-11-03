@@ -52,7 +52,6 @@ namespace MyKPPLearn.Learner
 
             litSummaryCompleted.Text = completed.ToString(CultureInfo.InvariantCulture);
             litSummaryTotal.Text = total.ToString(CultureInfo.InvariantCulture);
-            litSummaryPercent.Text = percent.ToString(CultureInfo.InvariantCulture);
             summaryFill.Style["width"] = percent.ToString(CultureInfo.InvariantCulture) + "%";
             pnlSummary.Visible = true;
 
@@ -97,7 +96,7 @@ namespace MyKPPLearn.Learner
 
             if (all <= 0) { return "No lessons yet"; }
 
-            return done + " of " + all + (all == 1 ? " lesson" : " lessons") + " \u00B7 " + LearningDisplay.Percent(done, all) + "%";
+            return done + " of " + all + (all == 1 ? " lesson" : " lessons");
         }
 
         protected int ChapterPercent(object completed, object total)

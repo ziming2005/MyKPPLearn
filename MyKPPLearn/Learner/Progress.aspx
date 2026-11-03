@@ -21,16 +21,15 @@
                 <div class="stat-card__label">Lessons Completed</div>
                 <div class="stat-card__value"><%= OverallCompleted %> / <%= OverallTotal %></div>
             </div>
-            <%-- Practice and Mock Exam attempts are not stored yet, so these show a dash (not 0) until they are tracked. --%>
             <div class="stat-card stat-card--green">
                 <span class="dash-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14l2 2 4-4"/></svg></span>
                 <div class="stat-card__label">Practice Attempts</div>
-                <div class="stat-card__value" title="Not tracked yet">&mdash;</div>
+                <div class="stat-card__value"><%= PracticeCount %></div>
             </div>
             <div class="stat-card stat-card--amber">
                 <span class="dash-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg></span>
                 <div class="stat-card__label">Mock Exams Completed</div>
-                <div class="stat-card__value" title="Not tracked yet">&mdash;</div>
+                <div class="stat-card__value"><%= MockCount %></div>
             </div>
             <div class="stat-card stat-card--purple">
                 <span class="dash-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 12h4M8 10v4"/><path d="M15 13h.01M18 11h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.2l-1.5 7A3 3 0 0 0 4.2 19a3 3 0 0 0 2.4-1.2l1.4-2h8l1.4 2a3 3 0 0 0 2.4 1.2 3 3 0 0 0 2.9-3.8l-1.5-7A4 4 0 0 0 17.3 5z"/></svg></span>
@@ -106,16 +105,72 @@
 
             <%-- Older games are in the page but hidden; this button expands / collapses them in place (no reload). --%>
             <asp:Panel ID="pnlGameToggle" runat="server" CssClass="history-more" Visible="false">
-                <button type="button" id="gameHistoryToggle" class="btn btn-secondary" aria-expanded="false" aria-controls="gameHistoryList" data-more="View All" data-less="Show Less">View All</button>
+                <button type="button" id="gameHistoryToggle" class="btn btn-secondary" data-history-toggle="gameHistoryList" aria-expanded="false" aria-controls="gameHistoryList" data-more="View All" data-less="Show Less">View All</button>
             </asp:Panel>
         </div>
     </section>
 
-    <!-- ================= PRACTICE + MOCK EXAM (placeholder until attempts are stored) ================= -->
+    <!-- ================= PRACTICE HISTORY ================= -->
     <section class="panel-section" aria-labelledby="progPracticeTitle">
-        <div class="panel-section__header"><h2 id="progPracticeTitle">Practice and Mock Exam</h2></div>
+        <div class="panel-section__header"><h2 id="progPracticeTitle">Practice History</h2></div>
+
         <div class="card progress-card">
-            <p class="progress-note">Your practice and mock exam results will appear here once they&rsquo;re available.</p>
+            <asp:Panel ID="pnlNoPractice" runat="server" CssClass="progress-note" Visible="false">
+                No completed practice sets yet.
+                <div class="progress-note__action"><a class="btn btn-primary btn-small" href="~/Learner/Practice.aspx" runat="server">Start Practice</a></div>
+            </asp:Panel>
+
+            <asp:Panel ID="pnlPracticeSummary" runat="server" CssClass="history-summary" Visible="false"><asp:Literal ID="litPracticeSummary" runat="server" /></asp:Panel>
+
+            <ul id="practiceHistoryList" class="history-list">
+                <asp:Repeater ID="rptPractice" runat="server">
+                    <ItemTemplate>
+                        <li class="history-item<%# Container.ItemIndex >= RecentGames ? " history-item--extra" : "" %>">
+                            <div class="history-item__main">
+                                <div class="history-item__title"><%# Server.HtmlEncode(Convert.ToString(Eval("CategoryTitle"))) %> &mdash; Practice Set <%# Eval("SetNumber") %></div>
+                                <div class="history-item__score"><%# Eval("CorrectCount") %> / <%# Eval("TotalQuestions") %> Questions Correct</div>
+                                <div class="history-item__date"><%# FormatDate(Eval("CompletedAt")) %></div>
+                            </div>
+                        </li>
+                    </ItemTemplate>
+                </asp:Repeater>
+            </ul>
+
+            <asp:Panel ID="pnlPracticeToggle" runat="server" CssClass="history-more" Visible="false">
+                <button type="button" class="btn btn-secondary" data-history-toggle="practiceHistoryList" aria-expanded="false" aria-controls="practiceHistoryList" data-more="View All" data-less="Show Less">View All</button>
+            </asp:Panel>
+        </div>
+    </section>
+
+    <!-- ================= MOCK EXAM HISTORY ================= -->
+    <section class="panel-section" aria-labelledby="progMockTitle">
+        <div class="panel-section__header"><h2 id="progMockTitle">Mock Exam History</h2></div>
+
+        <div class="card progress-card">
+            <asp:Panel ID="pnlNoMock" runat="server" CssClass="progress-note" Visible="false">
+                No mock exams taken yet.
+                <div class="progress-note__action"><a class="btn btn-primary btn-small" href="~/Learner/MockExam.aspx" runat="server">Take a Mock Exam</a></div>
+            </asp:Panel>
+
+            <asp:Panel ID="pnlMockSummary" runat="server" CssClass="history-summary" Visible="false"><asp:Literal ID="litMockSummary" runat="server" /></asp:Panel>
+
+            <ul id="mockHistoryList" class="history-list">
+                <asp:Repeater ID="rptMock" runat="server">
+                    <ItemTemplate>
+                        <li class="history-item<%# Container.ItemIndex >= RecentGames ? " history-item--extra" : "" %>">
+                            <div class="history-item__main">
+                                <div class="history-item__title"><%# MockTitle(Eval("ExamTypeCode"), Eval("SetNumber")) %> <span class='<%# (bool)Eval("IsPassed") ? "status-badge status-badge--active" : "status-badge status-badge--inactive" %>'><%# (bool)Eval("IsPassed") ? "Pass" : "Fail" %></span></div>
+                                <div class="history-item__score">Colour Blind <%# Eval("ColourBlindCorrect") %> / <%# Eval("ColourBlindTotal") %> &middot; Theory <%# Eval("TheoryCorrect") %> / <%# Eval("TheoryTotal") %></div>
+                                <div class="history-item__date"><%# FormatDate(Eval("CompletedAt")) %></div>
+                            </div>
+                        </li>
+                    </ItemTemplate>
+                </asp:Repeater>
+            </ul>
+
+            <asp:Panel ID="pnlMockToggle" runat="server" CssClass="history-more" Visible="false">
+                <button type="button" class="btn btn-secondary" data-history-toggle="mockHistoryList" aria-expanded="false" aria-controls="mockHistoryList" data-more="View All" data-less="Show Less">View All</button>
+            </asp:Panel>
         </div>
     </section>
 
@@ -123,16 +178,19 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script>
+        // Each history list shows its latest few; its "View All" button expands / collapses the rest in place.
         (function () {
-            var button = document.getElementById("gameHistoryToggle");
-            var list = document.getElementById("gameHistoryList");
+            var buttons = document.querySelectorAll("[data-history-toggle]");
 
-            if (!button || !list) { return; }
+            Array.prototype.forEach.call(buttons, function (button) {
+                var list = document.getElementById(button.getAttribute("data-history-toggle"));
+                if (!list) { return; }
 
-            button.addEventListener("click", function () {
-                var expanded = list.classList.toggle("is-expanded");
-                button.setAttribute("aria-expanded", expanded ? "true" : "false");
-                button.textContent = expanded ? button.getAttribute("data-less") : button.getAttribute("data-more");
+                button.addEventListener("click", function () {
+                    var expanded = list.classList.toggle("is-expanded");
+                    button.setAttribute("aria-expanded", expanded ? "true" : "false");
+                    button.textContent = expanded ? button.getAttribute("data-less") : button.getAttribute("data-more");
+                });
             });
         })();
     </script>

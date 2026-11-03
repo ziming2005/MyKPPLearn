@@ -50,8 +50,6 @@ namespace MyKPPLearn.Admin
     public partial class HiddenRoadSigns : System.Web.UI.Page
     {
         private const string GenericError = "Something went wrong. Please try again.";
-        private const string DuplicateMessage = "This set number already exists.";
-        private const string OrderMessage = "Set number must be a whole number greater than 0.";
         private const string AttemptHistoryMessage = "This Road Sign Game has learner attempt history and cannot be deleted. Deactivate it instead.";
         private const string StateMessage = "The editor content could not be read. Please reload the page and try again.";
         private const int MaxRoadSigns = 300;
@@ -60,7 +58,6 @@ namespace MyKPPLearn.Admin
         private bool _failedSave;
 
         // Set when the rejected Save was about the Game Set Number (the page then scrolls to that field instead of the Save button).
-        private bool _numberErrorShown;
 
         // 0 = creating a new Set; otherwise the Set being edited.
         private int EditingPracticeId
@@ -73,22 +70,6 @@ namespace MyKPPLearn.Admin
         {
             get { return ViewState["ViewingPracticeId"] == null ? 0 : (int)ViewState["ViewingPracticeId"]; }
             set { ViewState["ViewingPracticeId"] = value; }
-        }
-
-        /// <summary>"Used Numbers: 1, 2, 4" for the Set field: every existing Game Set number, from the database.</summary>
-        public string UsedNumbersText
-        {
-            get
-            {
-                try
-                {
-                    return HttpUtility.HtmlEncode(UsedNumbers.Format(HiddenRoadSignPracticeRepository.GetUsedNumbers()));
-                }
-                catch (Exception)
-                {
-                    return string.Empty;
-                }
-            }
         }
 
         public string EditorScriptVersion
@@ -173,7 +154,7 @@ namespace MyKPPLearn.Admin
             if (_failedSave)
             {
                 // The page is long: bring the reason into view instead of leaving it at the top or the bottom.
-                string targetId = _numberErrorShown ? lblNumberError.ClientID : (lblSaveError.Visible ? lblSaveError.ClientID : null);
+                string targetId = lblSaveError.Visible ? lblSaveError.ClientID : null;
 
                 if (targetId != null)
                 {
@@ -257,8 +238,7 @@ namespace MyKPPLearn.Admin
                 litFormHeading.Text = "Add Game Set";
                 litFormCrumb.Text = "Add Game Set";
                 btnSave.Text = "Save Game Set";
-                txtSetNumber.Text = NextFreeSetNumber();
-                rblStatus.SelectedValue = "Inactive";      // activate once the scene has its road signs
+                litSetInfo.Text = string.Empty;
                 return;
             }
 
@@ -266,31 +246,7 @@ namespace MyKPPLearn.Admin
             litFormHeading.Text = "Edit Game Set";
             litFormCrumb.Text = "Edit Game Set";
             btnSave.Text = "Save Changes";
-            txtSetNumber.Text = Convert.ToString(set["SetNumber"], CultureInfo.InvariantCulture);
-            rblStatus.SelectedValue = (bool)set["IsActive"] ? "Active" : "Inactive";
-
-            // One Scene Image only: the Scene Editor below is the preview.
-            litKeepImageHint.Text = " Choose a new file to replace the current Scene Image shown in the editor below.";
-        }
-
-        /// <summary>The number after the highest existing Game Set (1 for the first); blank if the numbers cannot be read.</summary>
-        private static string NextFreeSetNumber()
-        {
-            try
-            {
-                int max = 0;
-
-                foreach (int number in HiddenRoadSignPracticeRepository.GetUsedNumbers())
-                {
-                    if (number > max) { max = number; }
-                }
-
-                return (max + 1).ToString(CultureInfo.InvariantCulture);
-            }
-            catch (Exception)
-            {
-                return string.Empty;
-            }
+            litSetInfo.Text = string.Empty;
         }
 
         private void ShowView(DataRow set)
@@ -303,24 +259,20 @@ namespace MyKPPLearn.Admin
 
             bool isActive = (bool)set["IsActive"];
             int total = Convert.ToInt32(set["ItemCount"]);
-            int configured = Convert.ToInt32(set["ConfiguredCount"]);
-            int attemptCount = Convert.ToInt32(set["AttemptCount"]);
             string name = HiddenRoadSignPracticeRepository.FormatSetName(set["SetNumber"]);
 
             litViewSet.Text = HttpUtility.HtmlEncode(name);
             litViewStatus.Text = isActive
                 ? "<span class=\"status-badge status-badge--active\">Active</span>"
                 : "<span class=\"status-badge status-badge--inactive\">Inactive</span>";
-            litViewItems.Text = string.Format(CultureInfo.InvariantCulture, "{0} road signs · {1} configured · {2} incomplete",
-                total, configured, total - configured);
-            litViewAttempts.Text = attemptCount.ToString(CultureInfo.InvariantCulture) + (attemptCount == 1 ? " completed attempt" : " completed attempts");
+            litViewItems.Text = HttpUtility.HtmlEncode(RoadSignCount(total));
             imgView.Src = ResolveUrl("~/" + Convert.ToString(set["SceneImagePath"]));
             imgView.Alt = "Scene Image for " + name;
             litViewSigns.Text = BuildViewSignsHtml(ViewingPracticeId);
             litViewQuestions.Text = BuildViewQuestionsHtml(ViewingPracticeId);
         }
 
-        /// <summary>A read-only table of every road sign in the set: its question, the correct answer and whether it is complete.</summary>
+        /// <summary>A read-only table of every road sign in the set: its question and the correct answer.</summary>
         private string BuildViewQuestionsHtml(int practiceId)
         {
             DataTable items = HiddenRoadSignItemRepository.GetItemsBySet(practiceId);
@@ -335,7 +287,7 @@ namespace MyKPPLearn.Admin
 
             html.Append("<div class=\"table-wrap\"><table class=\"data-table\"><thead><tr>")
                 .Append("<th scope=\"col\">#</th><th scope=\"col\">Road Sign</th><th scope=\"col\">Question</th>")
-                .Append("<th scope=\"col\">Correct Answer</th><th scope=\"col\">Status</th></tr></thead><tbody>");
+                .Append("<th scope=\"col\">Correct Answer</th></tr></thead><tbody>");
 
             int number = 0;
 
@@ -343,7 +295,6 @@ namespace MyKPPLearn.Admin
             {
                 number++;
                 int itemId = Convert.ToInt32(item["HiddenRoadSignItemId"]);
-                bool configured = (bool)item["IsConfigured"];
                 string correct = "\u2014";
 
                 foreach (DataRow choice in choices.Select("HiddenRoadSignItemId = " + itemId.ToString(CultureInfo.InvariantCulture) + " AND IsCorrect = true"))
@@ -354,10 +305,7 @@ namespace MyKPPLearn.Admin
                 html.Append("<tr><td class=\"data-table__nowrap\"><strong>").Append(number.ToString(CultureInfo.InvariantCulture)).Append("</strong></td>")
                     .Append("<td>").Append(HttpUtility.HtmlEncode(Convert.ToString(item["AssetName"]))).Append("</td>")
                     .Append("<td class=\"data-table__muted\">").Append(HttpUtility.HtmlEncode(item["QuestionText"] as string ?? string.Empty)).Append("</td>")
-                    .Append("<td>").Append(HttpUtility.HtmlEncode(correct)).Append("</td>")
-                    .Append("<td>").Append(configured
-                        ? "<span class=\"status-badge status-badge--active\">Configured</span>"
-                        : "<span class=\"status-badge status-badge--inactive\">Incomplete</span>").Append("</td></tr>");
+                    .Append("<td>").Append(HttpUtility.HtmlEncode(correct)).Append("</td></tr>");
             }
 
             html.Append("</tbody></table></div>");
@@ -432,19 +380,11 @@ namespace MyKPPLearn.Admin
             }
         }
 
-        /// <summary>Green "x / y configured" pill when every road sign is complete (and there is at least one), amber otherwise.</summary>
-        protected string SignsBadgeClass(object configured, object total)
+        /// <summary>"3 road signs" (every saved road sign is complete, so only the number matters), or "None yet".</summary>
+        protected string RoadSignCount(object total)
         {
-            int all = Convert.ToInt32(total);
-            return "mx-qcount" + (all > 0 && Convert.ToInt32(configured) == all ? " mx-qcount--ok" : string.Empty);
-        }
-
-        protected string SignsBadgeTitle(object configured, object total)
-        {
-            int all = Convert.ToInt32(total);
-
-            if (all == 0) { return "No road signs placed yet. Edit the set to add them."; }
-            return Convert.ToInt32(configured) == all ? "Every road sign has its question." : "Some road signs are incomplete. Edit the set to finish them.";
+            int count = Convert.ToInt32(total);
+            return count == 0 ? "None yet" : count + (count == 1 ? " road sign" : " road signs");
         }
 
         protected void rptSets_ItemDataBound(object sender, RepeaterItemEventArgs e)
@@ -670,19 +610,8 @@ namespace MyKPPLearn.Admin
             FlashMessage.Show(lblSaveError, message, true);
         }
 
-        // A duplicate Game Set Number is shown under the Game Set Number field.
-        private void RejectNumber(string message)
-        {
-            _failedSave = true;
-            _numberErrorShown = true;
-            lblNumberError.Text = HttpUtility.HtmlEncode(message);
-            lblNumberError.Visible = true;
-            txtSetNumber.Focus();
-        }
-
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            lblNumberError.Visible = false;
             lblSaveError.Visible = false;
             Page.Validate("SetForm");
 
@@ -692,16 +621,6 @@ namespace MyKPPLearn.Admin
                 return;
             }
 
-            int setNumber;
-
-            if (!int.TryParse((txtSetNumber.Text ?? string.Empty).Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out setNumber)
-                || setNumber < 1)
-            {
-                RejectSave(OrderMessage);
-                return;
-            }
-
-            bool isActive = string.Equals(rblStatus.SelectedValue, "Active", StringComparison.Ordinal);
             int editingId = EditingPracticeId;
             string newImagePath = null;
             bool committed = false;
@@ -732,12 +651,6 @@ namespace MyKPPLearn.Admin
                     }
                 }
 
-                if (HiddenRoadSignPracticeRepository.SetNumberExists(setNumber, editingId))
-                {
-                    RejectNumber(DuplicateMessage);
-                    return;
-                }
-
                 if (editingId == 0 && !fuScene.HasFile)
                 {
                     RejectSave("Please choose a Scene Image for the game set.");
@@ -765,11 +678,10 @@ namespace MyKPPLearn.Admin
                     return;
                 }
 
-                if (isActive && items.Count == 0)
-                {
-                    RejectSave("An Active game set needs at least one road sign. Place a road sign in the scene, or set the status to Inactive.");
-                    return;
-                }
+                // A set is Active as soon as it has a road sign (a new set, or an existing one getting its first); after that
+                // an edited set keeps its status. A set without road signs can't be Active, so it is saved as Inactive.
+                bool firstRoadSigns = existingSet == null || Convert.ToInt32(existingSet["ItemCount"]) == 0;
+                bool isActive = items.Count > 0 && (firstRoadSigns || (bool)existingSet["IsActive"]);
 
                 // ---- Scene Image: staged only now that everything else is valid; the replaced file is removed after the commit ----
                 if (fuScene.HasFile)
@@ -778,7 +690,7 @@ namespace MyKPPLearn.Admin
                 }
 
                 HiddenRoadSignSaveSetResult result = HiddenRoadSignGameSetRepository.Save(
-                    editingId, setNumber, isActive, newImagePath, items, state.removed ?? new List<int>());
+                    editingId, isActive, newImagePath, items, state.removed ?? new List<int>());
 
                 if (result.Error != null)
                 {
@@ -796,12 +708,23 @@ namespace MyKPPLearn.Admin
 
                 if (editingId == 0)
                 {
-                    FlashMessage.Set(Session, "Game set created successfully.");
+                    FlashMessage.Set(Session, items.Count > 0
+                        ? "Game set created and Active."
+                        : "Game set saved as Inactive because it has no road signs yet. Edit it to place road signs in the scene.");
                     Response.Redirect("~/Admin/HiddenRoadSigns.aspx", true);
                     return;
                 }
 
                 string message = "Changes saved successfully.";
+
+                if ((bool)existingSet["IsActive"] && !isActive)
+                {
+                    message += " The set is now Inactive because it has no road signs.";
+                }
+                else if (!(bool)existingSet["IsActive"] && isActive)
+                {
+                    message += " The set is now Active because it has road signs.";
+                }
 
                 if (newImagePath != null && items.Count > 0)
                 {

@@ -797,7 +797,7 @@ a.lesson-row--link:focus-visible {
 }
 
 .practice-result {
-  max-width: 640px;
+  max-width: 740px;   /* wide enough for the four result buttons on one row, as the Mock Exam result */
   margin: 0 auto;
   text-align: center;
 }
@@ -1225,7 +1225,7 @@ a.lesson-row--link:focus-visible {
 
 /* ---- result ---- */
 .mx-result {
-  max-width: 680px;
+  max-width: 740px;   /* wide enough for the four result buttons on one row */
 }
 
     .mx-result .mx-result__heading {
@@ -2548,13 +2548,7 @@ body.hrs-modal-open {
   cursor: pointer;
 }
 
-/* ---- Mock Exam: result summary line, review flag marker ---- */
-.mx-result__weak {
-  margin: 0 0 16px;
-  font-weight: 600;
-  color: var(--color-navy);
-}
-
+/* ---- Mock Exam: review flag marker ---- */
 .mx-review-flag {
   font-size: var(--fs-small);
   font-weight: 700;
@@ -2693,4 +2687,51 @@ body.hrs-modal-open {
 
 .hrs-review .practice-review__filter {
   margin-bottom: 0;
+}
+
+/* Instructions screens: a <button> and an <a> button side by side get the same line height, so the same height. */
+.practice-instructions .form-actions .btn {
+  line-height: 1.25;
+}
+
+/* Button rows on learner pages (dialogs, instructions): side by side with a gap, wrapping on narrow screens.
+   Result screens centre theirs with their own rules above. Buttons and links get the same line height. */
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.form-actions .btn {
+  line-height: 1.25;
+}
+
+
+/* Result buttons (Practice and Mock Exam): coloured by role. Next Set (or Review Answers when it leads) stays
+   btn-primary; Review Answers is tinted blue, Try Again amber, and the Back link stays neutral. */
+#btnReviewAnswers.btn-secondary,
+#mxReviewBtn.btn-secondary {
+  background-color: var(--color-primary-light);
+  border-color: #BFDBFE;
+  color: var(--color-primary-dark);
+}
+
+#btnReviewAnswers.btn-secondary:hover,
+#mxReviewBtn.btn-secondary:hover {
+  background-color: #DBEAFE;
+  border-color: var(--color-primary);
+}
+
+#btnTryAgain,
+#mxTryAgainBtn {
+  background-color: #FFFBEB;
+  border-color: #FDE68A;
+  color: #B45309;
+}
+
+#btnTryAgain:hover,
+#mxTryAgainBtn:hover {
+  background-color: #FEF3C7;
+  border-color: var(--color-warning);
 }

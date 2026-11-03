@@ -98,7 +98,6 @@
 
             <uc:QuestionFields ID="QuestionFields1" runat="server" />
 
-            <p id="qbStatusHint" class="form-hint">A new question starts as Active. Use the Status button in the list to deactivate it.</p>
 
             <div class="form-actions">
                 <button type="button" id="qbSaveBtn" class="btn btn-primary">Save</button>

@@ -26,7 +26,6 @@
                     <asp:FileUpload ID="fuPhoto" runat="server" CssClass="profile-photo-input" accept=".jpg,.jpeg,.png,.webp" />
                     <asp:Button ID="btnUploadPhoto" runat="server" CssClass="profile-upload-trigger" CausesValidation="false" TabIndex="-1" Text="Upload" OnClick="btnUploadPhoto_Click" />
                 </div>
-                <p class="profile-photo-hint">Click or tap the picture to change it. JPG, PNG or WebP, up to 2&nbsp;MB.</p>
                 <asp:Button ID="btnRemovePhoto" runat="server" CssClass="profile-photo-remove" CausesValidation="false" Text="Remove photo" OnClick="btnRemovePhoto_Click" data-confirm="Your profile picture will be removed and your initials shown instead." data-confirm-title="Remove profile picture?" data-confirm-label="Remove" />
                 <span class="profile-photo-status" role="status" hidden>Uploading&hellip;</span>
                 <span class="field-error profile-photo-error" role="alert" hidden></span>

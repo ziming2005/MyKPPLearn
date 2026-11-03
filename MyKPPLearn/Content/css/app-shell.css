@@ -515,8 +515,25 @@
   font-weight: 700;
 }
 
-.profile-avatar:hover .profile-avatar__circle {
-    background-color: var(--color-primary-dark);
+.profile-avatar__circle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.profile-avatar:hover .profile-avatar__circle,
+.profile-avatar:focus-visible .profile-avatar__circle {
+  background-color: var(--color-primary-dark);
+}
+
+.profile-avatar:hover .profile-avatar__circle::after,
+.profile-avatar:focus-visible .profile-avatar__circle::after {
+  opacity: 1;
 }
 
 .profile-avatar__img {
@@ -530,19 +547,20 @@
 }
 
 .profile-avatar__badge {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border: 2px solid var(--color-surface);
-    border-radius: 50%;
-    background-color: #E2E8F0;
-    color: var(--color-navy);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  background-color: #E2E8F0;
+  color: var(--color-navy);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .profile-avatar__img[hidden],
@@ -752,15 +770,9 @@ body.profile-modal-open {
   padding-top: 16px;
 }
 
-/* ---- Profile: role badge, photo hint / remove, security text, activity ---- */
+/* ---- Profile: role badge, photo remove, security text, activity ---- */
 .profile-identity__role .badge {
   margin-top: 4px;
-}
-
-.profile-photo-hint {
-  margin: 8px 0 0;
-  font-size: var(--fs-small);
-  color: var(--color-text-secondary);
 }
 
 .profile-photo-remove {
@@ -873,6 +885,8 @@ body.profile-modal-open {
 
 .activity-item--lesson .activity-item__dot { background-color: #15803D; }
 .activity-item--game .activity-item__dot { background-color: #B45309; }
+.activity-item--practice .activity-item__dot { background-color: #0E7490; }
+.activity-item--mock .activity-item__dot { background-color: #7E22CE; }
 
 .activity-item__text {
   flex: 1;

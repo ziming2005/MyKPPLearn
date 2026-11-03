@@ -78,12 +78,11 @@
                 <p id="mxTypeError" class="field-error" role="alert" hidden></p>
             </div>
 
-            <p id="mxNumberInfo" class="form-hint"></p>
+            <p id="mxNumberInfo" class="form-hint" hidden></p>
 
             <dl class="detail-list mx-rules" id="mxFormRules" aria-label="Exam rules (set automatically from Exam Type)"></dl>
 
             <h3 class="mx-questions__title">Questions</h3>
-            <p class="form-hint">Tick the required number of active questions in every section. Questions come from the Question Bank: the Colour Blind Test uses Colour Recognition questions. A new set becomes Active when it is saved with every section complete; an incomplete set is saved as Inactive so you can finish it later.</p>
 
             <div class="filter-bar">
                 <label class="form-label" for="mxQSection">Section</label>

@@ -92,9 +92,9 @@ namespace MyKPPLearn.Data
                 return "Please select exactly one correct answer (A, B or C).";
             }
 
-            if (string.IsNullOrWhiteSpace(input.Explanation) || input.Explanation.Trim().Length > MaxExplanationLength)
+            if (input.Explanation != null && input.Explanation.Trim().Length > MaxExplanationLength)
             {
-                return "Explanation is required (up to " + MaxExplanationLength + " characters).";
+                return "Explanation must be " + MaxExplanationLength + " characters or fewer.";
             }
 
             return null;

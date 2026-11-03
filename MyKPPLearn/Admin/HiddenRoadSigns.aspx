@@ -28,7 +28,6 @@
                         <tr>
                             <th scope="col">Set</th>
                             <th scope="col">Road Signs</th>
-                            <th scope="col">Attempts</th>
                             <th scope="col">Status</th>
                             <th scope="col">Actions</th>
                         </tr>
@@ -38,8 +37,7 @@
                             <ItemTemplate>
                                 <tr class='<%# (bool)Eval("IsActive") ? "" : "row--inactive" %>'>
                                     <td class="data-table__nowrap"><strong><%# Eval("SetNumber") %></strong></td>
-                                    <td class="data-table__nowrap"><span class='<%# SignsBadgeClass(Eval("ConfiguredCount"), Eval("ItemCount")) %>' title='<%# SignsBadgeTitle(Eval("ConfiguredCount"), Eval("ItemCount")) %>'><%# Eval("ConfiguredCount") %> / <%# Eval("ItemCount") %> configured</span></td>
-                                    <td class="data-table__nowrap"><%# Eval("AttemptCount") %></td>
+                                    <td class="data-table__nowrap"><%# RoadSignCount(Eval("ItemCount")) %></td>
                                     <td><asp:LinkButton runat="server" ID="btnStatus" CommandName="toggle" CommandArgument='<%# Eval("HiddenRoadSignPracticeId") %>' CausesValidation="false" /></td>
                                     <td>
                                         <div class="row-actions">
@@ -69,42 +67,18 @@
             <h2><asp:Literal ID="litFormHeading" runat="server" /></h2>
         </div>
 
-        <div class="card form-card hrs-details">
-            <h3 class="hrs-section-title">Game Set Details</h3>
+        <!-- ================= EDITOR ================= -->
+        <div class="hrs-manage">
+            <div class="hrs-manage__head">
+                <asp:Literal ID="litSetInfo" runat="server" />
+            </div>
 
             <asp:ValidationSummary ID="valSummary" runat="server" CssClass="validation-summary" HeaderText="Please fix the following:" DisplayMode="BulletList" ValidationGroup="SetForm" />
 
-            <div class="form-group">
-                <asp:Label runat="server" AssociatedControlID="txtSetNumber" CssClass="form-label">Game Set Number</asp:Label>
-                <asp:TextBox ID="txtSetNumber" runat="server" CssClass="form-input form-input--short" MaxLength="9" />
-                <span class="used-numbers"><%= UsedNumbersText %></span>
-                <span class="form-hint">Enter the set number only, for example 1 (shown to learners as &ldquo;Road Sign Game Set 1&rdquo;). Each number must be unique.</span>
-                <asp:Label ID="lblNumberError" runat="server" CssClass="field-error" Visible="false" EnableViewState="false" role="alert" />
-                <asp:RequiredFieldValidator ID="rfvSetNumber" runat="server" ControlToValidate="txtSetNumber" CssClass="field-error" Display="Dynamic" ErrorMessage="Set number must be a whole number greater than 0." ValidationGroup="SetForm" />
-                <asp:RegularExpressionValidator ID="revSetNumber" runat="server" ControlToValidate="txtSetNumber" CssClass="field-error" Display="Dynamic" ValidationExpression="^\s*[1-9][0-9]{0,8}\s*$" ErrorMessage="Set number must be a whole number greater than 0." ValidationGroup="SetForm" />
-            </div>
-
-            <div class="form-group">
-                <span class="form-label">Status</span>
-                <asp:RadioButtonList ID="rblStatus" runat="server" CssClass="radio-list" RepeatDirection="Vertical">
-                    <asp:ListItem Text="Active" Value="Active" />
-                    <asp:ListItem Text="Inactive" Value="Inactive" Selected="True" />
-                </asp:RadioButtonList>
-                <span class="form-hint">A set can only be Active once it has at least one road sign and every road sign question is complete. New sets start as Inactive.</span>
-            </div>
-
-            <div class="form-group">
+            <div class="form-group hrs-scene-upload">
                 <asp:Label runat="server" AssociatedControlID="fuScene" CssClass="form-label">Scene Image</asp:Label>
                 <asp:FileUpload ID="fuScene" runat="server" CssClass="form-input" accept=".jpg,.jpeg,.png,.webp" />
                 <span class="form-hint">JPG, PNG or WEBP, up to 4 MB.<asp:Literal ID="litKeepImageHint" runat="server" /></span>
-            </div>
-        </div>
-
-        <!-- ================= MANAGE ROAD SIGNS ================= -->
-        <div class="hrs-manage">
-            <div class="hrs-manage__head">
-                <h3 class="hrs-section-title">Manage Road Signs</h3>
-                <p>Drag road signs into the scene, then select each one to configure its question.</p>
             </div>
 
             <div id="hrsNotice" class="alert" role="status" hidden></div>
@@ -176,35 +150,32 @@
                                     <span class="char-counter"><span id="hrsQuestionCount">0</span> / 500</span>
                                 </div>
 
-                                <div class="form-group">
-                                    <label class="form-label" for="hrsOptionA">Option A</label>
-                                    <input type="text" id="hrsOptionA" class="form-input" maxlength="200" data-field="a" disabled />
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="hrsOptionB">Option B</label>
-                                    <input type="text" id="hrsOptionB" class="form-input" maxlength="200" data-field="b" disabled />
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="hrsOptionC">Option C</label>
-                                    <input type="text" id="hrsOptionC" class="form-input" maxlength="200" data-field="c" disabled />
-                                </div>
-
                                 <div class="form-group hrs-form__wide">
-                                    <span class="form-label" id="lblCorrect">Correct Answer</span>
-                                    <div data-field="correct" role="radiogroup" aria-labelledby="lblCorrect" class="radio-list radio-list--inline">
-                                        <span><input type="radio" id="hrsCorrect1" name="hrsCorrect" value="1" disabled /><label for="hrsCorrect1">A</label></span>
-                                        <span><input type="radio" id="hrsCorrect2" name="hrsCorrect" value="2" disabled /><label for="hrsCorrect2">B</label></span>
-                                        <span><input type="radio" id="hrsCorrect3" name="hrsCorrect" value="3" disabled /><label for="hrsCorrect3">C</label></span>
+                                    <span class="form-label" id="lblOptions">Options</span>
+                                    <span class="form-hint">Enter three different options (A, B and C) and choose the correct one.</span>
+                                    <div data-field="correct" role="radiogroup" aria-labelledby="lblOptions">
+                                        <div class="qb-option">
+                                            <span class="qb-option__letter" aria-hidden="true">A</span>
+                                            <input type="text" id="hrsOptionA" class="form-input" maxlength="200" data-field="a" aria-label="Option A" disabled />
+                                            <label class="qb-option__correct"><input type="radio" id="hrsCorrect1" name="hrsCorrect" value="1" disabled /> Correct</label>
+                                        </div>
+                                        <div class="qb-option">
+                                            <span class="qb-option__letter" aria-hidden="true">B</span>
+                                            <input type="text" id="hrsOptionB" class="form-input" maxlength="200" data-field="b" aria-label="Option B" disabled />
+                                            <label class="qb-option__correct"><input type="radio" id="hrsCorrect2" name="hrsCorrect" value="2" disabled /> Correct</label>
+                                        </div>
+                                        <div class="qb-option">
+                                            <span class="qb-option__letter" aria-hidden="true">C</span>
+                                            <input type="text" id="hrsOptionC" class="form-input" maxlength="200" data-field="c" aria-label="Option C" disabled />
+                                            <label class="qb-option__correct"><input type="radio" id="hrsCorrect3" name="hrsCorrect" value="3" disabled /> Correct</label>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="form-group hrs-form__wide">
-                                    <label class="form-label" for="hrsExplanation">Explanation</label>
+                                    <label class="form-label" for="hrsExplanation">Explanation (optional)</label>
                                     <textarea id="hrsExplanation" class="form-input" rows="3" maxlength="500" data-field="explanation" disabled></textarea>
                                     <span class="char-counter"><span id="hrsExplanationCount">0</span> / 500</span>
-                                    <span class="form-hint">Required. Shown to the learner only after an incorrect answer.</span>
                                 </div>
 
                                 <p id="hrsFormProblem" class="field-error hrs-form__wide" role="alert" hidden></p>
@@ -260,7 +231,7 @@
                 <asp:Literal ID="litViewStatus" runat="server" />
             </div>
             <h2><asp:Literal ID="litViewSet" runat="server" /></h2>
-            <p class="lesson-article__chapter"><asp:Literal ID="litViewItems" runat="server" /> &middot; <asp:Literal ID="litViewAttempts" runat="server" /></p>
+            <p class="lesson-article__chapter"><asp:Literal ID="litViewItems" runat="server" /></p>
 
             <h3 class="hrs-section-title">Learner Scene Preview</h3>
             <%-- Read-only: the Scene Image plus the CONFIGURED road signs only, exactly as a learner first sees it. --%>

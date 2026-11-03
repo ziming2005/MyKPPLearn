@@ -170,8 +170,6 @@
                 </div>
             </div>
 
-            <p id="mxResultWeak" class="mx-result__weak" hidden></p>
-
             <div class="mx-result__scores">
                 <h3>Theory Breakdown</h3>
                 <ul id="mxResultSectionScores" class="mx-result__score-list"></ul>

@@ -156,7 +156,6 @@ namespace MyKPPLearn.Admin
                 litFormHeading.Text = "Add Road Sign";
                 litFormCrumb.Text = "Add Road Sign";
                 txtName.Text = string.Empty;
-                rblStatus.SelectedValue = "Active";
                 return;
             }
 
@@ -164,7 +163,6 @@ namespace MyKPPLearn.Admin
             litFormHeading.Text = "Edit Road Sign";
             litFormCrumb.Text = "Edit Road Sign";
             txtName.Text = Convert.ToString(asset["Name"]);
-            rblStatus.SelectedValue = (bool)asset["IsActive"] ? "Active" : "Inactive";
             previewImg.Src = ResolveUrl("~/" + Convert.ToString(asset["ImagePath"]));
             previewImg.Alt = "Current image for " + Convert.ToString(asset["Name"]);
             previewWrap.Style["display"] = "block";
@@ -282,7 +280,6 @@ namespace MyKPPLearn.Admin
 
             // Server-side re-validation: never rely on client-side checks.
             string name = (txtName.Text ?? string.Empty).Trim();
-            bool isActive = string.Equals(rblStatus.SelectedValue, "Active", StringComparison.Ordinal);
             int editingId = EditingAssetId;
 
             if (name.Length == 0 || name.Length > 150)
@@ -340,14 +337,14 @@ namespace MyKPPLearn.Admin
 
                 if (editingId == 0)
                 {
-                    HiddenRoadSignAssetRepository.Create(name, newImagePath, isActive);
+                    HiddenRoadSignAssetRepository.Create(name, newImagePath, true);
                     committed = true;
                     FlashMessage.Set(Session, "Road sign created.");
                 }
                 else
                 {
                     string oldImagePath = Convert.ToString(existing["ImagePath"]);
-                    HiddenRoadSignAssetRepository.Update(editingId, name, newImagePath, isActive);
+                    HiddenRoadSignAssetRepository.Update(editingId, name, newImagePath, (bool)existing["IsActive"]);
                     committed = true;
 
                     // The replacement is saved; only now is the old (replaced) image file removed.

@@ -53,7 +53,7 @@ namespace MyKPPLearn.Data
         /// <param name="newScenePath">Required when creating; when editing, null keeps the current Scene Image.</param>
         /// <param name="removedItemIds">Existing road signs the administrator removed.</param>
         public static HiddenRoadSignSaveSetResult Save(
-            int practiceId, int setNumber, bool isActive, string newScenePath,
+            int practiceId, bool isActive, string newScenePath,
             IList<HiddenRoadSignEditorItem> items, IList<int> removedItemIds)
         {
             using (SqlConnection connection = DatabaseHelper.GetConnection())
@@ -69,7 +69,7 @@ namespace MyKPPLearn.Data
 
                         if (practiceId == 0)
                         {
-                            id = InsertSet(connection, transaction, setNumber, newScenePath, isActive);
+                            id = InsertSet(connection, transaction, newScenePath, isActive);
                         }
                         else
                         {
@@ -93,7 +93,7 @@ namespace MyKPPLearn.Data
                                 result.ReplacedScenePath = Convert.ToString(oldPath);
                             }
 
-                            UpdateSet(connection, transaction, practiceId, setNumber, newScenePath, isActive);
+                            UpdateSet(connection, transaction, practiceId, newScenePath, isActive);
                         }
 
                         // Reconcile the submitted road signs with what is stored: every existing road sign must be
@@ -204,30 +204,39 @@ namespace MyKPPLearn.Data
             try { transaction.Rollback(); } catch (InvalidOperationException) { }
         }
 
-        private static int InsertSet(SqlConnection connection, SqlTransaction transaction, int setNumber, string scenePath, bool isActive)
+        /// <summary>
+        /// Inserts a new set with the lowest unused number (a gap left by a deleted set is filled first), chosen under
+        /// UPDLOCK/HOLDLOCK inside the save's transaction so two admins adding at the same moment get different numbers.
+        /// </summary>
+        private static int InsertSet(SqlConnection connection, SqlTransaction transaction, string scenePath, bool isActive)
         {
             using (SqlCommand command = new SqlCommand(@"
+                DECLARE @SetNumber INT =
+                    (SELECT MIN(n.Number)
+                     FROM (SELECT 1 AS Number
+                           UNION ALL
+                           SELECT SetNumber + 1 FROM HiddenRoadSignPractices WITH (UPDLOCK, HOLDLOCK)) n
+                     WHERE NOT EXISTS (SELECT 1 FROM HiddenRoadSignPractices p WHERE p.SetNumber = n.Number));
+
                 INSERT INTO HiddenRoadSignPractices (SetNumber, SceneImagePath, IsActive, CreatedAt, UpdatedAt)
                 OUTPUT INSERTED.HiddenRoadSignPracticeId
                 VALUES (@SetNumber, @Scene, @IsActive, SYSUTCDATETIME(), SYSUTCDATETIME());", connection, transaction))
             {
-                command.Parameters.AddWithValue("@SetNumber", setNumber);
                 command.Parameters.AddWithValue("@Scene", scenePath);
                 command.Parameters.AddWithValue("@IsActive", isActive);
                 return Convert.ToInt32(command.ExecuteScalar());
             }
         }
 
-        private static void UpdateSet(SqlConnection connection, SqlTransaction transaction, int practiceId, int setNumber, string scenePath, bool isActive)
+        private static void UpdateSet(SqlConnection connection, SqlTransaction transaction, int practiceId, string scenePath, bool isActive)
         {
             using (SqlCommand command = new SqlCommand(@"
                 UPDATE HiddenRoadSignPractices
-                SET SetNumber = @SetNumber, SceneImagePath = ISNULL(@Scene, SceneImagePath),
+                SET SceneImagePath = ISNULL(@Scene, SceneImagePath),
                     IsActive = @IsActive, UpdatedAt = SYSUTCDATETIME()
                 WHERE HiddenRoadSignPracticeId = @P", connection, transaction))
             {
                 command.Parameters.AddWithValue("@P", practiceId);
-                command.Parameters.AddWithValue("@SetNumber", setNumber);
                 command.Parameters.AddWithValue("@Scene", (object)scenePath ?? DBNull.Value);
                 command.Parameters.AddWithValue("@IsActive", isActive);
                 command.ExecuteNonQuery();

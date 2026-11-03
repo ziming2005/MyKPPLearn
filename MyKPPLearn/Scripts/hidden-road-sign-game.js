@@ -42,6 +42,18 @@
     var foundCountEl = document.getElementById("hrsFoundCount");
     var announceEl = document.getElementById("hrsAnnounce");
 
+    // The instructions screen comes first; Start Game hides it and shows the scene.
+    var intro = document.getElementById("hrsIntro");
+    var startBtn = document.getElementById("hrsStartBtn");
+
+    if (intro && startBtn) {
+        startBtn.addEventListener("click", function () {
+            intro.hidden = true;
+            root.hidden = false;
+            root.scrollIntoView({ block: "start" });
+        });
+    }
+
     var items = game.items;
     var total = items.length;
     var found = [];             // { itemId, choiceId, foundOrder } in the order discovered

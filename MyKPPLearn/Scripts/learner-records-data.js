@@ -77,7 +77,7 @@
         // ---- server calls (each resolves with the page method's result) ----
         loadLearners: function () { return call("LoadLearners"); },
         create: function (name, email, password) { return call("Create", { name: name, email: email, password: password }); },
-        update: function (id, name, email) { return call("Update", { id: id, name: name, email: email }); },
+        update: function (id, name) { return call("Update", { id: id, name: name }); },
         setStatus: function (id, active) { return call("SetStatus", { id: id, active: active }); },
         remove: function (id) { return call("Delete", { id: id }); },
         getDetails: function (id) { return call("GetDetails", { id: id }); },

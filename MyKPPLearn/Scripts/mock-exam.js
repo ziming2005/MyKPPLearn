@@ -662,25 +662,6 @@
             var elapsed = r.timeTakenSeconds;
             byId("mxResultTime").textContent = "Time taken: " + formatClock(elapsed) + " of " + type.minutes + " minutes";
 
-            // Where the most points were lost.
-            var weakest = null;
-            r.sections.forEach(function (section) {
-                var ratio = section.total === 0 ? 1 : section.score / section.total;
-
-                if (ratio < 1 && (weakest === null || ratio < weakest.ratio)) {
-                    weakest = { ratio: ratio, section: section };
-                }
-            });
-
-            var weakEl = byId("mxResultWeak");
-
-            if (weakest) {
-                weakEl.textContent = "Most points lost in: " + weakest.section.label + " (" + weakest.section.score + " / " + weakest.section.total + ")";
-                weakEl.hidden = false;
-            } else {
-                weakEl.hidden = true;
-            }
-
             // "Next Set" leads when there is one; otherwise Review Answers does.
             var nextSet = MockExamData.getActiveSets(type.id).filter(function (x) { return x.setNumber > setInfo.setNumber; })[0];
             var nextLink = byId("mxNextSetLink");

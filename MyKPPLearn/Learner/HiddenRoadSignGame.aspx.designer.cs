@@ -42,6 +42,33 @@ namespace MyKPPLearn.Learner
         protected global::System.Web.UI.WebControls.Literal litTotal;
 
         /// <summary>
+        /// litCrumbSet control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litCrumbSet;
+
+        /// <summary>
+        /// litIntroTitle control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litIntroTitle;
+
+        /// <summary>
+        /// litIntroCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litIntroCount;
+
+        /// <summary>
         /// imgScene control.
         /// </summary>
         /// <remarks>

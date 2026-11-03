@@ -111,6 +111,8 @@ namespace MyKPPLearn.Learner
 
             litSetName.Text = HttpUtility.HtmlEncode(setName);
             litTotal.Text = items.Rows.Count.ToString(CultureInfo.InvariantCulture);
+            litCrumbSet.Text = litIntroTitle.Text = litSetName.Text;
+            litIntroCount.Text = items.Rows.Count + (items.Rows.Count == 1 ? " road sign" : " road signs") + " to find";
             imgScene.Src = ResolveUrl("~/" + Convert.ToString(set["SceneImagePath"]));
 
             string gameUrl = ResolveUrl("~/Learner/HiddenRoadSignGame.aspx");

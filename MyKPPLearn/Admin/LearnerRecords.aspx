@@ -68,13 +68,14 @@
             <div class="form-group">
                 <label class="form-label" for="lrEditEmail">Email</label>
                 <input id="lrEditEmail" type="email" class="form-input" maxlength="254" autocomplete="off" />
+                <span id="lrEmailHint" class="form-hint" hidden>The email is the learner's sign-in and can't be changed.</span>
                 <p id="lrEmailError" class="field-error" role="alert" hidden></p>
             </div>
 
             <div id="lrPasswordGroup" class="form-group" hidden>
                 <label class="form-label" for="lrEditPassword">Password</label>
                 <input id="lrEditPassword" type="password" class="form-input" maxlength="100" autocomplete="new-password" />
-                <span class="form-hint">At least 8 characters with an uppercase letter, a lowercase letter and a number. Share it with the learner; they can change it in Profile.</span>
+                <span class="form-hint">At least 8 characters, including an uppercase letter, a lowercase letter, and a number.</span>
                 <p id="lrPasswordError" class="field-error" role="alert" hidden></p>
             </div>
 
@@ -102,6 +103,6 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="<%= ResolveUrl("~/Scripts/learner-records-data.js") + "?v=20261102-db" %>"></script>
-    <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261102-db" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/learner-records-data.js") + "?v=20261103" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261103" %>"></script>
 </asp:Content>

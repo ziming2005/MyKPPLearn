@@ -1,6 +1,8 @@
 using System;
 using System.Data;
 using System.Globalization;
+using System.Linq;
+using System.Web;
 using MyKPPLearn.Common;
 using MyKPPLearn.Data;
 using MyKPPLearn.Security;
@@ -11,17 +13,19 @@ namespace MyKPPLearn.Learner
     /// Learner progress, always for the signed-in learner (taken from Session, never from the request).
     ///   Learning: real LearningProgress against the currently active lessons and chapters.
     ///   Hidden Road Sign Game: real completed attempts (historical: kept even if the Set is later deactivated).
-    ///   Practice and Mock Exam: attempts are not stored yet, so they show a dash / an honest placeholder, never made-up data.
+    ///   Practice and Mock Exam: every finished practice set and mock exam, newest first.
     /// </summary>
     public partial class Progress : System.Web.UI.Page
     {
-        // The 3 most recent games are always shown; any older ones are hidden until "View All" is clicked (client-side, no reload).
+        // The 3 most recent entries of each history are always shown; older ones stay hidden until "View All" (client-side, no reload).
         protected const int RecentGames = 3;
 
         protected int OverallCompleted;
         protected int OverallTotal;
         protected int OverallPercent;
         protected int GamesCompleted;
+        protected int PracticeCount;
+        protected int MockCount;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -34,6 +38,8 @@ namespace MyKPPLearn.Learner
             {
                 BindLearning(userId);
                 BindGames(userId);
+                BindPractice(userId);
+                BindMockExams(userId);
             }
             catch (Exception)
             {
@@ -113,6 +119,64 @@ namespace MyKPPLearn.Learner
 
             pnlNoGames.Visible = GamesCompleted == 0;
             pnlGameToggle.Visible = GamesCompleted > RecentGames;
+        }
+
+        private void BindPractice(int userId)
+        {
+            DataTable history = LearnerRecordRepository.GetPracticeHistory(userId);
+            rptPractice.DataSource = history;
+            rptPractice.DataBind();
+
+            int count = history.Rows.Count;
+            PracticeCount = count;
+
+            if (count > 0)
+            {
+                double ratioSum = 0;
+
+                foreach (DataRow row in history.Rows)
+                {
+                    int total = Convert.ToInt32(row["TotalQuestions"]);
+                    ratioSum += total <= 0 ? 0 : (double)Convert.ToInt32(row["CorrectCount"]) / total;
+                }
+
+                int average = (int)Math.Round(ratioSum / count * 100, MidpointRounding.AwayFromZero);
+                litPracticeSummary.Text = count.ToString(CultureInfo.InvariantCulture) + (count == 1 ? " practice set completed" : " practice sets completed")
+                    + " &middot; Average: " + average.ToString(CultureInfo.InvariantCulture) + "%";
+                pnlPracticeSummary.Visible = true;
+            }
+
+            pnlNoPractice.Visible = count == 0;
+            pnlPracticeToggle.Visible = count > RecentGames;
+        }
+
+        private void BindMockExams(int userId)
+        {
+            DataTable history = LearnerRecordRepository.GetMockExamHistory(userId);
+            rptMock.DataSource = history;
+            rptMock.DataBind();
+
+            int count = history.Rows.Count;
+            MockCount = count;
+
+            if (count > 0)
+            {
+                int passed = history.Rows.Cast<DataRow>().Count(r => Convert.ToBoolean(r["IsPassed"]));
+                litMockSummary.Text = count.ToString(CultureInfo.InvariantCulture) + (count == 1 ? " mock exam taken" : " mock exams taken")
+                    + " &middot; Passed: " + passed.ToString(CultureInfo.InvariantCulture);
+                pnlMockSummary.Visible = true;
+            }
+
+            pnlNoMock.Visible = count == 0;
+            pnlMockToggle.Visible = count > RecentGames;
+        }
+
+        /// <summary>"KPP Standard — Mock Exam Set 1", HTML-encoded.</summary>
+        protected string MockTitle(object typeCode, object setNumber)
+        {
+            MockExamType type = MockExamRules.Find(Convert.ToString(typeCode));
+            string name = type == null ? Convert.ToString(typeCode) : type.Name;
+            return HttpUtility.HtmlEncode(name + " \u2014 Mock Exam Set " + Convert.ToInt32(setNumber).ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>"empty" (no lessons), "new", "progress" or "done".</summary>

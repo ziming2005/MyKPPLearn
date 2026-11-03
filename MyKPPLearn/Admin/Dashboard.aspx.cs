@@ -23,7 +23,6 @@ namespace MyKPPLearn.Admin
             {
                 int learners = UserRepository.GetLearnerCount();
                 litTotalLearners.Text = learners.ToString(CultureInfo.InvariantCulture);
-                litLearnersMeta.Text = learners + (learners == 1 ? " learner" : " learners");
             }
             catch (Exception)
             {
@@ -36,9 +35,6 @@ namespace MyKPPLearn.Admin
                 // The learner-visible count (active lessons in active chapters), so it matches what learners see.
                 int lessons = LessonRepository.GetTotalActiveLessonCount();
                 litTotalLessons.Text = lessons.ToString(CultureInfo.InvariantCulture);
-
-                int chapters = AdminDashboardRepository.GetActiveChapterCount();
-                litLearningMeta.Text = lessons + (lessons == 1 ? " lesson" : " lessons") + " in " + chapters + (chapters == 1 ? " chapter" : " chapters");
             }
             catch (Exception)
             {
@@ -50,11 +46,8 @@ namespace MyKPPLearn.Admin
             {
                 // Same idea as Active Lessons: the game sets a learner can actually play (Active, with a configured road sign).
                 int playable = HiddenRoadSignPracticeRepository.GetPlayableForLearner().Rows.Count;
-                int games = HiddenRoadSignPracticeRepository.GetTotalCount();
-                int assets = AdminDashboardRepository.GetRoadSignAssetCount();
 
                 litOverviewHiddenRoadSigns.Text = playable.ToString(CultureInfo.InvariantCulture);
-                litGamesMeta.Text = games + (games == 1 ? " game set" : " game sets") + " · " + assets + (assets == 1 ? " road sign" : " road signs");
             }
             catch (Exception)
             {
@@ -81,7 +74,7 @@ namespace MyKPPLearn.Admin
         {
             try
             {
-                DataTable rows = AdminDashboardRepository.GetRecentActivity(10);
+                DataTable rows = ActivityRepository.GetRecent(10);
 
                 if (rows.Rows.Count == 0)
                 {
@@ -103,28 +96,7 @@ namespace MyKPPLearn.Admin
         /// <summary>One feed line as safe HTML: learner name in bold, then what they did.</summary>
         protected string ActivityText(object kind, object who, object detail)
         {
-            string name = "<strong>" + HttpUtility.HtmlEncode(Convert.ToString(who)) + "</strong>";
-            string text = Convert.ToString(detail);
-
-            switch (Convert.ToString(kind))
-            {
-                case "register":
-                    return name + " registered a learner account";
-
-                case "lesson":
-                    return name + " completed <em>" + HttpUtility.HtmlEncode(text) + "</em>";
-
-                default:
-                    string[] parts = text.Split('|');
-
-                    if (parts.Length == 3)
-                    {
-                        return name + " finished " + HttpUtility.HtmlEncode(HiddenRoadSignPracticeRepository.FormatSetName(parts[0]))
-                            + " (" + HttpUtility.HtmlEncode(parts[1]) + " / " + HttpUtility.HtmlEncode(parts[2]) + ")";
-                    }
-
-                    return name + " finished a Road Sign Game";
-            }
+            return "<strong>" + HttpUtility.HtmlEncode(Convert.ToString(who)) + "</strong> " + ActivityRepository.Describe(kind, detail);
         }
 
         /// <summary>The exact date and time, shown when hovering over "3 hours ago".</summary>

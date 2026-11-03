@@ -14,7 +14,7 @@
     <asp:Panel ID="pnlSummary" runat="server" CssClass="card learn-summary" Visible="false">
         <div class="learn-summary__main">
             <div class="learn-summary__label">Your progress</div>
-            <div class="learn-summary__value"><asp:Literal ID="litSummaryCompleted" runat="server" /> of <asp:Literal ID="litSummaryTotal" runat="server" /> lessons completed &middot; <asp:Literal ID="litSummaryPercent" runat="server" />%</div>
+            <div class="learn-summary__value"><asp:Literal ID="litSummaryCompleted" runat="server" /> of <asp:Literal ID="litSummaryTotal" runat="server" /> lessons completed</div>
             <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Overall learning progress">
                 <div id="summaryFill" runat="server" class="progress-track__fill"></div>
             </div>

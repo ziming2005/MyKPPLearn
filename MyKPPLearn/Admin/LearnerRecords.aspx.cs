@@ -92,13 +92,21 @@ namespace MyKPPLearn.Admin
             return new SaveResultDto { learner = ToLearner(LearnerRecordRepository.GetById(userId)) };
         }
 
+        /// <summary>Changes a learner's name. The email is the learner's sign-in, so an administrator can't change it.</summary>
         [WebMethod(EnableSession = true)]
-        public static SaveResultDto Update(int id, string name, string email)
+        public static SaveResultDto Update(int id, string name)
         {
             SessionHelper.DemandAdministrator();
 
+            DataRow current = LearnerRecordRepository.GetById(id);
+
+            if (current == null)
+            {
+                return new SaveResultDto { error = "Learner not found. The account may have been deleted." };
+            }
+
             string fullName = (name ?? string.Empty).Trim();
-            string normalizedEmail = (email ?? string.Empty).Trim().ToLowerInvariant();
+            string normalizedEmail = Convert.ToString(current["Email"]);
 
             SaveResultDto problem = Validate(fullName, normalizedEmail);
 

@@ -117,15 +117,6 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <span class="form-label">Status</span>
-                <asp:RadioButtonList ID="rblStatus" runat="server" CssClass="radio-list" RepeatDirection="Vertical">
-                    <asp:ListItem Text="Active" Value="Active" Selected="True" />
-                    <asp:ListItem Text="Inactive" Value="Inactive" />
-                </asp:RadioButtonList>
-                <span class="form-hint">An Inactive road sign stays in the game sets already using it, but can not be added to new ones.</span>
-            </div>
-
             <div class="form-actions">
                 <asp:Button ID="btnSave" runat="server" Text="Save Road Sign" CssClass="btn btn-primary" ValidationGroup="AssetForm" OnClick="btnSave_Click" />
                 <asp:Button ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-secondary" CausesValidation="false" OnClick="btnCancel_Click" />

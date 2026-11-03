@@ -14,7 +14,6 @@ namespace MyKPPLearn.Learner
         protected global::System.Web.UI.WebControls.Panel pnlSummary;
         protected global::System.Web.UI.WebControls.Literal litSummaryCompleted;
         protected global::System.Web.UI.WebControls.Literal litSummaryTotal;
-        protected global::System.Web.UI.WebControls.Literal litSummaryPercent;
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl summaryFill;
         protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkContinue;
         protected global::System.Web.UI.WebControls.Panel pnlAllDone;

@@ -9,11 +9,6 @@
         <p>Find hidden road signs in a driving scene and test your road-sign knowledge.</p>
     </div>
 
-    <ol class="game-howto">
-        <li><span class="game-howto__num">1</span>Explore a real road scene.</li>
-        <li><span class="game-howto__num">2</span>Tap the road signs hidden in it.</li>
-        <li><span class="game-howto__num">3</span>Answer a question about each sign you find.</li>
-    </ol>
 
     <asp:Label ID="lblError" runat="server" Visible="false" CssClass="alert alert-error" role="alert" />
 
@@ -27,8 +22,7 @@
                 <div class="card mx-type-card mx-set-card">
                     <h3><%# "Set " + Eval("SetNumber") %></h3>
                     <p class="mx-type-card__subtitle"><%# SignCountText(Eval("ConfiguredCount")) %></p>
-                    <p class="game-best"><%# BestText(Eval("HiddenRoadSignPracticeId")) %></p>
-                    <a class="btn btn-primary" href='<%# ResolveUrl("~/Learner/HiddenRoadSignGame.aspx?set=" + Eval("HiddenRoadSignPracticeId")) %>'><%# PlayLabel(Eval("HiddenRoadSignPracticeId")) %></a>
+                    <a class="btn btn-primary" href='<%# ResolveUrl("~/Learner/HiddenRoadSignGame.aspx?set=" + Eval("HiddenRoadSignPracticeId")) %>'>Start Game</a>
                 </div>
             </ItemTemplate>
         </asp:Repeater>

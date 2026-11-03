@@ -549,8 +549,25 @@
             }
         }
 
+        /** Saves the finished practice for Progress; the result on screen does not wait for it. */
+        function saveAttempt() {
+            fetch(location.pathname + "/Save", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json; charset=utf-8" },
+                body: JSON.stringify({
+                    category: categoryId,
+                    set: setInfo.number,
+                    questionIds: questions.map(function (q) { return q.id; }),
+                    answers: answers.map(function (a) { return a.selectedIndex === null ? -1 : a.selectedIndex; }),
+                    seconds: Math.round((Date.now() - startedAt) / 1000)
+                })
+            }).catch(function () { /* the learner still sees the result; only the history entry is missing */ });
+        }
+
         function showResult() {
             var correct = 0;
+            saveAttempt();
 
             questions.forEach(function (question, index) {
                 if (answers[index].selectedIndex === question.correctIndex) {
@@ -673,14 +690,18 @@
         }
 
         function resetAttempt() {
+            startedAt = Date.now();
             answers = questions.map(function () { return { selectedIndex: null }; });
             currentIndex = 0;
             renderQuestion();
             setView("attempt");
         }
 
+        var startedAt = Date.now();
+
         btnStartPractice.addEventListener("click", function (event) {
             event.preventDefault();
+            startedAt = Date.now();
             setView("attempt");
             renderQuestion();
         });

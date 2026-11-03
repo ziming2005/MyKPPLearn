@@ -75,34 +75,19 @@ namespace MyKPPLearn.Data
             return table.Rows.Count == 0 ? null : table.Rows[0];
         }
 
-        /// <summary>Every Set Number already in use (all Game Sets), ascending.</summary>
-        public static System.Collections.Generic.List<int> GetUsedNumbers()
+        /// <summary>The number the next new Game Set will get: the lowest one not in use (a deleted set's gap first).</summary>
+        public static int NextFreeNumber()
         {
-            System.Collections.Generic.List<int> numbers = new System.Collections.Generic.List<int>();
-
-            foreach (DataRow row in DatabaseHelper.ExecuteQuery("SELECT SetNumber FROM HiddenRoadSignPractices ORDER BY SetNumber ASC").Rows)
-            {
-                numbers.Add(Convert.ToInt32(row["SetNumber"]));
-            }
-
-            return numbers;
+            return Convert.ToInt32(DatabaseHelper.ExecuteScalar(@"
+                SELECT MIN(n.Number)
+                FROM (SELECT 1 AS Number UNION ALL SELECT SetNumber + 1 FROM HiddenRoadSignPractices) n
+                WHERE NOT EXISTS (SELECT 1 FROM HiddenRoadSignPractices p WHERE p.SetNumber = n.Number)"));
         }
 
         /// <summary>Total number of Game Sets (Active and Inactive) for the Admin Dashboard.</summary>
         public static int GetTotalCount()
         {
             return Convert.ToInt32(DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM HiddenRoadSignPractices"));
-        }
-
-        /// <param name="excludePracticeId">Set being edited (0 when creating).</param>
-        public static bool SetNumberExists(int setNumber, int excludePracticeId)
-        {
-            object result = DatabaseHelper.ExecuteScalar(
-                "SELECT COUNT(1) FROM HiddenRoadSignPractices WHERE SetNumber = @SetNumber AND HiddenRoadSignPracticeId <> @ExcludeId",
-                new SqlParameter("@SetNumber", setNumber),
-                new SqlParameter("@ExcludeId", excludePracticeId));
-
-            return Convert.ToInt32(result) > 0;
         }
 
         /// <summary>Returns the new HiddenRoadSignPracticeId, or 0 if the Set Number already exists.</summary>

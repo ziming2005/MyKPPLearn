@@ -10,7 +10,6 @@
 namespace MyKPPLearn.Admin
 {
 
-
     public partial class HiddenRoadSigns
     {
 
@@ -114,49 +113,13 @@ namespace MyKPPLearn.Admin
         protected global::System.Web.UI.WebControls.ValidationSummary valSummary;
 
         /// <summary>
-        /// txtSetNumber control.
+        /// litSetInfo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtSetNumber;
-
-        /// <summary>
-        /// lblNumberError control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblNumberError;
-
-        /// <summary>
-        /// rfvSetNumber control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvSetNumber;
-
-        /// <summary>
-        /// revSetNumber control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RegularExpressionValidator revSetNumber;
-
-        /// <summary>
-        /// rblStatus control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButtonList rblStatus;
+        protected global::System.Web.UI.WebControls.Literal litSetInfo;
 
         /// <summary>
         /// fuScene control.
@@ -283,15 +246,6 @@ namespace MyKPPLearn.Admin
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litViewItems;
-
-        /// <summary>
-        /// litViewAttempts control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litViewAttempts;
 
         /// <summary>
         /// imgView control.

@@ -631,21 +631,19 @@ a.stat-card--link:focus-visible {
 }
 
 .image-preview-box {
-  display: inline-block;
-  max-width: 100%;
-  padding: 8px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  background-color: #FFFFFF;
+  margin-top: 12px;
 }
 
 .image-preview-box img {
   display: block;
   width: auto;
-  height: auto;
   max-width: 100%;
   max-height: 240px;
   object-fit: contain;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
 }
 
 .image-preview-box--wide img {
@@ -1898,4 +1896,21 @@ body.hrs-modal-open {
 
 .mx-questions__title {
   margin: 24px 0 4px;
+}
+
+/* Road Sign Game: the Scene Image upload sits at the top of the scene editor section. */
+.hrs-scene-upload {
+  max-width: 820px;
+}
+
+/* A read-only field (e.g. a learner's email on Edit Learner) looks fixed, not editable. */
+.form-input[readonly] {
+  background-color: var(--color-bg-page);
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+
+/* Practice Set page: keep Edit and Delete side by side; the long question text wraps instead. */
+.ps-questions .row-actions {
+  flex-wrap: nowrap;
 }

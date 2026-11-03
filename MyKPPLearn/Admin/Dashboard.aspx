@@ -48,7 +48,6 @@
                 <span class="dash-icon dash-icon--lg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span>
                 <h3>Learner Records</h3>
                 <p>View and manage registered learner accounts.</p>
-                <p class="management-card__meta"><asp:Literal ID="litLearnersMeta" runat="server" /></p>
                 <div class="management-card__footer">
                     <a class="btn btn-secondary btn-block" href="~/Admin/LearnerRecords.aspx" runat="server">Manage Learner Records</a>
                 </div>
@@ -58,11 +57,6 @@
                 <span class="dash-icon dash-icon--lg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M20 17v4H6.5A2.5 2.5 0 0 1 4 19.5"/></svg></span>
                 <h3>Learning</h3>
                 <p>Manage structured driving theory lessons.</p>
-                <p class="management-card__meta"><asp:Literal ID="litLearningMeta" runat="server" /></p>
-                <p class="management-card__links">
-                    <a href="~/Admin/LearningChapters.aspx" runat="server">Chapters</a>
-                    <a href="~/Admin/Lessons.aspx" runat="server">Lessons</a>
-                </p>
                 <div class="management-card__footer">
                     <a class="btn btn-secondary btn-block" href="~/Admin/LearningChapters.aspx" runat="server">Manage Learning</a>
                 </div>
@@ -72,13 +66,6 @@
                 <span class="dash-icon dash-icon--lg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14l2 2 4-4"/></svg></span>
                 <h3>Practice Management</h3>
                 <p>Manage practice sets, the Road Sign Game and road sign assets.</p>
-                <p class="management-card__meta"><asp:Literal ID="litGamesMeta" runat="server" /></p>
-                <p class="management-card__links">
-                    <a href="~/Admin/PracticeSets.aspx" runat="server">Practice Sets</a>
-                    <a href="~/Admin/QuestionBank.aspx" runat="server">Question Bank</a>
-                    <a href="~/Admin/HiddenRoadSigns.aspx" runat="server">Road Sign Game</a>
-                    <a href="~/Admin/RoadSignAssets.aspx" runat="server">Assets</a>
-                </p>
                 <div class="management-card__footer">
                     <a class="btn btn-secondary btn-block" href="~/Admin/PracticeSets.aspx" runat="server">Manage Practice</a>
                 </div>
@@ -104,7 +91,7 @@
         <asp:Panel ID="pnlNoActivity" runat="server" CssClass="empty-state empty-state--activity" Visible="false">
             <span class="dash-icon dash-icon--lg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
             <div class="empty-state__title">No learner activity yet.</div>
-            <p>New sign-ups, completed lessons and finished Road Sign Games will show up here.</p>
+            <p>New sign-ups, completed lessons, practice sets, mock exams and Road Sign Games will show up here.</p>
         </asp:Panel>
 
         <asp:Panel ID="pnlActivity" runat="server" CssClass="card activity-card" Visible="false">

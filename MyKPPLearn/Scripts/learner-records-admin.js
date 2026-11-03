@@ -49,6 +49,7 @@
         var editTitle = document.getElementById("lrEditTitle");
         var editName = document.getElementById("lrEditName");
         var editEmail = document.getElementById("lrEditEmail");
+        var emailHint = document.getElementById("lrEmailHint");
         var editPassword = document.getElementById("lrEditPassword");
         var passwordGroup = document.getElementById("lrPasswordGroup");
         var editError = document.getElementById("lrEditError");
@@ -215,6 +216,8 @@
             editSave.textContent = learner ? "Save Changes" : "Add Learner";
             editName.value = learner ? learner.name : "";
             editEmail.value = learner ? learner.email : "";
+            editEmail.readOnly = !!learner;        // the email is the learner's sign-in, so it is fixed once the account exists
+            emailHint.hidden = !learner;
             editPassword.value = "";
             passwordGroup.hidden = !!learner;      // a password is only chosen when the account is created
             openModal(editModal, editName);
@@ -251,7 +254,7 @@
             busy = true;
             editSave.disabled = true;
 
-            var request = adding ? Data.create(name, email, password) : Data.update(editingId, name, email);
+            var request = adding ? Data.create(name, email, password) : Data.update(editingId, name);
 
             request.then(function (result) {
                 if (result && result.error) {

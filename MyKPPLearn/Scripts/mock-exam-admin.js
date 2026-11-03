@@ -381,12 +381,11 @@
     function renderNumberInfo() {
         var type = currentType();
 
-        if (!editingSet) {
-            numberInfo.textContent = "This set will be " + MockExamData.setLabel(nextFreeNumber(type.id)) + " of " + type.title
-                + ". The number is given automatically.";
-        } else if (editingSet.typeId === type.id) {
-            numberInfo.textContent = "This is " + setLabel(editingSet) + " of " + type.title + ".";
+        if (!editingSet || editingSet.typeId === type.id) {
+            numberInfo.textContent = "";
+            numberInfo.hidden = true;
         } else {
+            numberInfo.hidden = false;
             var over = type.sections.some(function (section) { return selectedCount(section.id) > section.count; });
             numberInfo.textContent = "Saving moves this set to " + type.title + " as " + MockExamData.setLabel(nextFreeNumber(type.id))
                 + "." + (over ? " Untick questions in the sections that now have too many." : "");

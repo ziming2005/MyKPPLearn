@@ -937,7 +937,6 @@
             var heading = q ? "Edit Question" : "Add Question";
             setText(byId("qbFormHeading"), heading);
             setText(byId("qbFormCrumb"), heading);
-            byId("qbStatusHint").hidden = !!q;
 
             form.hidden = false;
             questionsPage.hidden = true;

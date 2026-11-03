@@ -23,12 +23,12 @@
         <div class="stat-card stat-card--green">
             <span class="dash-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14l2 2 4-4"/></svg></span>
             <div class="stat-card__label">Practice Average</div>
-            <div class="stat-card__value">&mdash;</div>
+            <div class="stat-card__value"><asp:Literal ID="litPracticeAverage" runat="server" Text="&mdash;" /></div>
         </div>
         <div class="stat-card stat-card--amber">
             <span class="dash-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></span>
             <div class="stat-card__label">Mock Exam Best Score</div>
-            <div class="stat-card__value">&mdash;</div>
+            <div class="stat-card__value"><asp:Literal ID="litMockBest" runat="server" Text="&mdash;" /></div>
         </div>
         <div class="stat-card stat-card--purple">
             <span class="dash-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></svg></span>
@@ -180,11 +180,25 @@
             <h2>Recent Activity</h2>
         </div>
 
-        <div class="empty-state empty-state--white empty-state--activity">
+        <asp:Panel ID="pnlNoActivity" runat="server" CssClass="empty-state empty-state--white empty-state--activity">
             <span class="dash-icon dash-icon--lg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
             <div class="empty-state__title">No recent activity yet.</div>
-            <p>Your lessons, practice sets and mock exams will show up here.</p>
-        </div>
+            <p>Your lessons, practice sets, mock exams and Road Sign Games will show up here.</p>
+        </asp:Panel>
+
+        <asp:Panel ID="pnlActivity" runat="server" CssClass="card activity-card" Visible="false">
+            <ul class="activity-list">
+                <asp:Repeater ID="rptActivity" runat="server">
+                    <ItemTemplate>
+                        <li class='<%# "activity-item activity-item--" + Eval("Kind") %>'>
+                            <span class="activity-item__dot" aria-hidden="true"></span>
+                            <span class="activity-item__text"><%# ActivityText(Eval("Kind"), Eval("Detail")) %></span>
+                            <span class="activity-item__time" title='<%# ExactTime(Eval("At")) %>'><%# TimeAgo(Eval("At")) %></span>
+                        </li>
+                    </ItemTemplate>
+                </asp:Repeater>
+            </ul>
+        </asp:Panel>
     </div>
 
 </asp:Content>
