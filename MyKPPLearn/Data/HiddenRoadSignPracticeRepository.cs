@@ -32,7 +32,8 @@ namespace MyKPPLearn.Data
             SELECT p.HiddenRoadSignPracticeId, p.SetNumber, p.SceneImagePath, p.IsActive,
                    (SELECT COUNT(*) FROM HiddenRoadSignItems i WHERE i.HiddenRoadSignPracticeId = p.HiddenRoadSignPracticeId) AS ItemCount,
                    (SELECT COUNT(*) FROM HiddenRoadSignItems i WHERE i.HiddenRoadSignPracticeId = p.HiddenRoadSignPracticeId AND i.IsConfigured = 1) AS ConfiguredCount,
-                   (SELECT COUNT(*) FROM HiddenRoadSignAttempts a WHERE a.HiddenRoadSignPracticeId = p.HiddenRoadSignPracticeId) AS AttemptCount
+                   (SELECT COUNT(*) FROM HiddenRoadSignAttempts a WHERE a.HiddenRoadSignPracticeId = p.HiddenRoadSignPracticeId) AS AttemptCount,
+                   (SELECT COUNT(DISTINCT a.UserId) FROM HiddenRoadSignAttempts a WHERE a.HiddenRoadSignPracticeId = p.HiddenRoadSignPracticeId) AS LearnerCount
             FROM HiddenRoadSignPractices p";
 
         public static DataTable GetAllForAdmin()
@@ -82,12 +83,6 @@ namespace MyKPPLearn.Data
                 SELECT MIN(n.Number)
                 FROM (SELECT 1 AS Number UNION ALL SELECT SetNumber + 1 FROM HiddenRoadSignPractices) n
                 WHERE NOT EXISTS (SELECT 1 FROM HiddenRoadSignPractices p WHERE p.SetNumber = n.Number)"));
-        }
-
-        /// <summary>Total number of Game Sets (Active and Inactive) for the Admin Dashboard.</summary>
-        public static int GetTotalCount()
-        {
-            return Convert.ToInt32(DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM HiddenRoadSignPractices"));
         }
 
         /// <summary>Returns the new HiddenRoadSignPracticeId, or 0 if the Set Number already exists.</summary>
@@ -178,12 +173,12 @@ namespace MyKPPLearn.Data
                             return HiddenRoadSignDeleteResult.NotFound;
                         }
 
-                        if (Scalar(connection, transaction,
-                                "SELECT COUNT(1) FROM HiddenRoadSignAttempts WITH (UPDLOCK, HOLDLOCK) WHERE HiddenRoadSignPracticeId = @P", practiceId) > 0)
-                        {
-                            transaction.Rollback();
-                            return HiddenRoadSignDeleteResult.HasAttempts;
-                        }
+                        // Learners' finished games of this set (and their answers) go with it; the admin was warned how many.
+                        Execute(connection, transaction, @"
+                            DELETE FROM HiddenRoadSignAttemptAnswers
+                            WHERE HiddenRoadSignAttemptId IN (SELECT HiddenRoadSignAttemptId FROM HiddenRoadSignAttempts WHERE HiddenRoadSignPracticeId = @P)", practiceId);
+                        Execute(connection, transaction,
+                            "DELETE FROM HiddenRoadSignAttempts WHERE HiddenRoadSignPracticeId = @P", practiceId);
 
                         Execute(connection, transaction, @"
                             DELETE FROM HiddenRoadSignChoices

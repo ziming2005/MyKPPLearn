@@ -1,4 +1,5 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Register.aspx.cs" Inherits="MyKPPLearn.Register" %>
+<%@ Register Src="~/Controls/GoogleButton.ascx" TagPrefix="uc" TagName="GoogleButton" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">Create Learner Account | MyKPP Learn</asp:Content>
 
@@ -45,6 +46,8 @@
 
                     <asp:Button ID="btnRegister" runat="server" CssClass="btn btn-primary btn-block" Text="Create Account" OnClick="btnRegister_Click" CausesValidation="true" />
                 </asp:Panel>
+
+                <uc:GoogleButton ID="googleButton" runat="server" ButtonText="signup_with" />
 
                 <div class="auth-card__footer">
                     Already registered? <a href="Login.aspx">Login</a>

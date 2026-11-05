@@ -1,0 +1,21 @@
+flowchart TD
+    S([Start]) --> O[Open MyKPP Learn website]
+    O --> H{Already have an account?}
+    H -->|No| R[Register with email or Google]
+    R --> RV{Details valid?}
+    RV -->|No| RX[/Display error message/]
+    RX --> R
+    RV -->|Yes| RC[Create learner account and sign in]
+    RC --> LD[/Display Learner Dashboard/]
+    H -->|Yes| F{Forgot password?}
+    F -->|Yes| RP[Reset password with emailed code]
+    RP --> L[Log in with email or Google]
+    F -->|No| L
+    L --> VA{Valid user and account active?}
+    VA -->|No| VX[/Display error message/]
+    VX --> L
+    VA -->|Yes| RO{Role?}
+    RO -->|Learner| LD
+    RO -->|Administrator| AD[/Display Administrator Dashboard/]
+    LD --> E([End])
+    AD --> E

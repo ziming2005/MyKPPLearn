@@ -13,6 +13,10 @@ namespace MyKPPLearn.Learner
         private int _lessonId;
         private int _userId;
 
+        // Where "Complete & Next" goes after saving: the next lesson or chapter, or null for the very last lesson.
+        private string _nextUrl;
+        private string _nextLabel;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             SessionHelper.RequireLearner(this);
@@ -112,15 +116,25 @@ namespace MyKPPLearn.Learner
 
             if (next != null)
             {
-                lnkNext.HRef = LessonUrl(next["LessonId"]);
-                lnkNext.InnerHtml = "Next Lesson " + LessonNumber(next["ChapterOrder"], next["DisplayOrder"]) + " &gt;";
-                lnkNext.Visible = true;
+                _nextUrl = LessonUrl(next["LessonId"]);
+                _nextLabel = "Next Lesson " + LessonRepository.FormatLessonNumber(next["ChapterOrder"], next["DisplayOrder"]);
             }
             else if (nextChapter != null)
             {
                 // Last lesson of the chapter: Next Chapter opens the next chapter's page.
-                lnkNext.HRef = ResolveUrl("~/Learner/Chapter.aspx?id=" + Convert.ToInt32(nextChapter["ChapterId"]).ToString(CultureInfo.InvariantCulture));
-                lnkNext.InnerHtml = "Next Chapter " + Convert.ToInt32(nextChapter["DisplayOrder"]).ToString(CultureInfo.InvariantCulture) + " &gt;";
+                _nextUrl = ResolveUrl("~/Learner/Chapter.aspx?id=" + Convert.ToInt32(nextChapter["ChapterId"]).ToString(CultureInfo.InvariantCulture));
+                _nextLabel = "Next Chapter " + Convert.ToInt32(nextChapter["DisplayOrder"]).ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (!isCompleted)
+            {
+                // The very last lesson leads back to Learning, where every chapter now shows its progress.
+                btnComplete.Text = "Complete & " + (_nextUrl == null ? "Back to Learning" : _nextLabel) + " >";
+            }
+            else if (_nextUrl != null)
+            {
+                lnkNext.HRef = _nextUrl;
+                lnkNext.InnerText = _nextLabel + " >";
                 lnkNext.Visible = true;
             }
         }
@@ -142,15 +156,17 @@ namespace MyKPPLearn.Learner
             try
             {
                 LearningProgressRepository.MarkLessonCompleted(_userId, _lessonId);
-                FlashMessage.Set(Session, "Lesson completed.");
             }
             catch (Exception)
             {
+                // Nothing was saved: stay on this lesson, at its buttons, and say so.
                 FlashMessage.Set(Session, "Your progress could not be saved. Please try again.", true);
+                Response.Redirect(Request.RawUrl + "#lessonActions", true);
+                return;
             }
 
-            // Back to the buttons (not the top of the page) so the learner sees the result where they clicked.
-            Response.Redirect(Request.RawUrl + "#lessonActions", true);
+            // Saved: straight on to the next lesson or chapter; after the very last lesson, back to Learning.
+            Response.Redirect(_nextUrl ?? ResolveUrl("~/Learner/Learn.aspx"), true);
         }
 
         private void RedirectToLearn()

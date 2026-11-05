@@ -12,26 +12,33 @@ namespace MyKPPLearn.Learner
     /// </summary>
     public partial class HiddenRoadSignResult : System.Web.UI.Page
     {
+        private bool _adminView;
+
+        protected override void OnPreInit(EventArgs e)
+        {
+            _adminView = AttemptViewer.UseAdminLayout(this);
+            base.OnPreInit(e);
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            SessionHelper.RequireLearner(this);
-            ((LearnerMaster)Master).PageHeading = "Road Sign Game";
+            AttemptViewer.SetUp(this, _adminView, "Road Sign Game");
+            string notFoundUrl = _adminView ? "~/Admin/LearnerRecords.aspx" : "~/Learner/Game.aspx";
 
             int attemptId;
 
             if (!int.TryParse(Request.QueryString["attempt"], NumberStyles.None, CultureInfo.InvariantCulture, out attemptId))
             {
-                Response.Redirect("~/Learner/Game.aspx", true);
+                Response.Redirect(notFoundUrl, true);
                 return;
             }
 
-            int userId = SessionHelper.CurrentUserId(Session).Value;
             DataRow attempt;
 
             try
             {
                 // Ownership is part of the query: someone else's attempt id simply isn't found.
-                attempt = HiddenRoadSignAttemptRepository.GetAttemptForUser(attemptId, userId);
+                attempt = HiddenRoadSignAttemptRepository.GetAttemptForUser(attemptId, AttemptViewer.OwnerFilter(this, _adminView));
             }
             catch (System.Threading.ThreadAbortException)
             {
@@ -39,15 +46,17 @@ namespace MyKPPLearn.Learner
             }
             catch (Exception)
             {
-                Response.Redirect("~/Learner/Game.aspx", true);
+                Response.Redirect(notFoundUrl, true);
                 return;
             }
 
             if (attempt == null)
             {
-                Response.Redirect("~/Learner/Game.aspx", true);
+                Response.Redirect(notFoundUrl, true);
                 return;
             }
+
+            int userId = Convert.ToInt32(attempt["UserId"]);
 
             int total = Convert.ToInt32(attempt["TotalItems"]);
             int correct = Convert.ToInt32(attempt["CorrectCount"]);
@@ -93,7 +102,18 @@ namespace MyKPPLearn.Learner
                 // The best score and the next set are extras; the result itself still shows.
             }
 
-            lnkReview.CssClass = hasNext ? "btn btn-secondary" : "btn btn-primary";
+            // An administrator only looks: no Next Set or Try Again, and back to the learner's record.
+            if (_adminView)
+            {
+                lnkNextSet.Visible = false;
+                lnkTryAgain.Visible = false;
+                litBest.Text = string.Empty;
+                hasNext = false;
+                lnkBack.HRef = AttemptViewer.LearnerRecordUrl(this, userId);
+                lnkBack.InnerText = "Back to Learner Record";
+            }
+
+            lnkReview.CssClass = hasNext ? "btn btn-secondary result-review" : "btn btn-primary";
 
             lnkReview.NavigateUrl = "~/Learner/HiddenRoadSignReview.aspx?attempt=" + attemptId.ToString(CultureInfo.InvariantCulture);
             lnkTryAgain.NavigateUrl = "~/Learner/HiddenRoadSignGame.aspx?set="

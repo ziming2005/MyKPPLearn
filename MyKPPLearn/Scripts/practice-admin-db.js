@@ -112,6 +112,33 @@
      * A Delete button that uses the site's confirm modal (Scripts/confirm-modal.js): the first click only opens
      * the modal; the modal's confirm repeats the click with data-confirmed="1", and only that click runs onConfirm.
      */
+    function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
+
+    /** Practice Set delete confirmation: says which questions go with the set. (A set with learner results can't be deleted.) */
+    function setDeleteWarning(set, categoryName) {
+        var text = "Delete Practice Set " + set.number + " (" + categoryName + ")?";
+        if (set.questionCount > 0) { text += " Its " + plural(set.questionCount, "question", "questions") + " will be deleted too. This cannot be undone."; }
+        return text;
+    }
+
+    /** A set with learner results keeps them: its Delete button explains that instead of asking to confirm. */
+    function blockedDeleteButton(set, toast) {
+        return makeButton("Delete", "btn btn-secondary btn-small btn-danger", function () {
+            showMessage(toast, plural(set.learnerCount, "learner has", "learners have")
+                + " results for this Practice Set, so it can't be deleted. Deactivate it instead to hide it from learners.", true);
+        });
+    }
+
+    /** Question delete confirmation: Mock Exam Sets lose it; learners' past results keep their own copy. */
+    function questionDeleteWarning(q, text) {
+        if (q.mockExamUseCount > 0) {
+            text += " It will be removed from " + plural(q.mockExamUseCount, "Mock Exam Set", "Mock Exam Sets")
+                + ", which become Inactive until a replacement question is added.";
+        }
+        if (q.attemptCount > 0) { text += " Learners' past results that include it stay as they are."; }
+        return text;
+    }
+
     function makeDeleteButton(message, onConfirm) {
         var b = makeButton("Delete", "btn btn-secondary btn-small btn-danger", function () {
             if (b.getAttribute("data-confirmed") === "1") { onConfirm(); }
@@ -143,7 +170,7 @@
         el.className = "alert alert-" + (isError ? "error" : "success");
         setText(el, text);
         window.clearTimeout(el._timer);
-        el._timer = window.setTimeout(function () { el.hidden = true; }, isError ? 8000 : 4500);
+        el._timer = window.setTimeout(function () { el.hidden = true; }, 5000);
     }
 
     function addCell(tr, value) {
@@ -327,12 +354,6 @@
 
             focus: function () { formText.focus(); },
 
-            /** True when something has been typed or chosen (used before throwing a new question away). */
-            hasContent: function () {
-                return !!(formText.value.trim() || formExplanation.value.trim() || image || correctIndex() >= 0
-                    || optionInputs.some(function (input) { return input.value.trim(); }));
-            },
-
             /** Mirrors QuestionRepository.Validate, with each message under its own field. */
             validate: function (errors) {
                 var text = formText.value.trim();
@@ -483,11 +504,12 @@
                 var actions = document.createElement("div");
                 actions.className = "row-actions";
                 actions.appendChild(makeButton("Edit", null, function () { openSet(set); }));
-                actions.appendChild(makeDeleteButton("Delete Practice Set " + set.number + " (" + categoryTitle(set.categoryId) + ")?", function () {
+                actions.appendChild(set.learnerCount > 0 ? blockedDeleteButton(set, toast) : makeDeleteButton(setDeleteWarning(set, categoryTitle(set.categoryId)), function () {
                     call("Delete", { id: set.id }).then(function (message) {
-                        if (message !== "Deleted") { throw new Error(message); }
+                        if (message.indexOf("Deleted") !== 0) { throw new Error(message); }
                         load();
-                        showMessage(toast, "Practice Set deleted.");
+                        var notice = message.substring("Deleted".length).trim();
+                        showMessage(toast, notice ? "Practice Set deleted. " + notice : "Practice Set deleted.");
                     }).catch(fail);
                 }));
                 actionsCell.appendChild(actions);
@@ -555,7 +577,7 @@
                 var actions = document.createElement("div");
                 actions.className = "row-actions";
                 actions.appendChild(makeButton("Edit", null, function () { openQuestion(q); }));
-                actions.appendChild(makeDeleteButton("Delete this question from the Question Bank?", function () {
+                actions.appendChild(makeDeleteButton(questionDeleteWarning(q, "Delete this question from the Question Bank?"), function () {
                     call("Delete", { id: q.id }, questionBank).then(function (message) {
                         if (message.indexOf("Deleted") !== 0) { throw new Error(message); }
                         if (editingQuestionId === q.id) { closeQuestion(); }
@@ -876,7 +898,7 @@
                 actions.appendChild(makeButton("Edit", null, function () {
                     call("Get", { id: q.id }).then(check).then(openForm).catch(fail);
                 }));
-                actions.appendChild(makeDeleteButton("Delete this question?", function () {
+                actions.appendChild(makeDeleteButton(questionDeleteWarning(q, "Delete this question?"), function () {
                     call("Delete", { id: q.id }).then(function (message) {
                         if (message.indexOf("Deleted") !== 0) { throw new Error(message); }
                         load();

@@ -15,28 +15,36 @@ namespace MyKPPLearn.Learner
     /// </summary>
     public partial class HiddenRoadSignReview : System.Web.UI.Page
     {
+        private bool _adminView;
+
+        protected override void OnPreInit(EventArgs e)
+        {
+            _adminView = AttemptViewer.UseAdminLayout(this);
+            base.OnPreInit(e);
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            SessionHelper.RequireLearner(this);
-            ((LearnerMaster)Master).PageHeading = "Road Sign Game";
+            AttemptViewer.SetUp(this, _adminView, "Road Sign Game");
+            string notFoundUrl = _adminView ? "~/Admin/LearnerRecords.aspx" : "~/Learner/Game.aspx";
+            int? owner = AttemptViewer.OwnerFilter(this, _adminView);
 
             int attemptId;
 
             if (!int.TryParse(Request.QueryString["attempt"], NumberStyles.None, CultureInfo.InvariantCulture, out attemptId))
             {
-                Response.Redirect("~/Learner/Game.aspx", true);
+                Response.Redirect(notFoundUrl, true);
                 return;
             }
 
-            int userId = SessionHelper.CurrentUserId(Session).Value;
             DataRow attempt;
             DataTable rows;
 
             try
             {
                 // Both queries are scoped to the signed-in learner: another learner's id is never returned.
-                attempt = HiddenRoadSignAttemptRepository.GetAttemptForUser(attemptId, userId);
-                rows = attempt == null ? null : HiddenRoadSignAttemptRepository.GetReviewRows(attemptId, userId);
+                attempt = HiddenRoadSignAttemptRepository.GetAttemptForUser(attemptId, owner);
+                rows = attempt == null ? null : HiddenRoadSignAttemptRepository.GetReviewRows(attemptId, owner);
             }
             catch (System.Threading.ThreadAbortException)
             {
@@ -44,14 +52,20 @@ namespace MyKPPLearn.Learner
             }
             catch (Exception)
             {
-                Response.Redirect("~/Learner/Game.aspx", true);
+                Response.Redirect(notFoundUrl, true);
                 return;
             }
 
             if (attempt == null)
             {
-                Response.Redirect("~/Learner/Game.aspx", true);
+                Response.Redirect(notFoundUrl, true);
                 return;
+            }
+
+            if (_adminView)
+            {
+                lnkBack.HRef = AttemptViewer.LearnerRecordUrl(this, attempt["UserId"]);
+                lnkBack.InnerText = "Back to Learner Record";
             }
 
             string attemptKey = attemptId.ToString(CultureInfo.InvariantCulture);

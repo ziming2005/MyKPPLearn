@@ -35,12 +35,26 @@ namespace MyKPPLearn.Learner
             public DateTime StartedUtc;
         }
 
+        private bool _adminView;
+
+        protected override void OnPreInit(EventArgs e)
+        {
+            _adminView = AttemptViewer.UseAdminLayout(this);
+            base.OnPreInit(e);
+        }
+
         public string TypeId { get; private set; }
+
+        /// <summary>For an administrator: the learner's record page, where "Back" leads. Empty for the learner.</summary>
+        public string BackUrl { get; private set; }
 
         public string SetNumber { get; private set; }
 
         /// <summary>window.MockExamDatabaseData for mock-exam.js: the startable sets of this type (for "Next Set").</summary>
         public string DataJson { get; private set; }
+
+        /// <summary>window.MockExamSavedAttempt: a finished exam reopened from Progress ("?attempt="), or "null".</summary>
+        public string SavedJson { get; private set; }
 
         public string MockExamScriptVersion
         {
@@ -53,8 +67,15 @@ namespace MyKPPLearn.Learner
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SessionHelper.RequireLearner(this);
-            ((LearnerMaster)Master).PageHeading = "Mock Exam";
+            AttemptViewer.SetUp(this, _adminView, "Mock Exam");
+            SavedJson = "null";
+            BackUrl = string.Empty;
+
+            if (Request.QueryString["attempt"] != null)
+            {
+                LoadSaved();
+                return;
+            }
 
             string requestedType = Request.QueryString["type"];
 
@@ -77,6 +98,85 @@ namespace MyKPPLearn.Learner
             TypeId = requestedType;
             SetNumber = setNumber.ToString(CultureInfo.InvariantCulture);
             DataJson = MockExamSets.BuildDataJson(requestedType, startable);
+        }
+
+        /// <summary>Reopens one of the learner's own saved exams on its result screen; anything else goes back to Progress.</summary>
+        private void LoadSaved()
+        {
+            int attemptId;
+            System.Data.DataTable rows = null;
+
+            if (int.TryParse(Request.QueryString["attempt"], NumberStyles.None, CultureInfo.InvariantCulture, out attemptId))
+            {
+                rows = MockExamAttemptRepository.GetSavedForUser(attemptId, AttemptViewer.OwnerFilter(this, _adminView));
+            }
+
+            MockExamType type = rows == null || rows.Rows.Count == 0 ? null : MockExamRules.Find(Convert.ToString(rows.Rows[0]["ExamTypeCode"]));
+
+            if (type == null)
+            {
+                Response.Redirect(_adminView ? "~/Admin/LearnerRecords.aspx" : "~/Learner/Progress.aspx", true);
+                return;
+            }
+
+            System.Data.DataRow first = rows.Rows[0];
+            if (_adminView) { BackUrl = AttemptViewer.LearnerRecordUrl(this, first["UserId"]); }
+            TypeId = type.Code;
+            SetNumber = Convert.ToInt32(first["SetNumber"]).ToString(CultureInfo.InvariantCulture);
+            DataJson = MockExamSets.BuildDataJson(type.Code, MockExamSetRepository.GetStartableSetNumbers(type.Code));
+
+            var questions = new List<object>();
+            var answers = new List<int>();
+            var flags = new List<bool>();
+            var correctBySection = type.Sections.ToDictionary(s => s.Id, s => 0);
+            var totalBySection = type.Sections.ToDictionary(s => s.Id, s => 0);
+
+            foreach (System.Data.DataRow row in rows.Rows)
+            {
+                MockExamSection section = MockExamRules.SectionForCategory(type, Convert.ToString(row["QuestionCategoryCodeSnapshot"])) ?? type.Sections[0];
+                string image = row.IsNull("ImagePathSnapshot") ? null : Convert.ToString(row["ImagePathSnapshot"]);
+
+                totalBySection[section.Id]++;
+                if (Convert.ToBoolean(row["IsCorrect"])) { correctBySection[section.Id]++; }
+
+                questions.Add(new
+                {
+                    id = Convert.ToInt32(row["QuestionId"]),
+                    number = Convert.ToInt32(row["QuestionNumber"]),
+                    section = section.Id,
+                    sectionLabel = section.Label,
+                    text = Convert.ToString(row["QuestionTextSnapshot"]),
+                    image = string.IsNullOrEmpty(image) ? null : image,
+                    options = new[] { Convert.ToString(row["OptionATextSnapshot"]), Convert.ToString(row["OptionBTextSnapshot"]), Convert.ToString(row["OptionCTextSnapshot"]) },
+                    correctIndex = PracticeAttempt.LetterIndex(row["CorrectOptionSnapshot"]),
+                    explanation = Convert.ToString(row["ExplanationSnapshot"])
+                });
+                answers.Add(PracticeAttempt.LetterIndex(row["SelectedOptionSnapshot"]));
+                flags.Add(Convert.ToBoolean(row["IsFlagged"]));
+            }
+
+            int colourBlind = type.Sections.Where(s => s.IsColourBlind).Sum(s => correctBySection[s.Id]);
+            int theory = type.Sections.Where(s => !s.IsColourBlind).Sum(s => correctBySection[s.Id]);
+            int answered = answers.Count(a => a >= 0);
+
+            var result = new ResultDto
+            {
+                colourBlindScore = colourBlind,
+                theoryScore = theory,
+                colourBlindPass = colourBlind >= type.ColourBlindPass,
+                theoryPass = theory >= type.TheoryPass,
+                overallPass = Convert.ToBoolean(first["IsPassed"]),
+                answered = answered,
+                unanswered = answers.Count - answered,
+                timeTakenSeconds = Convert.ToInt32(first["TimeTakenSeconds"]),
+                autoSubmitted = Convert.ToBoolean(first["AutoSubmitted"]),
+                sections = type.Sections.Select(s => new SectionScoreDto { id = s.Id, label = s.Label, score = correctBySection[s.Id], total = totalBySection[s.Id] }).ToList()
+            };
+
+            // "<" is escaped so question text can never close the inline <script> block.
+            SavedJson = new JavaScriptSerializer { MaxJsonLength = int.MaxValue }
+                .Serialize(new { questions = questions, answers = answers, flags = flags, result = result })
+                .Replace("<", "\\u003c");
         }
 
         public sealed class QuestionDto

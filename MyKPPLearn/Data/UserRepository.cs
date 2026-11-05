@@ -47,10 +47,50 @@ namespace MyKPPLearn.Data
 
         public static AppUser GetUserByEmail(string normalizedEmail)
         {
-            DataTable table = DatabaseHelper.ExecuteQuery(
+            return ReadUser(DatabaseHelper.ExecuteQuery(
                 "SELECT UserId, FullName, Email, PasswordHash, Role, ProfileImagePath, Status FROM Users WHERE Email = @Email",
-                new SqlParameter("@Email", normalizedEmail));
+                new SqlParameter("@Email", normalizedEmail)));
+        }
 
+        public static AppUser GetUserByGoogleSubject(string googleSubjectId)
+        {
+            return ReadUser(DatabaseHelper.ExecuteQuery(
+                "SELECT UserId, FullName, Email, PasswordHash, Role, ProfileImagePath, Status FROM Users WHERE GoogleSubjectId = @Sub",
+                new SqlParameter("@Sub", googleSubjectId)));
+        }
+
+        /// <summary>Links an existing account to a Google account, unless it is already linked to another one.</summary>
+        public static void LinkGoogleSubject(int userId, string googleSubjectId)
+        {
+            DatabaseHelper.ExecuteNonQuery(
+                "UPDATE Users SET GoogleSubjectId = @Sub, UpdatedAt = SYSUTCDATETIME() WHERE UserId = @UserId AND GoogleSubjectId IS NULL",
+                new SqlParameter("@Sub", googleSubjectId),
+                new SqlParameter("@UserId", userId));
+        }
+
+        /// <summary>
+        /// A learner created from a Google sign-in. The password hash is of a random value nobody knows,
+        /// so the account can only be entered through Google until a password is set some other way.
+        /// </summary>
+        public static int CreateGoogleLearner(string fullName, string normalizedEmail, string googleSubjectId)
+        {
+            const string sql = @"
+                INSERT INTO Users (FullName, Email, PasswordHash, Role, GoogleSubjectId, CreatedAt, UpdatedAt)
+                OUTPUT INSERTED.UserId
+                VALUES (@FullName, @Email, @PasswordHash, @Role, @Sub, SYSUTCDATETIME(), SYSUTCDATETIME());";
+
+            object result = DatabaseHelper.ExecuteScalar(sql,
+                new SqlParameter("@FullName", fullName),
+                new SqlParameter("@Email", normalizedEmail),
+                new SqlParameter("@PasswordHash", PasswordHasher.HashPassword(Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"))),
+                new SqlParameter("@Role", SessionHelper.RoleLearner),
+                new SqlParameter("@Sub", googleSubjectId));
+
+            return Convert.ToInt32(result);
+        }
+
+        private static AppUser ReadUser(DataTable table)
+        {
             if (table.Rows.Count == 0)
             {
                 return null;

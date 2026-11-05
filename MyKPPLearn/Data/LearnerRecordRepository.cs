@@ -190,7 +190,7 @@ namespace MyKPPLearn.Data
         public static DataTable GetPracticeHistory(int userId)
         {
             const string sql = @"
-                SELECT c.Title AS CategoryTitle, p.SetNumber, a.CorrectCount, a.TotalQuestions, a.CompletedAt
+                SELECT a.PracticeAttemptId, c.Title AS CategoryTitle, p.SetNumber, a.CorrectCount, a.TotalQuestions, a.CompletedAt
                 FROM PracticeAttempts a
                 INNER JOIN PracticeSets p ON p.PracticeSetId = a.PracticeSetId
                 INNER JOIN QuestionCategories c ON c.QuestionCategoryId = p.QuestionCategoryId
@@ -204,7 +204,7 @@ namespace MyKPPLearn.Data
         public static DataTable GetMockExamHistory(int userId)
         {
             const string sql = @"
-                SELECT s.ExamTypeCode, s.SetNumber, a.ColourBlindCorrect, a.ColourBlindTotal,
+                SELECT a.MockExamAttemptId, s.ExamTypeCode, s.SetNumber, a.ColourBlindCorrect, a.ColourBlindTotal,
                        a.TheoryCorrect, a.TheoryTotal, a.IsPassed, a.CompletedAt
                 FROM MockExamAttempts a
                 INNER JOIN MockExamSets s ON s.MockExamSetId = a.MockExamSetId

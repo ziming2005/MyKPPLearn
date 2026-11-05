@@ -35,11 +35,12 @@
                 <a id="lnkPrevious" runat="server" class="btn btn-secondary lesson-nav-btn" visible="false"></a>
             </div>
 
-            <div class="lesson-nav__center">
-                <asp:Button ID="btnComplete" runat="server" Text="Complete Lesson" CssClass="btn btn-primary" OnClick="btnComplete_Click" />
-            </div>
+            <div class="lesson-nav__center"></div>
 
+            <%-- Not completed yet: one button marks the lesson completed and moves on ("Complete & Next Lesson 2.3 >").
+                 Already completed: a plain Next link. --%>
             <div class="lesson-nav__side lesson-nav__side--end">
+                <asp:Button ID="btnComplete" runat="server" Text="Complete Lesson" CssClass="btn btn-primary lesson-nav-btn lesson-nav-btn--next" OnClick="btnComplete_Click" />
                 <a id="lnkNext" runat="server" class="btn btn-secondary lesson-nav-btn lesson-nav-btn--next" visible="false"></a>
             </div>
         </div>

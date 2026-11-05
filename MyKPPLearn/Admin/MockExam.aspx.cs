@@ -47,6 +47,7 @@ namespace MyKPPLearn.Admin
             public int number;
             public string status;
             public int attemptCount;
+            public int learnerCount;
             public List<int> selected;
         }
 
@@ -186,8 +187,8 @@ namespace MyKPPLearn.Admin
             {
                 case MockExamSetDeleteResult.Deleted:
                     return "Deleted";
-                case MockExamSetDeleteResult.HasAttempts:
-                    return "This set is protected because learners have taken it. Deactivate it instead.";
+                case MockExamSetDeleteResult.HasResults:
+                    return "Learners have taken this Mock Exam Set, so it can't be deleted. Deactivate it instead to hide it from learners.";
                 default:
                     return "Mock Exam Set not found.";
             }
@@ -219,6 +220,7 @@ namespace MyKPPLearn.Admin
                 number = Convert.ToInt32(row["SetNumber"]),
                 status = Convert.ToBoolean(row["IsActive"]) ? "Active" : "Inactive",
                 attemptCount = Convert.ToInt32(row["AttemptCount"]),
+                learnerCount = Convert.ToInt32(row["LearnerCount"]),
                 selected = selected
             };
         }

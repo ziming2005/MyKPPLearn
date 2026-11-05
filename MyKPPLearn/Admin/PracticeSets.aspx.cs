@@ -40,6 +40,7 @@ namespace MyKPPLearn.Admin
             public int questionCount;
             public int activeQuestionCount;
             public int attemptCount;
+            public int learnerCount;
             public string error;
         }
 
@@ -117,17 +118,23 @@ namespace MyKPPLearn.Admin
         {
             RequireAdmin();
 
-            switch (PracticeSetRepository.Delete(id))
+            List<string> imagePaths;
+            List<string> mockSets;
+
+            switch (PracticeSetRepository.Delete(id, out imagePaths, out mockSets))
             {
-                case PracticeSetDeleteResult.Deleted:
-                    return "Deleted";
-                case PracticeSetDeleteResult.HasQuestions:
-                    return "Move or delete this set's questions first.";
-                case PracticeSetDeleteResult.HasAttempts:
-                    return "This Practice Set is protected because learners have attempted it.";
-                default:
+                case PracticeSetDeleteResult.NotFound:
                     return "Practice Set not found.";
+                case PracticeSetDeleteResult.HasResults:
+                    return "Learners have results for this Practice Set, so it can't be deleted. Deactivate it instead to hide it from learners.";
             }
+
+            foreach (string path in imagePaths)
+            {
+                MyKPPLearn.Common.QuestionImageStorage.DeleteIfUnreferenced(path);
+            }
+
+            return "Deleted" + QuestionBank.MockSetsNotice(mockSets);
         }
 
         /// <summary>Shared with the Question Bank page, which offers the same categories and sets in its form.</summary>
@@ -175,7 +182,8 @@ namespace MyKPPLearn.Admin
                 status = Convert.ToBoolean(row["IsActive"]) ? "Active" : "Inactive",
                 questionCount = Convert.ToInt32(row["QuestionCount"]),
                 activeQuestionCount = Convert.ToInt32(row["ActiveQuestionCount"]),
-                attemptCount = Convert.ToInt32(row["AttemptCount"])
+                attemptCount = Convert.ToInt32(row["AttemptCount"]),
+                learnerCount = Convert.ToInt32(row["LearnerCount"])
             };
         }
     }

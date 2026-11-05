@@ -116,7 +116,7 @@
 
                                 <div id="hrsLibraryBody" runat="server" class="hrs-library__body">
                                     <input type="search" id="hrsSearch" class="form-input" placeholder="Search road signs..." aria-label="Search road signs" autocomplete="off" />
-                                    <p class="form-hint hrs-library__tip">Drag a sign onto the scene.</p>
+                                    <p class="form-hint hrs-library__tip">Drag a sign onto the scene. On a touch screen, press and hold a sign first.</p>
                                     <div id="hrsLibrary" class="hrs-library__grid" role="list"></div>
                                     <p id="hrsLibraryEmpty" class="hrs-library__nomatch" hidden>No road signs found.</p>
                                 </div>

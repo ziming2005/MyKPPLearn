@@ -9,5 +9,5 @@
         <p>Manage your personal information and password.</p>
     </div>
 
-    <uc:ProfileEditor ID="ProfileEditor1" runat="server" ShowActivity="true" />
+    <uc:ProfileEditor ID="ProfileEditor1" runat="server" />
 </asp:Content>

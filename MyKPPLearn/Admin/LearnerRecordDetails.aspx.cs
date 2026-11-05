@@ -22,10 +22,11 @@ namespace MyKPPLearn.Admin
 
         public sealed class ChapterDto { public int number; public string title; public int total; public int completed; }
 
-        public sealed class PracticeDto { public string category; public int setNumber; public int total; public int correct; public string date; }
+        public sealed class PracticeDto { public int attemptId; public string category; public int setNumber; public int total; public int correct; public string date; }
 
         public sealed class MockDto
         {
+            public int attemptId;
             public string examType;
             public int setNumber;
             public int colourBlind;
@@ -36,7 +37,7 @@ namespace MyKPPLearn.Admin
             public string date;
         }
 
-        public sealed class GameDto { public int setNumber; public int total; public int correct; public string date; }
+        public sealed class GameDto { public int attemptId; public int setNumber; public int total; public int correct; public string date; }
 
         public sealed class DetailsDto
         {
@@ -93,6 +94,7 @@ namespace MyKPPLearn.Admin
             {
                 details.practice.Add(new PracticeDto
                 {
+                    attemptId = Convert.ToInt32(row["PracticeAttemptId"]),
                     category = Convert.ToString(row["CategoryTitle"]),
                     setNumber = Convert.ToInt32(row["SetNumber"]),
                     total = Convert.ToInt32(row["TotalQuestions"]),
@@ -105,6 +107,7 @@ namespace MyKPPLearn.Admin
             {
                 details.mock.Add(new MockDto
                 {
+                    attemptId = Convert.ToInt32(row["MockExamAttemptId"]),
                     examType = ExamTypeTitle(Convert.ToString(row["ExamTypeCode"])),
                     setNumber = Convert.ToInt32(row["SetNumber"]),
                     colourBlind = Convert.ToInt32(row["ColourBlindCorrect"]),
@@ -120,6 +123,7 @@ namespace MyKPPLearn.Admin
             {
                 details.games.Add(new GameDto
                 {
+                    attemptId = Convert.ToInt32(row["HiddenRoadSignAttemptId"]),
                     setNumber = Convert.ToInt32(row["SetNumber"]),
                     total = Convert.ToInt32(row["TotalItems"]),
                     correct = Convert.ToInt32(row["CorrectCount"]),

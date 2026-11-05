@@ -76,7 +76,7 @@
             toast.className = "alert alert-" + (isError ? "error" : "success");
             toast.hidden = false;
             window.clearTimeout(toastTimer);
-            toastTimer = window.setTimeout(function () { toast.hidden = true; }, isError ? 8000 : 4000);
+            toastTimer = window.setTimeout(function () { toast.hidden = true; }, 5000);
         }
 
         function fail(e) { showToast(e.message, true); }
@@ -487,41 +487,76 @@
 
             // ---- Learning Progress ----
             var learning = byId("lrLearning");
-            learning.appendChild(progressBlock("Overall Learning Progress", done, total, "", "Overall learning progress"));
+            var overall = progressBlock("Overall Learning Progress", done, total, "", "Overall learning progress");
+            overall.classList.add("lr-progress-block--overall");
+            learning.appendChild(overall);
             if (!learner.chapters.length) {
                 learning.appendChild(el("p", "lr-note", "No learning content is available yet."));
             }
-            learner.chapters.forEach(function (chapter) {
-                learning.appendChild(progressBlock("Chapter " + chapter.number + " — " + chapter.title, chapter.completed, chapter.total, "lr-progress-block--chapter", "Chapter progress"));
+            // The first chapters are always shown; the rest stay hidden until "View All" (as on the learner's Progress page).
+            learner.chapters.forEach(function (chapter, index) {
+                var block = progressBlock("Chapter " + chapter.number + " — " + chapter.title, chapter.completed, chapter.total, "lr-progress-block--chapter", "Chapter progress");
+                if (index >= RECENT) { block.classList.add("lr-progress-block--extra"); }
+                learning.appendChild(block);
             });
 
-            // ---- history lists ----
+            if (learner.chapters.length > RECENT) {
+                var more = el("div", "history-more");
+                var toggle = el("button", "btn btn-secondary", "View All");
+                toggle.type = "button";
+                toggle.setAttribute("aria-expanded", "false");
+                toggle.setAttribute("aria-controls", "lrLearning");
+                toggle.addEventListener("click", function () {
+                    var expanded = learning.classList.toggle("is-expanded");
+                    toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+                    toggle.textContent = expanded ? "Show Less" : "View All";
+                });
+                more.appendChild(toggle);
+                learning.appendChild(more);
+            }
+
+            // ---- history lists (same layout as the learner's Progress page) ----
+            historyList("lrGames", learner.games, "No Road Sign Games completed yet.", function (li, a) {
+                li.appendChild(scoreBadge(a.correct, a.total));
+                li.appendChild(rowMain("Road Sign Game Set " + a.setNumber, a.correct + " / " + a.total + " correct · " + Data.formatDate(a.date, false)));
+                li.appendChild(resultLink("../Learner/HiddenRoadSignResult.aspx?attempt=" + a.attemptId));
+            }, gameStats(learner.games));
+
             historyList("lrPractice", learner.practice, "No Practice attempts yet.", function (li, a) {
-                var main = el("div", "lr-history__main");
-                main.appendChild(el("div", "lr-history__title", a.category + " · Practice Set " + a.setNumber));
-                main.appendChild(el("div", "lr-history__line", a.correct + " / " + a.total + " Correct"));
-                main.appendChild(el("div", "lr-history__date", Data.formatDate(a.date, false)));
-                li.appendChild(main);
-                li.appendChild(el("div", "lr-history__score", Data.percent(a.correct, a.total) + "%"));
-            });
+                li.appendChild(scoreBadge(a.correct, a.total));
+                li.appendChild(rowMain(a.category + " — Practice Set " + a.setNumber, a.correct + " / " + a.total + " correct · " + Data.formatDate(a.date, false)));
+                li.appendChild(resultLink("../Learner/PracticeAttempt.aspx?attempt=" + a.attemptId));
+            }, practiceStats(learner.practice));
 
             historyList("lrMock", learner.mock, "No Mock Exams completed yet.", function (li, a) {
-                var main = el("div", "lr-history__main");
-                main.appendChild(el("div", "lr-history__title", a.examType + " · Mock Exam Set " + a.setNumber));
-                main.appendChild(el("div", "lr-history__line", "Colour Blind: " + a.colourBlind + " / " + a.colourBlindTotal));
-                main.appendChild(el("div", "lr-history__line", "Theory: " + a.theory + " / " + a.theoryTotal));
-                main.appendChild(el("div", "lr-history__date", Data.formatDate(a.date, false)));
-                li.appendChild(main);
-                li.appendChild(el("span", "status-badge " + (a.passed ? "status-badge--active" : "status-badge--error"), a.passed ? "PASS" : "FAIL"));
-            });
+                li.appendChild(scoreBadge(a.colourBlind + a.theory, a.colourBlindTotal + a.theoryTotal));
+                li.appendChild(rowMain(a.examType + " — Mock Exam Set " + a.setNumber,
+                    "Colour Blind " + a.colourBlind + " / " + a.colourBlindTotal + " · Theory " + a.theory + " / " + a.theoryTotal + " · " + Data.formatDate(a.date, false)));
+                li.appendChild(el("span", "history-result " + (a.passed ? "history-result--pass" : "history-result--fail"), a.passed ? "Passed" : "Not Passed"));
+                li.appendChild(resultLink("../Learner/MockExamAttempt.aspx?attempt=" + a.attemptId));
+            }, mockStats(learner.mock));
+        }
 
-            historyList("lrGames", learner.games, "No Road Sign Games completed yet.", function (li, a) {
-                var main = el("div", "lr-history__main");
-                main.appendChild(el("div", "lr-history__title", "Road Sign Game Set " + a.setNumber));
-                main.appendChild(el("div", "lr-history__line", a.correct + " / " + a.total + " Questions Correct"));
-                main.appendChild(el("div", "lr-history__date", Data.formatDate(a.date, false)));
-                li.appendChild(main);
-            }, learner.games.length ? gameSummary(learner.games) : "");
+        // Opens the learner's saved result read-only, in the Admin layout (Learner/AttemptViewer.cs).
+        function resultLink(href) {
+            var link = el("a", "btn btn-secondary btn-small btn-result", "View Result");
+            link.href = href;
+            return link;
+        }
+
+        function rowMain(title, meta) {
+            var main = el("div", "history-item__main");
+            main.appendChild(el("div", "history-item__title", title));
+            main.appendChild(el("div", "history-item__meta", meta));
+            return main;
+        }
+
+        // Round percentage badge: green from 80%, amber from 50%, red below (as on Progress).
+        function scoreBadge(correct, total) {
+            var pct = Data.percent(correct, total);
+            var badge = el("span", "history-score history-score--" + (pct >= 80 ? "good" : pct >= 50 ? "fair" : "low"), pct + "%");
+            badge.setAttribute("aria-label", "Score " + pct + " percent");
+            return badge;
         }
 
         // Same states as the learner Progress page: a finished chapter is green with a tick, a chapter without lessons says so.
@@ -534,7 +569,7 @@
 
             var head = el("div", "lr-progress-block__head");
             head.appendChild(el("span", "lr-progress-block__title", title));
-            head.appendChild(el("span", "lr-progress-block__percent", (finished ? "✓ " : "") + pct + "%"));
+            head.appendChild(el("span", "lr-progress-block__percent", pct + "%"));
             block.appendChild(head);
 
             block.appendChild(el("div", "lr-progress-block__meta", noLessons ? "No lessons yet" : completed + " / " + totalLessons + " Lessons Completed"));
@@ -556,7 +591,7 @@
         // Like the learner Progress page: the 3 most recent are shown, older ones sit behind a View All / Show Less button.
         var RECENT = 3;
 
-        function historyList(containerId, items, emptyText, build, summaryText) {
+        function historyList(containerId, items, emptyText, build, stats) {
             var container = byId(containerId);
 
             if (!items.length) {
@@ -564,20 +599,29 @@
                 return;
             }
 
-            if (summaryText) { container.appendChild(el("div", "lr-history-summary", summaryText)); }
+            if (stats && stats.length) {
+                var row = el("div", "history-stats");
+                stats.forEach(function (s) {
+                    var box = el("div", "history-stat");
+                    box.appendChild(el("span", "history-stat__value", s[0]));
+                    box.appendChild(el("span", "history-stat__label", s[1]));
+                    row.appendChild(box);
+                });
+                container.appendChild(row);
+            }
 
             var listId = containerId + "List";
-            var list = el("ul", "lr-history");
+            var list = el("ul", "history-list");
             list.id = listId;
             items.forEach(function (item, index) {
-                var li = el("li", "lr-history__item" + (index >= RECENT ? " lr-history__item--extra" : ""));
+                var li = el("li", "history-item" + (index >= RECENT ? " history-item--extra" : ""));
                 build(li, item);
                 list.appendChild(li);
             });
             container.appendChild(list);
 
             if (items.length > RECENT) {
-                var more = el("div", "lr-history-more");
+                var more = el("div", "history-more");
                 var toggle = el("button", "btn btn-secondary", "View All");
                 toggle.type = "button";
                 toggle.setAttribute("aria-expanded", "false");
@@ -592,17 +636,27 @@
             }
         }
 
-        // "N games played · Best: x / y · Average: z%" (same wording and maths as the learner page).
-        function gameSummary(games) {
-            var best = games[0], ratioSum = 0;
-            games.forEach(function (g) {
-                var ratio = g.total > 0 ? g.correct / g.total : 0;
-                ratioSum += ratio;
-                if (ratio > (best.total > 0 ? best.correct / best.total : 0)) { best = g; }
-            });
-            return games.length + (games.length === 1 ? " game played" : " games played")
-                + " · Best: " + best.correct + " / " + best.total
-                + " · Average: " + Math.round(ratioSum / games.length * 100) + "%";
+        function average(items) {
+            var sum = 0;
+            items.forEach(function (x) { sum += x.total > 0 ? x.correct / x.total : 0; });
+            return Math.round(sum / items.length * 100) + "%";
+        }
+
+        // Summary boxes, same figures and maths as the learner Progress page: [value, label].
+        function gameStats(games) {
+            if (!games.length) { return []; }
+            return [[String(games.length), games.length === 1 ? "Game Played" : "Games Played"], [average(games), "Average"]];
+        }
+
+        function practiceStats(practice) {
+            if (!practice.length) { return []; }
+            return [[String(practice.length), practice.length === 1 ? "Set Completed" : "Sets Completed"], [average(practice), "Average"]];
+        }
+
+        function mockStats(mock) {
+            if (!mock.length) { return []; }
+            var passed = mock.filter(function (m) { return m.passed; }).length;
+            return [[String(mock.length), mock.length === 1 ? "Exam Taken" : "Exams Taken"], [String(passed), "Passed"]];
         }
     })();
 })();

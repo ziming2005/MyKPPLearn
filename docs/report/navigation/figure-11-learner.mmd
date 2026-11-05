@@ -1,0 +1,20 @@
+flowchart LR
+    D[Learner Dashboard]:::main --> A[Learning]:::main
+    D --> B[Practice]:::main
+    D --> C[Road Sign Game]:::main
+    D --> E[Mock Exam]:::main
+    D --> F[Progress]:::main
+    D --> G[Profile]:::main
+    D --> H[Logout]:::main
+    A --> A1[Chapter List]:::page --> A2[Chapter Details]:::page --> A3[Lesson]:::page
+    B --> B1["Category: Colour Recognition, Road Signs, Rules of the Road or KEJARA & Safety"]:::page --> B2[Practice Sets]:::page --> B3[Practice Attempt]:::page --> B4[Result and Review]:::page
+    C --> C1[Game Sets]:::page --> C2[Road Sign Game]:::page --> C3[Result]:::page --> C4[Review]:::page
+    E --> E1[Exam Type: KPP Combined or KPP Standard]:::page --> E2[Mock Exam Sets]:::page --> E3[Mock Exam Attempt]:::page --> E4[Result and Review]:::page
+    F --> F1[Learning Progress]:::page
+    F --> F2[Practice Results]:::page
+    F --> F3[Road Sign Game Results]:::page
+    F --> F4[Mock Exam Results]:::page
+    G --> G1[View and Edit Profile, Change Password]:::page
+    classDef main fill:#FFF2CC,stroke:#D6B656,color:#111111
+    classDef page fill:#E6E6FA,stroke:#9370DB,color:#111111
+    classDef group fill:#EEEEEE,stroke:#888888,color:#111111

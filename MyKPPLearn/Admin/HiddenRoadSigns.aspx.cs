@@ -50,7 +50,8 @@ namespace MyKPPLearn.Admin
     public partial class HiddenRoadSigns : System.Web.UI.Page
     {
         private const string GenericError = "Something went wrong. Please try again.";
-        private const string AttemptHistoryMessage = "This Road Sign Game has learner attempt history and cannot be deleted. Deactivate it instead.";
+        // Only when a learner finished a game of the set while it was being deleted.
+        private const string AttemptHistoryMessage = "A learner just finished a game of this set, so it was not deleted. Please try again.";
         private const string StateMessage = "The editor content could not be read. Please reload the page and try again.";
         private const int MaxRoadSigns = 300;
 
@@ -398,14 +399,14 @@ namespace MyKPPLearn.Admin
             StatusToggle.Apply((LinkButton)e.Item.FindControl("btnStatus"), (bool)row["IsActive"],
                 HiddenRoadSignPracticeRepository.FormatSetName(row["SetNumber"]));
 
-            // A set with completed learner attempts can not be deleted (history is kept), so the action is not offered.
-            if (Convert.ToInt32(row["AttemptCount"]) > 0)
+            // A set learners have played can still be deleted, but the confirmation says whose results go with it.
+            int learners = Convert.ToInt32(row["LearnerCount"]);
+
+            if (learners > 0)
             {
-                LinkButton delete = (LinkButton)e.Item.FindControl("btnDelete");
-                delete.Enabled = false;
-                delete.ToolTip = "This set has learner attempts. Deactivate it instead.";
-                delete.Attributes.Remove("data-confirm");
-                delete.Attributes["aria-disabled"] = "true";
+                ((LinkButton)e.Item.FindControl("btnDelete")).Attributes["data-confirm"] =
+                    learners.ToString(CultureInfo.InvariantCulture) + (learners == 1 ? " learner has" : " learners have")
+                    + " played this set. Deleting it also removes their game results. This cannot be undone.";
             }
         }
 

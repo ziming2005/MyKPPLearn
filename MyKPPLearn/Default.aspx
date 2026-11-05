@@ -15,7 +15,6 @@
                 <div class="hero__actions">
                     <asp:PlaceHolder ID="phHeroGuest" runat="server">
                         <a class="btn btn-primary" href="Register.aspx">Get Started</a>
-                        <a class="hero__login" href="Login.aspx">Already have an account? Login</a>
                     </asp:PlaceHolder>
                     <a id="lnkHeroDashboard" runat="server" class="btn btn-primary" visible="false">Go to Dashboard</a>
                 </div>
@@ -37,7 +36,7 @@
             </div>
 
             <div class="hero__media">
-                <img src="Content/images/illustrations/driving-theory.svg" alt="Driving theory learning illustration with a car, road signs and study checklist." width="560" height="440" />
+                <img src="Content/images/illustrations/driving-theory-hero.webp" alt="Blue learner car beside a study tablet, open book and road signs, with the Kuala Lumpur skyline behind." width="1040" height="817" />
             </div>
         </div>
     </section>
@@ -53,7 +52,7 @@
             <ol class="steps">
                 <li class="steps__item">
                     <span class="steps__number">1</span>
-                    <h3>Register</h3>
+                    <h3><a class="steps__link" href="Register.aspx">Register</a></h3>
                     <p>Create a learner account to get started.</p>
                 </li>
                 <li class="steps__item">
@@ -91,8 +90,8 @@
                     <h3>Colour Recognition</h3>
                     <p>Understand the meaning of traffic light and road-marking colours.</p>
                     <div class="topic-card__actions">
-                        <a class="btn btn-secondary btn-small" href="Login.aspx">Learn</a>
-                        <a class="btn btn-secondary btn-small" href="Login.aspx">Practice</a>
+                        <a class="btn btn-primary btn-small" href="Login.aspx">Learn</a>
+                        <a class="btn btn-outline-primary btn-small" href="Login.aspx">Practice</a>
                     </div>
                 </div>
                 <div class="card topic-card topic-card--blue">
@@ -102,8 +101,8 @@
                     <h3>Road Signs</h3>
                     <p>Recognise warning, regulatory and informational road signs.</p>
                     <div class="topic-card__actions">
-                        <a class="btn btn-secondary btn-small" href="Login.aspx">Learn</a>
-                        <a class="btn btn-secondary btn-small" href="Login.aspx">Practice</a>
+                        <a class="btn btn-primary btn-small" href="Login.aspx">Learn</a>
+                        <a class="btn btn-outline-primary btn-small" href="Login.aspx">Practice</a>
                     </div>
                 </div>
                 <div class="card topic-card topic-card--green">
@@ -113,8 +112,8 @@
                     <h3>Rules of the Road</h3>
                     <p>Learn the regulations and driving behaviour that keep all road users safe.</p>
                     <div class="topic-card__actions">
-                        <a class="btn btn-secondary btn-small" href="Login.aspx">Learn</a>
-                        <a class="btn btn-secondary btn-small" href="Login.aspx">Practice</a>
+                        <a class="btn btn-primary btn-small" href="Login.aspx">Learn</a>
+                        <a class="btn btn-outline-primary btn-small" href="Login.aspx">Practice</a>
                     </div>
                 </div>
                 <div class="card topic-card topic-card--purple">
@@ -124,8 +123,8 @@
                     <h3>KEJARA &amp; Safety</h3>
                     <p>Understand the demerit points system and safe driving practices.</p>
                     <div class="topic-card__actions">
-                        <a class="btn btn-secondary btn-small" href="Login.aspx">Learn</a>
-                        <a class="btn btn-secondary btn-small" href="Login.aspx">Practice</a>
+                        <a class="btn btn-primary btn-small" href="Login.aspx">Learn</a>
+                        <a class="btn btn-outline-primary btn-small" href="Login.aspx">Practice</a>
                     </div>
                 </div>
             </div>
@@ -150,22 +149,8 @@
                     <a class="btn btn-primary" href="Login.aspx">Play Road Sign Game</a>
                 </div>
 
-                <div class="game-feature__scene" aria-hidden="true">
-                    <svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" focusable="false">
-                        <rect width="320" height="200" fill="#DBEAFE" />
-                        <circle cx="262" cy="42" r="20" fill="#FDE68A" />
-                        <path d="M0 120 L70 80 L130 112 L200 70 L320 125 V200 H0 Z" fill="#BFDBFE" />
-                        <rect y="130" width="320" height="70" fill="#94A3B8" />
-                        <path d="M0 170 H320" stroke="#F8FAFC" stroke-width="3" stroke-dasharray="22 16" />
-                        <rect x="38" y="104" width="6" height="40" fill="#64748B" />
-                        <circle cx="41" cy="96" r="16" fill="#16A34A" />
-                        <rect x="248" y="86" width="5" height="50" fill="#64748B" />
-                        <path d="M250 60 L270 82 H230 Z" fill="#F59E0B" stroke="#B45309" stroke-width="2" stroke-linejoin="round" />
-                        <rect x="150" y="100" width="5" height="34" fill="#64748B" />
-                        <circle cx="152" cy="92" r="14" fill="#DC2626" />
-                        <rect x="144" y="90" width="16" height="4" rx="1" fill="#FFFFFF" />
-                        <circle cx="152" cy="92" r="23" fill="none" stroke="#FACC15" stroke-width="3" stroke-dasharray="5 4" />
-                    </svg>
+                <div class="game-feature__scene">
+                    <img src="Content/images/illustrations/road-sign-game-workshop.webp" alt="Road signs hidden among toys and craft supplies in a workshop, with a no-entry sign highlighted." width="1200" height="751" loading="lazy" />
                 </div>
             </div>
         </div>
@@ -341,7 +326,7 @@
                 <div class="final-cta__actions">
                     <asp:PlaceHolder ID="phCtaGuest" runat="server">
                         <a class="btn btn-primary" href="Register.aspx">Create Account</a>
-                        <a class="final-cta__login" href="Login.aspx">Already have an account? Login</a>
+                        <a class="btn final-cta__login" href="Login.aspx">Login</a>
                     </asp:PlaceHolder>
                     <a id="lnkCtaDashboard" runat="server" class="btn btn-primary" visible="false">Go to Dashboard</a>
                 </div>

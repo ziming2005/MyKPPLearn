@@ -11,11 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
 
     <link rel="stylesheet" href="~/Content/css/site.css" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/components.css?v=20261103-grid3" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/forms.css?v=20261102-hidden" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/app-shell.css?v=20261103-activity" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/learner.css?v=20261103-resultbtns" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/components.css?v=20261105-modal-scroll" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/forms.css?v=20261104-gbtn2" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/app-shell.css?v=20261105-modal-scroll" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/learner.css?v=20261105-modal-scroll" runat="server" />
 
+    <link rel="stylesheet" href="~/Content/css/branding.css?v=20261104-logo-v4" runat="server" />
     <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
 </head>
 <body>
@@ -25,7 +26,7 @@
 
             <aside id="appSidebar" class="app-sidebar">
                 <div class="app-sidebar__brand">
-                    <a class="site-logo" href="~/Learner/Dashboard.aspx" runat="server">My<span>KPP</span> Learn</a>
+                    <a class="site-logo site-logo--image site-logo--light" href="~/Learner/Dashboard.aspx" runat="server"><img src="~/Content/images/branding/mykpp-learn-logo-white-book-v6.png" alt="MyKPP Learn" width="2172" height="724" runat="server" /></a>
                 </div>
 
                 <nav class="app-sidebar__nav" aria-label="Learner">
@@ -69,7 +70,7 @@
             </div>
         </div>
     </form>
-    <script src="<%= ResolveUrl("~/Scripts/app-shell.js") + "?v=20261011-nav" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/app-shell.js") + "?v=20261103-alerts5" %>"></script>
     <script src="<%= ResolveUrl("~/Scripts/confirm-modal.js") + "?v=20261104" %>"></script>
     <script>window.PracticeDatabaseData = <%= PracticeDataJson() %>;</script>
     <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />

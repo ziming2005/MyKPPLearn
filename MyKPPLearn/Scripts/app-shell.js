@@ -50,4 +50,16 @@
             }
         }
     });
+
+    // One-off feedback messages (success, error and warning) fade out and leave after 5 seconds.
+    document.addEventListener("DOMContentLoaded", function () {
+        var messages = document.querySelectorAll(".alert--flash");
+
+        Array.prototype.forEach.call(messages, function (message) {
+            window.setTimeout(function () {
+                message.classList.add("is-hiding");
+                window.setTimeout(function () { message.style.display = "none"; }, 400);
+            }, 5000);
+        });
+    });
 })();

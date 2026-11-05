@@ -41,7 +41,7 @@
 
         <div class="form-actions">
             <asp:HyperLink ID="lnkBackResult" runat="server" CssClass="btn btn-secondary">Back to Result</asp:HyperLink>
-            <a class="btn btn-primary" href="~/Learner/Game.aspx" runat="server">Back to Game</a>
+            <a id="lnkBack" class="btn btn-primary" href="~/Learner/Game.aspx" runat="server">Back to Game</a>
         </div>
     </section>
 

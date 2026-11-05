@@ -121,8 +121,7 @@ small {
    -------------------------------------------------------------------- */
 a:focus-visible,
 button:focus-visible,
-input:focus-visible,
-.skip-link:focus {
+input:focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
@@ -246,6 +245,11 @@ input:focus-visible,
   gap: 12px;
 }
 
+/* Login / Register inside the menu: phones only (see the 480px rule). */
+.main-nav__account {
+  display: none;
+}
+
 .nav-toggle {
   display: none;
   align-items: center;
@@ -293,6 +297,10 @@ input:focus-visible,
     border-bottom: 1px solid var(--color-border);
     display: none;
     padding: 8px var(--container-padding) 16px;
+    /* The header stays stuck to the top, so a menu taller than the screen must scroll on its own. */
+    max-height: calc(100vh - 77px);
+    max-height: calc(100dvh - 77px);
+    overflow-y: auto;
   }
 
   .main-nav.is-open {
@@ -318,9 +326,34 @@ input:focus-visible,
   }
 }
 
+@media (max-width: 1023px) {
+  /* Logo on the left; buttons and the menu button together on the right, the menu button last. */
+  .nav-toggle {
+    order: 3;
+  }
+
+  .header-actions {
+    margin-left: auto;
+  }
+
+  .site-header__inner {
+    gap: 12px;
+  }
+}
+
+/* Phones: no room for the header buttons, so Login / Register (or Go to Dashboard) move into the menu. */
 @media (max-width: 480px) {
-  .header-actions .btn-secondary {
+  .header-actions {
     display: none;
+  }
+
+  .main-nav__account {
+    display: block;
+  }
+
+  .main-nav__account:first-of-type,
+  .main-nav__list > li:not(.main-nav__account) + .main-nav__account {
+    margin-top: 8px;
   }
 }
 

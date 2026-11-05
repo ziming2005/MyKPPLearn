@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copy this file to Mail.config and fill in the account. Mail.config is ignored by Git: never commit it. -->
+<smtp from="MyKPP Learn &lt;your.address@gmail.com&gt;" deliveryMethod="Network">
+  <network host="smtp.gmail.com" port="587" enableSsl="true" userName="your.address@gmail.com" password="your-16-character-app-password" />
+</smtp>

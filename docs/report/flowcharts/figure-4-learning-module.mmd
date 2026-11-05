@@ -1,0 +1,16 @@
+flowchart TD
+    S([Start]) --> O[Open Learning page]
+    O --> C[Select chapter]
+    C --> L[Select lesson]
+    L --> R[Read lesson]
+    R --> A{Learner action?}
+    A -->|Complete lesson| SV[Save completion to database]
+    SV --> LAST{Last lesson?}
+    LAST -->|No| NX[Open next lesson or chapter]
+    NX --> R
+    LAST -->|Yes| BK[/Display Learning page with updated progress/]
+    BK --> E([End])
+    A -->|Next or Previous Lesson| NP[Open that lesson]
+    NP --> R
+    A -->|Back to Chapter| L
+    A -->|Leave Learning| E

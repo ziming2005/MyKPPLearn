@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace MyKPPLearn.Data
 {
-    public enum MockExamSetDeleteResult { Deleted, NotFound, HasAttempts }
+    public enum MockExamSetDeleteResult { Deleted, NotFound, HasResults }
 
     /// <summary>
     /// Data access for Mock Exam Sets (Admin Mock Exam and the Learner Mock Exam pages) and the questions chosen for
@@ -18,7 +18,8 @@ namespace MyKPPLearn.Data
     {
         private const string SelectSql = @"
             SELECT s.MockExamSetId, s.ExamTypeCode, s.SetNumber, s.IsActive,
-                   (SELECT COUNT(*) FROM MockExamAttempts a WHERE a.MockExamSetId = s.MockExamSetId) AS AttemptCount
+                   (SELECT COUNT(*) FROM MockExamAttempts a WHERE a.MockExamSetId = s.MockExamSetId) AS AttemptCount,
+                   (SELECT COUNT(DISTINCT a.UserId) FROM MockExamAttempts a WHERE a.MockExamSetId = s.MockExamSetId) AS LearnerCount
             FROM MockExamSets s";
 
         public static DataTable GetAll()
@@ -353,8 +354,8 @@ namespace MyKPPLearn.Data
         }
 
         /// <summary>
-        /// Deletes a set and its question list. Refused when learners have attempted it, so their results stay intact;
-        /// deactivate it instead.
+        /// Deletes a set and its question list, in one transaction; the questions themselves stay in the Question Bank.
+        /// A set that learners have taken is never deleted (HasResults): it is deactivated instead, so their results stay.
         /// </summary>
         public static MockExamSetDeleteResult Delete(int id)
         {
@@ -372,14 +373,16 @@ namespace MyKPPLearn.Data
                             return MockExamSetDeleteResult.NotFound;
                         }
 
+                        // Locked so no attempt can be saved between this check and the delete.
                         if (Count(connection, transaction, "SELECT COUNT(*) FROM MockExamAttempts WITH (UPDLOCK, HOLDLOCK) WHERE MockExamSetId = @Id", id) > 0)
                         {
                             transaction.Rollback();
-                            return MockExamSetDeleteResult.HasAttempts;
+                            return MockExamSetDeleteResult.HasResults;
                         }
 
-                        using (SqlCommand command = new SqlCommand(
-                            "DELETE FROM MockExamSetQuestions WHERE MockExamSetId = @Id; DELETE FROM MockExamSets WHERE MockExamSetId = @Id;",
+                        using (SqlCommand command = new SqlCommand(@"
+                            DELETE FROM MockExamSetQuestions WHERE MockExamSetId = @Id;
+                            DELETE FROM MockExamSets WHERE MockExamSetId = @Id;",
                             connection, transaction))
                         {
                             command.Parameters.AddWithValue("@Id", id);

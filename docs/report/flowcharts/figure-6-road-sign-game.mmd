@@ -1,0 +1,22 @@
+flowchart TD
+    S([Start]) --> O[Open Road Sign Game page]
+    O --> G[Select game set]
+    G --> I[/Display instructions/]
+    I --> ST[Click Start Game]
+    ST --> A1((A))
+
+    A2((A)) --> SC[/Display road scene/]
+    SC --> CK[Click a road sign in the scene]
+    CK --> Q[/Display question with options A, B and C/]
+    Q --> SA[Select an answer]
+    SA --> FB[/Display feedback and explanation/]
+    FB --> AL{All signs found?}
+    AL -->|No| SC
+    AL -->|Yes| CS[Calculate score]
+    CS --> SV[Save attempt to database]
+    SV --> RS[/Display result/]
+    RS --> RA{Result action?}
+    RA -->|Review Answers| RV[/Display answer review/]
+    RV --> E([End])
+    RA -->|Try Again| SC
+    RA -->|Next Set or Back to Game| E

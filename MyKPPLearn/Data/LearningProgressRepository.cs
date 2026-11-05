@@ -45,13 +45,18 @@ namespace MyKPPLearn.Data
             return Convert.ToInt32(result) > 0;
         }
 
-        public static bool LessonHasProgress(int lessonId)
+        /// <summary>How many learners have completed each lesson (lessons nobody completed are not listed).</summary>
+        public static Dictionary<int, int> GetLearnerCountsByLesson()
         {
-            object result = DatabaseHelper.ExecuteScalar(
-                "SELECT COUNT(1) FROM LearningProgress WHERE LessonId = @LessonId",
-                new SqlParameter("@LessonId", lessonId));
+            var counts = new Dictionary<int, int>();
 
-            return Convert.ToInt32(result) > 0;
+            foreach (DataRow row in DatabaseHelper.ExecuteQuery(
+                "SELECT LessonId, COUNT(DISTINCT UserId) AS Learners FROM LearningProgress GROUP BY LessonId").Rows)
+            {
+                counts[Convert.ToInt32(row["LessonId"])] = Convert.ToInt32(row["Learners"]);
+            }
+
+            return counts;
         }
 
         public static int GetCompletedLessonCount(int userId)
@@ -79,20 +84,5 @@ namespace MyKPPLearn.Data
             return (int)Math.Round(completed * 100.0 / total, MidpointRounding.AwayFromZero);
         }
 
-        public static HashSet<int> GetCompletedLessonIds(int userId)
-        {
-            DataTable table = DatabaseHelper.ExecuteQuery(
-                "SELECT LessonId FROM LearningProgress WHERE UserId = @UserId",
-                new SqlParameter("@UserId", userId));
-
-            HashSet<int> ids = new HashSet<int>();
-
-            foreach (DataRow row in table.Rows)
-            {
-                ids.Add(Convert.ToInt32(row["LessonId"]));
-            }
-
-            return ids;
-        }
     }
 }

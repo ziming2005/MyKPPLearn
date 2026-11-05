@@ -433,3 +433,6 @@ FodyWeavers.xsd
 
 # Stray ASP.NET temporary files folder (build output)
 _program files_git/
+
+# Mail account settings (holds the Gmail app password)
+MyKPPLearn/Mail.config

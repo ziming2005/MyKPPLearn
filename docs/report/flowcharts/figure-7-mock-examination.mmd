@@ -1,0 +1,28 @@
+flowchart TD
+    S([Start]) --> O[Open Mock Exam page]
+    O --> T[Select exam type: KPP Combined or KPP Standard]
+    T --> SE[Select exam set]
+    SE --> I[/Display instructions/]
+    I --> ST[Click Start Mock Exam and start timer]
+    ST --> Q[/Display question/]
+    Q --> SA[Select or change answer]
+    SA --> F{Flag question?}
+    F -->|Yes| MF[Mark question as flagged]
+    MF --> TE{Time expired?}
+    F -->|No| TE
+    TE -->|Yes| AS[Submit exam automatically]
+    AS --> CS[Calculate result]
+    TE -->|No| N{Learner action?}
+    N -->|Go to another question| Q
+    N -->|Submit Exam| U{Unanswered questions?}
+    U -->|Yes| CF{Submit anyway?}
+    CF -->|No| Q
+    CF -->|Yes| CS
+    U -->|No| CS
+    CS --> SV[Save attempt to database]
+    SV --> RS[/Display pass or fail result/]
+    RS --> RA{Result action?}
+    RA -->|Review Answers| RV[/Display answer review/]
+    RV --> E([End])
+    RA -->|Try Again| I
+    RA -->|Back to Progress| E

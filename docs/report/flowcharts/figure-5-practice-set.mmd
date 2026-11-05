@@ -1,0 +1,27 @@
+flowchart TD
+    S([Start]) --> O[Open Practice page]
+    O --> C["Select category: Colour Recognition, Road Signs, Rules of the Road, or KEJARA & Safety"]
+    C --> P[Select practice set]
+    P --> I[/Display instructions/]
+    I --> ST[Click Start Practice]
+    ST --> A1((A))
+
+    A2((A)) --> Q[/Display question/]
+    Q --> AN{Answer this question?}
+    AN -->|Yes| SA[Select answer A, B or C]
+    SA --> FB[/Display feedback and explanation/]
+    FB --> N{Learner action?}
+    AN -->|No| N
+    N -->|Next or Previous| Q
+    N -->|Submit Practice| U{Unanswered questions?}
+    U -->|Yes| CF{Submit anyway?}
+    CF -->|No| Q
+    CF -->|Yes| CS[Calculate score]
+    U -->|No| CS
+    CS --> SV[Save attempt to database]
+    SV --> RS[/Display result/]
+    RS --> RA{Result action?}
+    RA -->|Review Answers| RV[/Display answer review/]
+    RV --> E([End])
+    RA -->|Try Again| Q
+    RA -->|Next Set or Back to Practice| E

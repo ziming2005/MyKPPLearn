@@ -4,7 +4,7 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div id="mockExamAttemptRoot" data-type='<%= TypeId %>' data-set='<%= SetNumber %>' data-app-root='<%= ResolveUrl("~/") %>'>
+    <div id="mockExamAttemptRoot" data-type='<%= TypeId %>' data-set='<%= SetNumber %>' data-back-url='<%= BackUrl %>' data-app-root='<%= ResolveUrl("~/") %>'>
 
         <!-- ================= INSTRUCTIONS ================= -->
         <section id="mxViewInstructions" class="card mx-intro">
@@ -208,5 +208,6 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script>window.MockExamDatabaseData = <%= DataJson %>;</script>
+    <script>window.MockExamSavedAttempt = <%= SavedJson %>;</script>
     <script src="<%= ResolveUrl("~/Scripts/mock-exam.js") + "?v=" + MockExamScriptVersion %>"></script>
 </asp:Content>

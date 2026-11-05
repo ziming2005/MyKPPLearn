@@ -43,9 +43,16 @@
 
         <div class="hrs-game__bar">
             <h2 class="hrs-game__title"><span class="dash-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 12h4M8 10v4"/><path d="M15 13h.01M18 11h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.2l-1.5 7A3 3 0 0 0 4.2 19a3 3 0 0 0 2.4-1.2l1.4-2h8l1.4 2a3 3 0 0 0 2.4 1.2 3 3 0 0 0 2.9-3.8l-1.5-7A4 4 0 0 0 17.3 5z"/></svg></span><asp:Literal ID="litSetName" runat="server" /></h2>
-            <div class="hrs-progress" aria-live="polite">
-                <span class="hrs-progress__count"><span id="hrsFoundCount">0</span> / <span id="hrsTotalCount"><asp:Literal ID="litTotal" runat="server" /></span></span>
-                <span class="hrs-progress__label">Found</span>
+            <div class="hrs-game__tools">
+                <div class="hrs-progress" aria-live="polite">
+                    <span class="hrs-progress__count"><span id="hrsFoundCount">0</span> / <span id="hrsTotalCount"><asp:Literal ID="litTotal" runat="server" /></span></span>
+                    <span class="hrs-progress__label">Found</span>
+                </div>
+                <%-- Shown by the script only where the browser supports full screen (not on iPhone Safari). --%>
+                <button type="button" id="hrsFullscreenBtn" class="btn btn-secondary btn-small hrs-fullscreen-btn" hidden>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                    <span class="hrs-fullscreen-btn__text">Full Screen</span>
+                </button>
             </div>
         </div>
 

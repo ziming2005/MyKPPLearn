@@ -193,6 +193,27 @@ namespace MyKPPLearn.Data
             }
         }
 
+        /// <summary>
+        /// One saved attempt, one row per question in the order answered: the learner, the attempt's category code and
+        /// set number plus the question snapshots. userId limits it to that learner's own attempts (null: any learner,
+        /// for an administrator). Empty when there is no such attempt.
+        /// </summary>
+        public static DataTable GetSavedForUser(int attemptId, int? userId)
+        {
+            return DatabaseHelper.ExecuteQuery(@"
+                SELECT a.UserId, c.Code AS CategoryCode, p.SetNumber, q.QuestionId, q.QuestionTextSnapshot, q.ExplanationSnapshot,
+                       q.OptionATextSnapshot, q.OptionBTextSnapshot, q.OptionCTextSnapshot,
+                       q.CorrectOptionSnapshot, q.SelectedOptionSnapshot, q.ImagePathSnapshot
+                FROM PracticeAttempts a
+                INNER JOIN PracticeSets p ON p.PracticeSetId = a.PracticeSetId
+                INNER JOIN QuestionCategories c ON c.QuestionCategoryId = p.QuestionCategoryId
+                INNER JOIN PracticeAttemptQuestions q ON q.PracticeAttemptId = a.PracticeAttemptId
+                WHERE a.PracticeAttemptId = @AttemptId AND (@UserId IS NULL OR a.UserId = @UserId)
+                ORDER BY q.QuestionNumber",
+                new SqlParameter("@AttemptId", attemptId),
+                new SqlParameter("@UserId", SqlDbType.Int) { Value = userId.HasValue ? (object)userId.Value : DBNull.Value });
+        }
+
         private static string Letter(int index)
         {
             return ((char)('A' + index)).ToString();

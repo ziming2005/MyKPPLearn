@@ -54,6 +54,48 @@
         });
     }
 
+    // ------------------------------------------------------------------
+    // Full screen: the game block (title, Found count and scene) fills the screen. The question modal is moved
+    // inside it so it still appears in full screen. Esc or the button leaves full screen.
+    // ------------------------------------------------------------------
+    var fullscreenBtn = document.getElementById("hrsFullscreenBtn");
+    var canFullscreen = !!(root.requestFullscreen || root.webkitRequestFullscreen)
+        && (document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
+    function fullscreenElement() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+
+    function setSceneRatio() {
+        if (img.naturalWidth && img.naturalHeight) {
+            root.style.setProperty("--scene-ratio", String(img.naturalWidth / img.naturalHeight));
+        }
+    }
+
+    if (fullscreenBtn && canFullscreen) {
+        if (modal && modal.parentNode !== root) { root.appendChild(modal); }
+
+        setSceneRatio();
+        img.addEventListener("load", setSceneRatio);
+
+        fullscreenBtn.hidden = false;
+        fullscreenBtn.addEventListener("click", function () {
+            if (fullscreenElement()) {
+                (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+            } else {
+                // A browser may refuse (e.g. inside an embedded frame); the game simply stays as it is.
+                var request = (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+                if (request && request.catch) { request.catch(function () { }); }
+            }
+        });
+
+        var onFullscreenChange = function () {
+            var on = fullscreenElement() === root;
+            fullscreenBtn.querySelector(".hrs-fullscreen-btn__text").textContent = on ? "Exit Full Screen" : "Full Screen";
+            fullscreenBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        };
+        document.addEventListener("fullscreenchange", onFullscreenChange);
+        document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+    }
+
     var items = game.items;
     var total = items.length;
     var found = [];             // { itemId, choiceId, foundOrder } in the order discovered

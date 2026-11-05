@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
 namespace MyKPPLearn.Data
 {
-    public enum PracticeSetDeleteResult { Deleted, NotFound, HasQuestions, HasAttempts }
+    public enum PracticeSetDeleteResult { Deleted, NotFound, HasResults }
 
     /// <summary>
     /// Data access for Practice Sets (Admin Practice Sets and the Learner Practice pages).
@@ -19,7 +20,8 @@ namespace MyKPPLearn.Data
                    c.Code AS CategoryCode, c.Title AS CategoryTitle,
                    (SELECT COUNT(*) FROM Questions q WHERE q.PracticeSetId = p.PracticeSetId) AS QuestionCount,
                    (SELECT COUNT(*) FROM Questions q WHERE q.PracticeSetId = p.PracticeSetId AND q.IsActive = 1) AS ActiveQuestionCount,
-                   (SELECT COUNT(*) FROM PracticeAttempts a WHERE a.PracticeSetId = p.PracticeSetId) AS AttemptCount
+                   (SELECT COUNT(*) FROM PracticeAttempts a WHERE a.PracticeSetId = p.PracticeSetId) AS AttemptCount,
+                   (SELECT COUNT(DISTINCT a.UserId) FROM PracticeAttempts a WHERE a.PracticeSetId = p.PracticeSetId) AS LearnerCount
             FROM PracticeSets p
             INNER JOIN QuestionCategories c ON c.QuestionCategoryId = p.QuestionCategoryId";
 
@@ -109,11 +111,16 @@ namespace MyKPPLearn.Data
         }
 
         /// <summary>
-        /// Deletes a set only when nothing depends on it. The checks and the delete run in one transaction,
-        /// with UPDLOCK/HOLDLOCK so a question or attempt cannot be added between the check and the delete.
+        /// Deletes a set with its questions (taken out of Mock Exam Sets; see QuestionRepository.DeleteWhere), in one
+        /// transaction. A set that learners have results for is never deleted (HasResults): it is deactivated instead, so
+        /// their history stays. Returns the deleted questions' image paths (for the caller to remove once unused) and the
+        /// Mock Exam Sets that became Inactive.
         /// </summary>
-        public static PracticeSetDeleteResult Delete(int id)
+        public static PracticeSetDeleteResult Delete(int id, out List<string> imagePaths, out List<string> deactivatedMockSets)
         {
+            imagePaths = new List<string>();
+            deactivatedMockSets = new List<string>();
+
             using (SqlConnection connection = DatabaseHelper.GetConnection())
             {
                 connection.Open();
@@ -128,17 +135,25 @@ namespace MyKPPLearn.Data
                             return PracticeSetDeleteResult.NotFound;
                         }
 
+                        // Locked so no attempt can be saved between this check and the delete.
                         if (Count(connection, transaction, "SELECT COUNT(*) FROM PracticeAttempts WITH (UPDLOCK, HOLDLOCK) WHERE PracticeSetId = @Id", id) > 0)
                         {
                             transaction.Rollback();
-                            return PracticeSetDeleteResult.HasAttempts;
+                            return PracticeSetDeleteResult.HasResults;
                         }
 
-                        if (Count(connection, transaction, "SELECT COUNT(*) FROM Questions WITH (UPDLOCK, HOLDLOCK) WHERE PracticeSetId = @Id", id) > 0)
+                        using (SqlCommand command = new SqlCommand(
+                            "SELECT ImagePath FROM Questions WHERE PracticeSetId = @Id AND ImagePath IS NOT NULL", connection, transaction))
                         {
-                            transaction.Rollback();
-                            return PracticeSetDeleteResult.HasQuestions;
+                            command.Parameters.AddWithValue("@Id", id);
+
+                            using (SqlDataReader reader = command.ExecuteReader())
+                            {
+                                while (reader.Read()) { imagePaths.Add(reader.GetString(0)); }
+                            }
                         }
+
+                        deactivatedMockSets = QuestionRepository.DeleteWhere(connection, transaction, "q.PracticeSetId = @Id", id);
 
                         using (SqlCommand command = new SqlCommand("DELETE FROM PracticeSets WHERE PracticeSetId = @Id", connection, transaction))
                         {

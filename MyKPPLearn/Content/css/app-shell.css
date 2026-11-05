@@ -336,32 +336,8 @@
   color: var(--color-navy);
 }
 
-.empty-state__text {
-  color: var(--color-text-secondary);
-  font-size: var(--fs-small);
-  margin: 0;
-}
-
 .empty-state .btn {
   margin-top: 10px;
-}
-
-.placeholder-panel {
-  padding: 48px 32px;
-  text-align: center;
-}
-
-.placeholder-panel h1 {
-  margin-bottom: 8px;
-}
-
-.placeholder-panel p {
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.placeholder-panel .badge {
-  margin-bottom: 16px;
 }
 
 @media (max-width: 1199px) {
@@ -576,10 +552,6 @@
   overflow-wrap: anywhere;
 }
 
-.profile-identity__role {
-  color: var(--color-text-secondary);
-}
-
 .profile-photo-controls {
   display: flex;
   flex-wrap: wrap;
@@ -637,8 +609,6 @@
 /* ---- Change Password modal (opened from the Personal Information card) ---- */
 .profile-modal {
   max-width: 440px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
 }
 
 .profile-modal__head {
@@ -728,8 +698,7 @@ body.profile-modal-open {
 }
 
 .dash-icon svg { width: 20px; height: 20px; }
-.dash-icon--sm { width: 26px; height: 26px; border-radius: 8px; margin-right: 8px; vertical-align: middle; }
-.dash-icon--sm svg { width: 15px; height: 15px; }
+
 .dash-icon--lg { width: 48px; height: 48px; border-radius: 12px; }
 .dash-icon--lg svg { width: 24px; height: 24px; }
 
@@ -770,11 +739,6 @@ body.profile-modal-open {
   padding-top: 16px;
 }
 
-/* ---- Profile: role badge, photo remove, security text, activity ---- */
-.profile-identity__role .badge {
-  margin-top: 4px;
-}
-
 .profile-photo-remove {
   margin-top: 4px;
   padding: 0;
@@ -791,65 +755,9 @@ body.profile-modal-open {
   text-decoration: underline;
 }
 
-.profile-card__text {
-  margin: 0 0 16px;
-  color: var(--color-text-secondary);
-}
-
 .profile-editor .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.profile-activity {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.profile-activity__item {
-  flex: 1 1 160px;
-  padding: 14px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background-color: var(--color-bg-page);
-}
-
-.profile-activity__item strong {
-  display: block;
-  font-size: 1.5rem;
-  line-height: 1.2;
-  color: var(--color-navy);
-}
-
-.profile-activity__item span {
-  font-size: var(--fs-small);
-  color: var(--color-text-secondary);
-}
-
-/* ---- Admin dashboard: card counts / links and the recent activity feed ---- */
-.management-card__meta {
-  margin: 0;
-  font-size: var(--fs-small);
-  font-weight: 700;
-  color: var(--dash-color, var(--color-primary));
-}
-
-.management-card__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  margin: 10px 0 0;
-  font-size: var(--fs-small);
-  font-weight: 600;
-}
-
-.management-card__links a {
-  color: var(--color-primary);
-}
-
-.management-card__links a:hover {
-  text-decoration: underline;
 }
 
 .activity-card {
@@ -914,5 +822,215 @@ body.profile-modal-open {
   .activity-item__time {
     margin-left: 22px;
     flex-basis: 100%;
+  }
+}
+
+/* ---- History lists: learner Progress and admin Learner Record Details ---- */
+.history-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.history-item__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-item__meta {
+  margin-top: 2px;
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+/* Round score badge at the start of each row. */
+.history-score {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  border: 3px solid currentColor;
+}
+
+.history-score--good { color: #15803D; background-color: #F0FDF4; }
+.history-score--fair { color: #B45309; background-color: #FFFBEB; }
+.history-score--low  { color: #B91C1C; background-color: #FEF2F2; }
+
+/* Mock exam outcome pill at the end of the row. */
+.history-result {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.history-result--pass { background-color: #DCFCE7; color: #166534; }
+.history-result--fail { background-color: #FEE2E2; color: #991B1B; }
+
+/* Summary figures above each history list. */
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.history-stat {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background-color: var(--color-primary-light);
+}
+
+.history-stat__value {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: var(--color-navy);
+  line-height: 1.2;
+}
+
+.history-stat__label {
+  margin-top: 2px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Older games stay hidden until the list is expanded. */
+.history-list:not(.is-expanded) .history-item--extra {
+  display: none;
+}
+
+.history-item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.history-item__title {
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.history-more {
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 479px) {
+  .history-item {
+    flex-wrap: wrap;
+  }
+
+  .history-item .btn-result,
+  .history-item .history-result {
+    margin-left: 68px;
+  }
+}
+
+/* "View Result" in the history lists: green background, border and text. */
+.history-item .btn-result {
+  background-color: #F0FDF4;
+  border-color: var(--color-success);
+  color: #166534;
+}
+
+.history-item .btn-result:hover {
+  background-color: #DCFCE7;
+  border-color: #15803D;
+  color: #14532D;
+}
+
+/* ---- Sidebar colour (Learner and Admin): brand blue with white text; the active link is a white pill with blue text ---- */
+.app-sidebar {
+  background-color: var(--color-primary);
+  border-right-color: var(--color-primary-dark);
+}
+
+.app-sidebar__brand,
+.app-sidebar__footer {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.app-sidebar .site-logo {
+  font-size: 1.4rem;
+  color: #FFFFFF;
+}
+
+/* "KPP" in a deep navy blue: clearly darker than the sidebar, still readable on it. */
+.app-sidebar .site-logo span {
+  color: #172554;
+}
+
+.app-sidebar .app-nav-link,
+.app-sidebar--admin .app-nav-link:not(.is-active):not(:hover):not(.app-nav-link--logout) {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.app-sidebar .app-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+}
+
+.app-sidebar .app-nav-link.is-active {
+  background-color: #FFFFFF;
+  color: var(--color-primary);
+}
+
+.app-sidebar .app-nav-link:focus-visible {
+  outline-color: #FFFFFF;
+}
+
+.app-sidebar .app-nav-group__label {
+  color: #BFDBFE;
+}
+
+.app-sidebar .app-nav-link--logout {
+  color: #FFFFFF;
+}
+
+.app-sidebar .app-nav-link--logout:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+}
+
+/* Phones: the four overview boxes (both dashboards, Progress, Learner Record Details) sit two by two in compact
+   cards instead of one tall column. The corner icon is dropped so the label has the whole width. */
+@media (max-width: 767px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .stat-grid .stat-card {
+    padding: 14px;
+  }
+
+  .stat-grid .stat-card .dash-icon {
+    display: none;
+  }
+
+  .stat-grid .stat-card .stat-card__label {
+    display: block;
+    padding-right: 0;
+    font-size: 0.8125rem;
+  }
+
+  .stat-grid .stat-card__value {
+    font-size: 1.5rem;
   }
 }

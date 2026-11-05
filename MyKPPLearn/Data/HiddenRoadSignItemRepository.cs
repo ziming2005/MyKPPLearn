@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Globalization;
 
 namespace MyKPPLearn.Data
 {
@@ -111,21 +110,6 @@ namespace MyKPPLearn.Data
             return null;
         }
 
-        /// <summary>
-        /// Parses a percentage posted by the editor (invariant culture, two decimals). Returns false
-        /// for anything that is not a finite number.
-        /// </summary>
-        public static bool TryParsePercent(string text, out decimal value)
-        {
-            if (decimal.TryParse((text ?? string.Empty).Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out value))
-            {
-                value = Math.Round(value, 2, MidpointRounding.AwayFromZero);
-                return true;
-            }
-
-            return false;
-        }
-
         // ------------------------------------------------------------------
         // Reads
         // ------------------------------------------------------------------
@@ -152,20 +136,6 @@ namespace MyKPPLearn.Data
             return DatabaseHelper.ExecuteQuery(sql, new SqlParameter("@PracticeId", practiceId));
         }
 
-        public static DataRow GetItemById(int itemId)
-        {
-            const string sql = @"
-                SELECT i.HiddenRoadSignItemId, i.HiddenRoadSignPracticeId, i.RoadSignAssetId, i.QuestionText, i.Explanation,
-                       i.HotspotXPercent, i.HotspotYPercent, i.HotspotWidthPercent, i.HotspotHeightPercent, i.IsConfigured,
-                       a.Name AS AssetName, a.ImagePath AS AssetImagePath, a.IsActive AS AssetIsActive
-                FROM HiddenRoadSignItems i
-                INNER JOIN HiddenRoadSignAssets a ON a.RoadSignAssetId = i.RoadSignAssetId
-                WHERE i.HiddenRoadSignItemId = @ItemId";
-
-            DataTable table = DatabaseHelper.ExecuteQuery(sql, new SqlParameter("@ItemId", itemId));
-            return table.Rows.Count == 0 ? null : table.Rows[0];
-        }
-
         /// <summary>
         /// All choices of every hotspot in a Set, ordered A/B/C per Item. Includes IsCorrect, so callers
         /// that build learner-facing data must NOT forward that column.
@@ -180,15 +150,6 @@ namespace MyKPPLearn.Data
                 ORDER BY c.HiddenRoadSignItemId ASC, c.DisplayOrder ASC";
 
             return DatabaseHelper.ExecuteQuery(sql, new SqlParameter("@PracticeId", practiceId));
-        }
-
-        public static bool HasAttemptAnswers(int itemId)
-        {
-            object result = DatabaseHelper.ExecuteScalar(
-                "SELECT COUNT(1) FROM HiddenRoadSignAttemptAnswers WHERE HiddenRoadSignItemId = @ItemId",
-                new SqlParameter("@ItemId", itemId));
-
-            return Convert.ToInt32(result) > 0;
         }
 
         // ------------------------------------------------------------------

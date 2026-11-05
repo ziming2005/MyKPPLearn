@@ -102,13 +102,10 @@
             var type = findType(id);
             return type ? clone(type) : null;
         },
-        isKnownType: function (id) { return findType(id) !== null; },
         totalQuestions: function (type) {
             return type.sections.reduce(function (sum, section) { return sum + section.count; }, 0);
         },
         setLabel: function (number) { return "Mock Exam Set " + number; },
-        /** All sets of an exam type, or [] for an unknown type. */
-        getSets: function (typeId) { return clone(EXAM_SETS[typeId] || []); },
         /** Only the Active sets of an exam type (what learners may see). */
         getActiveSets: function (typeId) {
             return clone((EXAM_SETS[typeId] || []).filter(function (set) { return set.status === "Active"; }));
@@ -178,7 +175,11 @@
         if (!type) { return; }
 
         var setsUrl = appRoot + "Learner/MockExamSets.aspx?type=" + encodeURIComponent(type.id);
-        var setInfo = MockExamData.getSet(type.id, root.getAttribute("data-set"));
+        // A finished exam reopened from Progress: its own saved paper, answers and result, shown on the result screen.
+        var saved = global.MockExamSavedAttempt || null;
+        var setInfo = saved
+            ? { setNumber: Number(root.getAttribute("data-set")), status: "Active" }
+            : MockExamData.getSet(type.id, root.getAttribute("data-set"));
 
         // The code-behind can only check the query string shape; this catches a set that
         // does not exist for the type or is not Active, and never starts a broken exam.
@@ -523,9 +524,23 @@
             if (fromNavigator) {
                 setNavOpen(false);
                 if (window.matchMedia("(max-width: 991px)").matches) {
-                    byId("mxQuestionCard").scrollIntoView({ block: "start" });
+                    var card = byId("mxQuestionCard");
+                    card.style.scrollMarginTop = stickyHeadersHeight() + 12 + "px";
+                    card.scrollIntoView({ block: "start" });
                 }
             }
+        }
+
+        // How much of the top of the screen the sticky headers cover (the exam header is only sticky on a phone).
+        function stickyHeadersHeight() {
+            var appHeader = document.querySelector(".app-header");
+            var examHeader = document.querySelector(".mx-header");
+            var height = appHeader ? appHeader.offsetHeight : 0;
+
+            if (examHeader && window.getComputedStyle(examHeader).position === "sticky") {
+                height += examHeader.offsetHeight;
+            }
+            return height;
         }
 
         function setNavOpen(open) {
@@ -663,7 +678,7 @@
             byId("mxResultTime").textContent = "Time taken: " + formatClock(elapsed) + " of " + type.minutes + " minutes";
 
             // "Next Set" leads when there is one; otherwise Review Answers does.
-            var nextSet = MockExamData.getActiveSets(type.id).filter(function (x) { return x.setNumber > setInfo.setNumber; })[0];
+            var nextSet = saved ? null : MockExamData.getActiveSets(type.id).filter(function (x) { return x.setNumber > setInfo.setNumber; })[0];
             var nextLink = byId("mxNextSetLink");
 
             if (nextSet) {
@@ -850,7 +865,38 @@
         });
         byId("mxBackToResultBtn").addEventListener("click", function () { setView("result"); });
         byId("mxBackToResultTopBtn").addEventListener("click", function () { setView("result"); });
-        byId("mxTryAgainBtn").addEventListener("click", showInstructions);
+        byId("mxTryAgainBtn").addEventListener("click", function () {
+            if (saved) {
+                window.location.href = appRoot + "Learner/MockExamAttempt.aspx?type=" + encodeURIComponent(type.id) + "&set=" + encodeURIComponent(setInfo.setNumber);
+                return;
+            }
+
+            showInstructions();
+        });
+
+        if (saved) {
+            questions = saved.questions;
+            total = questions.length;
+            state = freshState();
+            state.answers = saved.answers.map(function (a) { return a >= 0 ? a : null; });
+            state.flags = saved.flags;
+            state.isSubmitted = true;
+            state.autoSubmitted = saved.result.autoSubmitted;
+            state.result = saved.result;
+
+            // An administrator (data-back-url) only looks: back to the learner's record, and no Try Again.
+            var backUrl = root.getAttribute("data-back-url");
+
+            Array.prototype.forEach.call(document.querySelectorAll(".mx-back-to-sets"), function (link) {
+                link.setAttribute("href", backUrl || appRoot + "Learner/Progress.aspx");
+                link.textContent = backUrl ? "Back to Learner Record" : "Back to Progress";
+            });
+            byId("mxTryAgainBtn").hidden = !!backUrl;
+
+            renderResult();
+            setView("result");
+            return;
+        }
 
         state = freshState();
         setView("instructions");

@@ -1,0 +1,37 @@
+flowchart TD
+    S([Start]) --> D[/Display Administrator Dashboard/]
+    D --> M{Select module}
+    M -->|Learner records| M1[Open Learner Records]
+    M -->|Learning content| M2[Open Chapters and Lessons]
+    M -->|Question Bank| M3[Open Question Bank]
+    M -->|Practice sets| M4[Open Practice Sets]
+    M -->|Mock exam sets| M5[Open Mock Exam Sets]
+    M -->|Road Sign Game| M6[Open Game Sets and Road Sign Assets]
+    M1 --> A{Select action}
+    M2 --> A
+    M3 --> A
+    M4 --> A
+    M5 --> A
+    M6 --> A
+    A -->|View| V[/Display records/]
+    A -->|Add| AD[Enter details]
+    A -->|Edit| ED[Update details]
+    A -->|Activate or deactivate| ST[Change status]
+    A -->|Delete| CF{Confirm delete?}
+    AD --> VL{Details valid?}
+    ED --> VL
+    VL -->|No| VX[/Display error message/]
+    VX --> A
+    VL -->|Yes| SV[Save to database]
+    ST --> SV
+    SV --> OK[/Display success message/]
+    CF -->|No| A
+    CF -->|Yes| PR{Record protected from deletion?}
+    PR -->|Yes| NO[/Display cannot delete message/]
+    PR -->|No| DL[Delete from database]
+    DL --> OK
+    V --> MORE{Another action?}
+    OK --> MORE
+    NO --> MORE
+    MORE -->|Yes| A
+    MORE -->|No| E([End])

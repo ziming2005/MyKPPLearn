@@ -35,18 +35,21 @@ namespace MyKPPLearn.Common
             Show(label, text, isError);
         }
 
+        // "alert--flash": the message fades out by itself after a few seconds (Scripts/app-shell.js).
+        private const string FlashClass = " alert--flash";
+
         /// <summary>A cautionary (amber) message: the action worked, but the administrator should know about a side effect.</summary>
         public static void ShowWarning(Label label, string text)
         {
             label.Text = HttpUtility.HtmlEncode(text);
-            label.CssClass = "alert alert-warning";
+            label.CssClass = "alert alert-warning" + FlashClass;
             label.Visible = true;
         }
 
         public static void Show(Label label, string text, bool isError)
         {
             label.Text = HttpUtility.HtmlEncode(text);
-            label.CssClass = isError ? "alert alert-error" : "alert alert-success";
+            label.CssClass = (isError ? "alert alert-error" : "alert alert-success") + FlashClass;
             label.Visible = true;
         }
     }

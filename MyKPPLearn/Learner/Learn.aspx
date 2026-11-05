@@ -23,6 +23,16 @@
         <asp:Panel ID="pnlAllDone" runat="server" CssClass="learn-summary__done" Visible="false">All lessons completed</asp:Panel>
     </asp:Panel>
 
+    <%-- Every lesson completed: point the learner to the next step, a Mock Exam. --%>
+    <asp:Panel ID="pnlFinished" runat="server" CssClass="card learn-finished" Visible="false" role="status">
+        <span class="learn-finished__icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <div class="learn-finished__text">
+            <h3>You've completed all lessons.</h3>
+            <p>Try a Mock Exam to test yourself.</p>
+        </div>
+        <a class="btn btn-primary learn-finished__btn" href="~/Learner/MockExam.aspx" runat="server">Take a Mock Exam</a>
+    </asp:Panel>
+
     <asp:Panel ID="pnlEmpty" runat="server" CssClass="empty-state" Visible="false">
         <div class="empty-state__title">No learning content is available yet.</div>
     </asp:Panel>

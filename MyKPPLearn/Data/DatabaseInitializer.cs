@@ -21,13 +21,35 @@ namespace MyKPPLearn.Data
             EnsureLegacyUserIsActiveColumnRemoved();
             EnsureLearningTablesExist();
             EnsureLessonImagePositionColumnExists();
+            EnsureUserGoogleSubjectColumnExists();
+            EnsurePasswordResetTokensTableExists();
             EnsureHiddenRoadSignTablesExist();
             EnsureQuestionBankAndExamTablesExist();
             EnsureImageAltTextColumnsRemoved();
+            EnsureAttemptQuestionLinksRemoved();
         }
 
         // Questions no longer have an image description. Databases created before that change still have the column
         // (and its check constraint) on Questions and on both attempt-question snapshot tables: drop them once.
+        // A learner's saved result keeps its own copy of every question, so it must not stop the question (or its options)
+        // from being deleted. The saved QuestionId / SelectedOptionId stay as plain numbers; nothing joins on them.
+        private static void EnsureAttemptQuestionLinksRemoved()
+        {
+            string[][] links =
+            {
+                new[] { "PracticeAttemptQuestions", "FK_PracticeAttemptQuestions_Questions" },
+                new[] { "PracticeAttemptQuestions", "FK_PracticeAttemptQuestions_QuestionOptions" },
+                new[] { "MockExamAttemptQuestions", "FK_MockExamAttemptQuestions_Questions" },
+                new[] { "MockExamAttemptQuestions", "FK_MockExamAttemptQuestions_QuestionOptions" }
+            };
+
+            foreach (string[] link in links)
+            {
+                DatabaseHelper.ExecuteNonQuery(
+                    "IF OBJECT_ID('" + link[1] + "', 'F') IS NOT NULL ALTER TABLE " + link[0] + " DROP CONSTRAINT " + link[1] + ";");
+            }
+        }
+
         private static void EnsureImageAltTextColumnsRemoved()
         {
             string[][] columns =
@@ -200,8 +222,6 @@ namespace MyKPPLearn.Data
                         SelectedOptionTextSnapshot NVARCHAR(200) NULL,
                         ImagePathSnapshot NVARCHAR(500) NULL,
                         CONSTRAINT FK_PracticeAttemptQuestions_Attempts FOREIGN KEY (PracticeAttemptId) REFERENCES PracticeAttempts (PracticeAttemptId),
-                        CONSTRAINT FK_PracticeAttemptQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
-                        CONSTRAINT FK_PracticeAttemptQuestions_QuestionOptions FOREIGN KEY (SelectedOptionId) REFERENCES QuestionOptions (QuestionOptionId),
                         CONSTRAINT UQ_PracticeAttemptQuestions_Attempt_Question UNIQUE (PracticeAttemptId, QuestionId),
                         CONSTRAINT UQ_PracticeAttemptQuestions_Attempt_Number UNIQUE (PracticeAttemptId, QuestionNumber),
                         CONSTRAINT CK_PracticeAttemptQuestions_Number CHECK (QuestionNumber > 0),
@@ -309,8 +329,6 @@ namespace MyKPPLearn.Data
                         ImagePathSnapshot NVARCHAR(500) NULL,
                         QuestionCategoryCodeSnapshot NVARCHAR(40) NOT NULL,
                         CONSTRAINT FK_MockExamAttemptQuestions_Attempts FOREIGN KEY (MockExamAttemptId) REFERENCES MockExamAttempts (MockExamAttemptId),
-                        CONSTRAINT FK_MockExamAttemptQuestions_Questions FOREIGN KEY (QuestionId) REFERENCES Questions (QuestionId),
-                        CONSTRAINT FK_MockExamAttemptQuestions_QuestionOptions FOREIGN KEY (SelectedOptionId) REFERENCES QuestionOptions (QuestionOptionId),
                         CONSTRAINT UQ_MockExamAttemptQuestions_Attempt_Question UNIQUE (MockExamAttemptId, QuestionId),
                         CONSTRAINT UQ_MockExamAttemptQuestions_Attempt_Number UNIQUE (MockExamAttemptId, QuestionNumber),
                         CONSTRAINT CK_MockExamAttemptQuestions_Number CHECK (QuestionNumber > 0),
@@ -773,6 +791,56 @@ namespace MyKPPLearn.Data
         // Phase 4 enhancement: lesson image position (Above/Below content). Added as a safe,
         // idempotent column upgrade so existing Lessons rows and their images are never touched;
         // the DEFAULT constraint backfills every existing row as 'Above', preserving current behavior.
+        // The Google account (its stable "sub" id) a learner signs in with; one Google account per user.
+        private static void EnsureUserGoogleSubjectColumnExists()
+        {
+            const string sql = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'GoogleSubjectId')
+                BEGIN
+                    ALTER TABLE Users ADD GoogleSubjectId NVARCHAR(255) NULL;
+                END
+                IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID('Users') AND name = 'UQ_Users_GoogleSubjectId')
+                BEGIN
+                    EXEC('CREATE UNIQUE INDEX UQ_Users_GoogleSubjectId ON Users (GoogleSubjectId) WHERE GoogleSubjectId IS NOT NULL');
+                END";
+
+            DatabaseHelper.ExecuteNonQuery(sql);
+        }
+
+        // Forgot password: one row per emailed 6-digit code. Only a SHA-256 hash of the code is stored.
+        private static void EnsurePasswordResetTokensTableExists()
+        {
+            const string sql = @"
+                IF OBJECT_ID('PasswordResetTokens', 'U') IS NULL
+                BEGIN
+                    CREATE TABLE PasswordResetTokens
+                    (
+                        TokenId     INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                        UserId      INT               NOT NULL CONSTRAINT FK_PasswordResetTokens_Users REFERENCES Users(UserId) ON DELETE CASCADE,
+                        TokenHash   CHAR(64)          NOT NULL,
+                        ExpiresAt   DATETIME2         NOT NULL,
+                        UsedAt      DATETIME2         NULL,
+                        CreatedAt   DATETIME2         NOT NULL
+                    );
+                END
+                IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('PasswordResetTokens') AND name = 'FailedAttempts')
+                BEGIN
+                    ALTER TABLE PasswordResetTokens ADD FailedAttempts INT NOT NULL CONSTRAINT DF_PasswordResetTokens_FailedAttempts DEFAULT 0;
+                END
+                -- Set once the code has been entered correctly; only then may the new password be chosen.
+                IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('PasswordResetTokens') AND name = 'VerifiedAt')
+                BEGIN
+                    ALTER TABLE PasswordResetTokens ADD VerifiedAt DATETIME2 NULL;
+                END
+                -- A 6-digit code can repeat for the same user over time, so the hash is not unique.
+                IF OBJECT_ID('UQ_PasswordResetTokens_TokenHash', 'UQ') IS NOT NULL
+                BEGIN
+                    ALTER TABLE PasswordResetTokens DROP CONSTRAINT UQ_PasswordResetTokens_TokenHash;
+                END";
+
+            DatabaseHelper.ExecuteNonQuery(sql);
+        }
+
         private static void EnsureLessonImagePositionColumnExists()
         {
             const string sql = @"

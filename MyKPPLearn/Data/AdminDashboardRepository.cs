@@ -1,5 +1,4 @@
 using System;
-using System.Data;
 using System.Data.SqlClient;
 using MyKPPLearn.Security;
 
@@ -17,17 +16,6 @@ namespace MyKPPLearn.Data
                 new SqlParameter("@Days", days));
 
             return Convert.ToInt32(result);
-        }
-
-        public static int GetActiveChapterCount()
-        {
-            return Convert.ToInt32(DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM LearningChapters WHERE IsActive = 1"));
-        }
-
-        /// <summary>Road sign assets in the library (Active and Inactive).</summary>
-        public static int GetRoadSignAssetCount()
-        {
-            return Convert.ToInt32(DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM HiddenRoadSignAssets"));
         }
     }
 }

@@ -1,0 +1,35 @@
+flowchart LR
+    D[Administrator Dashboard]:::main --> LR[Learner Records]:::main
+    D --> GL[Learning]:::group
+    D --> GA[Assessment]:::group
+    D --> GG[Game]:::group
+    D --> P[Profile]:::main
+    D --> O[Logout]:::main
+
+    LR --> LR1["Learner List: add, edit, delete"]:::page --> LR2["Learner Details: view"]:::page
+
+    GL --> CH[Chapters]:::main
+    GL --> LE[Lessons]:::main
+    CH --> CH1["Chapter List: add, view, edit, delete"]:::page
+    LE --> LE1["Lesson List: delete"]:::page
+    LE1 --> LE2["Lesson Details: view"]:::page
+    LE1 --> LE3[Add and Edit Lesson]:::page
+
+    GA --> PS[Practice Sets]:::main
+    GA --> QB[Question Bank]:::main
+    GA --> ME[Mock Exam]:::main
+    PS --> PS1["Practice Set List: delete"]:::page --> PS2[Add and Edit Practice Set]:::page
+    QB --> QB1["Question List: delete"]:::page --> QB2[Add and Edit Question]:::page
+    ME --> ME1["Mock Exam Sets: delete"]:::page --> ME2["Add and Edit Mock Exam Set: select questions"]:::page
+
+    GG --> RG[Road Sign Game]:::main
+    GG --> RA[Road Sign Assets]:::main
+    RG --> RG1["Game Set List: delete"]:::page
+    RG1 --> RG2["Game Set Details: view"]:::page
+    RG1 --> RG3["Add and Edit Game Set: place road signs"]:::page
+    RA --> RA1["Road Sign Asset List: delete"]:::page --> RA2[Add and Edit Road Sign]:::page
+
+    P --> P1[View and Edit Profile, Change Password]:::page
+    classDef main fill:#FFF2CC,stroke:#D6B656,color:#111111
+    classDef page fill:#E6E6FA,stroke:#9370DB,color:#111111
+    classDef group fill:#EEEEEE,stroke:#888888,color:#111111

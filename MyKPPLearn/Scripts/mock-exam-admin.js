@@ -28,7 +28,7 @@
         el.className = "alert alert-" + (type || "success");
         el.hidden = false;
         window.clearTimeout(el._hideTimer);
-        el._hideTimer = window.setTimeout(function () { el.hidden = true; }, type === "error" ? 9000 : 6000);
+        el._hideTimer = window.setTimeout(function () { el.hidden = true; }, 5000);
         window.scrollTo(0, 0);
     }
 
@@ -300,6 +300,16 @@
         button.type = "button";
         button.className = "btn btn-secondary btn-small btn-danger";
         button.textContent = "Delete";
+
+        if (set.learnerCount > 0) {
+            // Learners' results keep the set: explain that instead of asking to confirm a delete the server refuses.
+            button.addEventListener("click", function () {
+                showToast(toast, set.learnerCount + (set.learnerCount === 1 ? " learner has" : " learners have")
+                    + " taken this set, so it can't be deleted. Deactivate it instead to hide it from learners.", "error");
+            });
+            return button;
+        }
+
         button.setAttribute("data-confirm", "Delete " + setLabel(set) + " (" + typeById(set.typeId).title + ")?"
             + (set.status === "Active" ? " It is Active, so learners will no longer be able to start it." : ""));
         button.setAttribute("data-confirm-title", "Delete Mock Exam Set?");

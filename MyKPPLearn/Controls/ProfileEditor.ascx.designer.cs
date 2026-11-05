@@ -124,11 +124,6 @@ namespace MyKPPLearn.Controls
 
         protected global::System.Web.UI.WebControls.Button btnRemovePhoto;
 
-        protected global::System.Web.UI.WebControls.Panel pnlActivity;
-
-        protected global::System.Web.UI.WebControls.Literal litActivityLessons;
-
-        protected global::System.Web.UI.WebControls.Literal litActivityGames;
 
         /// <summary>
         /// pnlPasswordModal control.

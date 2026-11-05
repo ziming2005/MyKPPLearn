@@ -175,12 +175,19 @@
   list-style: disc;
 }
 
+/* Block, not inline: a message rendered as a <span> (asp:Label) otherwise pads over the heading below it. */
 .alert {
+  display: block;
   border-radius: 8px;
   padding: 14px 16px;
   margin-bottom: 20px;
   font-size: var(--fs-small);
   font-weight: 500;
+}
+
+/* Messages waiting for the script (the `hidden` attribute) stay hidden: the display above would otherwise show them as empty boxes. */
+.alert[hidden] {
+  display: none;
 }
 
 .alert-error {
@@ -199,6 +206,15 @@
   background-color: #FFFBEB;
   border: 1px solid #FDE68A;
   color: #92400E;
+}
+
+/* One-off feedback ("Lesson deleted.", "Profile updated.") fades out on its own (Scripts/app-shell.js). */
+.alert--flash {
+  transition: opacity 0.4s ease;
+}
+
+.alert--flash.is-hiding {
+  opacity: 0;
 }
 
 /* --------------------------------------------------------------------
@@ -220,6 +236,110 @@
   margin-top: 8px;
 }
 
+/* Under the Login password box, right-aligned */
+.auth-forgot-link {
+  display: block;
+  margin-top: 8px;
+  text-align: right;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.auth-forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Forgot Password: the 6-digit code box and the resend / change email links under the form */
+.otp-input {
+  font-size: 1.25rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.otp-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.otp-actions a {
+  color: var(--color-primary);
+}
+
+.otp-actions a:hover {
+  text-decoration: underline;
+}
+
+/* "or" line between the email form and the Google button */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 16px;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-small);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+.google-button {
+  position: relative;
+}
+
+/* Same height as the Login / Create Account button; no top margin, so Google's overlay lines up with it. */
+.auth-card .google-button__face {
+  height: 44px;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.google-button__face {
+  gap: 10px;
+  color: var(--color-navy);
+}
+
+.google-button__logo {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* Hover/focus look on our button, since the pointer is really over Google's invisible one. */
+.google-button:hover .google-button__face,
+.google-button:focus-within .google-button__face {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+/* Google's real button, stretched over ours (see GoogleButton.ascx) and fully transparent. */
+.google-button__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400px;
+  height: 40px;
+  overflow: hidden;
+  opacity: 0.01;
+  transform-origin: 0 0;
+}
+
+/* Clicked from script once Google returns the sign-in token; never shown. */
+.google-button__submit {
+  display: none;
+}
+
 .auth-card__footer a:hover {
   text-decoration: underline;
 }
@@ -237,6 +357,3 @@
   margin-bottom: 16px;
 }
 
-.dashboard-shell__actions {
-  margin-top: 24px;
-}

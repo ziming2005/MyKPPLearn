@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MyKPP Learn Navigation</title>
+<style>
+body{margin:0;background:#fff;color:#111;font:16px/1.5 Arial,sans-serif;padding:16px}
+h1{font-size:22px;margin:0 0 6px}p{margin:0 0 20px}
+section{border:1px solid #ccc;padding:16px;margin:0 0 24px;overflow-x:auto}
+h2{font-size:17px;margin:0 0 10px}button{font:inherit;padding:6px 14px;margin:0 0 12px;cursor:pointer}.err{color:#b00020}
+</style></head><body>
+<h1>MyKPP Learn Navigation</h1>
+<p>Click Download PNG under a diagram's title, then replace that figure in the report (right-click, Change Picture, From a File).</p>
+<div id="out"></div>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+const charts = [["figure-10-guest", "Figure 10: Guest User Navigational Structure", "flowchart TD\n    G([Guest]):::main --> H[Home Page]:::main\n    H --> S[\"Home page sections: Topics, Road Sign Game, Mock Exam, FAQ\"]:::page\n    H --> R[Register]:::page\n    H --> L[Login]:::page\n    S -->|Section buttons| L\n    L --> F[Forgot Password]:::page\n    F -->|After reset| L\n    R --> LD[Learner Dashboard]:::page\n    L -->|Learner| LD\n    L -->|Administrator| AD[Administrator Dashboard]:::page\n    classDef main fill:#FFF2CC,stroke:#D6B656,color:#111111\n    classDef page fill:#E6E6FA,stroke:#9370DB,color:#111111\n    classDef group fill:#EEEEEE,stroke:#888888,color:#111111\n"], ["figure-11-learner", "Figure 11: Learner Navigational Structure", "flowchart LR\n    D[Learner Dashboard]:::main --> A[Learning]:::main\n    D --> B[Practice]:::main\n    D --> C[Road Sign Game]:::main\n    D --> E[Mock Exam]:::main\n    D --> F[Progress]:::main\n    D --> G[Profile]:::main\n    D --> H[Logout]:::main\n    A --> A1[Chapter List]:::page --> A2[Chapter Details]:::page --> A3[Lesson]:::page\n    B --> B1[\"Category: Colour Recognition, Road Signs, Rules of the Road or KEJARA & Safety\"]:::page --> B2[Practice Sets]:::page --> B3[Practice Attempt]:::page --> B4[Result and Review]:::page\n    C --> C1[Game Sets]:::page --> C2[Road Sign Game]:::page --> C3[Result]:::page --> C4[Review]:::page\n    E --> E1[Exam Type: KPP Combined or KPP Standard]:::page --> E2[Mock Exam Sets]:::page --> E3[Mock Exam Attempt]:::page --> E4[Result and Review]:::page\n    F --> F1[Learning Progress]:::page\n    F --> F2[Practice Results]:::page\n    F --> F3[Road Sign Game Results]:::page\n    F --> F4[Mock Exam Results]:::page\n    G --> G1[View and Edit Profile, Change Password]:::page\n    classDef main fill:#FFF2CC,stroke:#D6B656,color:#111111\n    classDef page fill:#E6E6FA,stroke:#9370DB,color:#111111\n    classDef group fill:#EEEEEE,stroke:#888888,color:#111111\n"], ["figure-12-administrator", "Figure 12: Administrator Navigational Structure", "flowchart LR\n    D[Administrator Dashboard]:::main --> LR[Learner Records]:::main\n    D --> GL[Learning]:::group\n    D --> GA[Assessment]:::group\n    D --> GG[Game]:::group\n    D --> P[Profile]:::main\n    D --> O[Logout]:::main\n\n    LR --> LR1[\"Learner List: add, edit, delete\"]:::page --> LR2[\"Learner Details: view\"]:::page\n\n    GL --> CH[Chapters]:::main\n    GL --> LE[Lessons]:::main\n    CH --> CH1[\"Chapter List: add, view, edit, delete\"]:::page\n    LE --> LE1[\"Lesson List: delete\"]:::page\n    LE1 --> LE2[\"Lesson Details: view\"]:::page\n    LE1 --> LE3[Add and Edit Lesson]:::page\n\n    GA --> PS[Practice Sets]:::main\n    GA --> QB[Question Bank]:::main\n    GA --> ME[Mock Exam]:::main\n    PS --> PS1[\"Practice Set List: delete\"]:::page --> PS2[Add and Edit Practice Set]:::page\n    QB --> QB1[\"Question List: delete\"]:::page --> QB2[Add and Edit Question]:::page\n    ME --> ME1[\"Mock Exam Sets: delete\"]:::page --> ME2[\"Add and Edit Mock Exam Set: select questions\"]:::page\n\n    GG --> RG[Road Sign Game]:::main\n    GG --> RA[Road Sign Assets]:::main\n    RG --> RG1[\"Game Set List: delete\"]:::page\n    RG1 --> RG2[\"Game Set Details: view\"]:::page\n    RG1 --> RG3[\"Add and Edit Game Set: place road signs\"]:::page\n    RA --> RA1[\"Road Sign Asset List: delete\"]:::page --> RA2[Add and Edit Road Sign]:::page\n\n    P --> P1[View and Edit Profile, Change Password]:::page\n    classDef main fill:#FFF2CC,stroke:#D6B656,color:#111111\n    classDef page fill:#E6E6FA,stroke:#9370DB,color:#111111\n    classDef group fill:#EEEEEE,stroke:#888888,color:#111111\n"]];
+mermaid.initialize({startOnLoad:false, securityLevel:'loose', theme:'base',
+  themeVariables:{lineColor:'#111111',fontFamily:'Arial, sans-serif',fontSize:'15px',edgeLabelBackground:'#eeeeee'},
+  flowchart:{htmlLabels:false,curve:'basis',wrappingWidth:190,nodeSpacing:16,rankSpacing:34}});
+window.__status = {};
+function toPng(svgEl){
+  const box = svgEl.viewBox.baseVal, s = 3, c = document.createElement('canvas');
+  c.width = Math.ceil(box.width*s); c.height = Math.ceil(box.height*s);
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute('width', box.width); clone.setAttribute('height', box.height); clone.removeAttribute('style');
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+  return new Promise((res, rej) => { const img = new Image(); img.onload = () => {
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL('image/png')); }; img.onerror = rej; img.src = url; });
+}
+const out = document.getElementById('out'); let i = 0;
+window.__toPng = {};
+for (const [name, cap, src] of charts) {
+  const sec = document.createElement('section');
+  sec.innerHTML = '<h2></h2><button type="button">Download PNG</button><div class="c"></div>';
+  sec.querySelector('h2').textContent = cap; out.appendChild(sec);
+  try {
+    const {svg} = await mermaid.render('m' + (i++), src);
+    sec.querySelector('.c').innerHTML = svg;
+    const el = sec.querySelector('svg'); const size = el.viewBox.baseVal;
+    window.__status[name] = {ok:true, w:Math.round(size.width), h:Math.round(size.height)};
+    sec.querySelector('button').onclick = async () => { const a = document.createElement('a'); a.href = await toPng(el); a.download = name + '.png'; a.click(); };
+    window.__toPng[name] = () => toPng(el);
+  } catch (e) {
+    sec.querySelector('.c').innerHTML = '<p class="err"></p>'; sec.querySelector('.err').textContent = String(e);
+    window.__status[name] = {ok:false, error:String(e)};
+  }
+}
+window.__done = true;
+</script></body></html>

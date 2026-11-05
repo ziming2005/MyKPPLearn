@@ -18,9 +18,9 @@
 
         <div class="form-actions">
             <asp:HyperLink ID="lnkNextSet" runat="server" CssClass="btn btn-primary" Visible="false">Next Set</asp:HyperLink>
-            <asp:HyperLink ID="lnkReview" runat="server" CssClass="btn btn-secondary">Review Answers</asp:HyperLink>
-            <asp:HyperLink ID="lnkTryAgain" runat="server" CssClass="btn btn-secondary">Try Again</asp:HyperLink>
-            <a class="btn btn-secondary" href="~/Learner/Game.aspx" runat="server">Back to Game</a>
+            <asp:HyperLink ID="lnkReview" runat="server" CssClass="btn btn-secondary result-review">Review Answers</asp:HyperLink>
+            <asp:HyperLink ID="lnkTryAgain" runat="server" CssClass="btn btn-secondary result-try-again">Try Again</asp:HyperLink>
+            <a id="lnkBack" class="btn btn-secondary" href="~/Learner/Game.aspx" runat="server">Back to Game</a>
         </div>
     </section>
 

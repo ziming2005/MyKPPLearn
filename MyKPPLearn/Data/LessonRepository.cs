@@ -153,14 +153,21 @@ namespace MyKPPLearn.Data
         }
 
         /// <summary>Deletes the lesson only if no learner progress exists for it. Returns true if deleted.</summary>
+        /// <summary>
+        /// Deletes the lesson together with every learner's completion of it (LearningProgress), in one transaction.
+        /// Learners' progress totals change accordingly. False when the lesson no longer exists.
+        /// </summary>
         public static bool DeleteLesson(int lessonId)
         {
             const string sql = @"
-                DELETE FROM Lessons
-                WHERE LessonId = @LessonId
-                  AND NOT EXISTS (SELECT 1 FROM LearningProgress WHERE LessonId = @LessonId)";
+                SET XACT_ABORT ON;
+                BEGIN TRANSACTION;
+                DELETE FROM LearningProgress WHERE LessonId = @LessonId;
+                DELETE FROM Lessons WHERE LessonId = @LessonId;
+                SELECT @@ROWCOUNT;
+                COMMIT TRANSACTION;";
 
-            return DatabaseHelper.ExecuteNonQuery(sql, new SqlParameter("@LessonId", lessonId)) > 0;
+            return Convert.ToInt32(DatabaseHelper.ExecuteScalar(sql, new SqlParameter("@LessonId", lessonId))) > 0;
         }
 
         public static void SetLessonActive(int lessonId, bool isActive)
@@ -181,12 +188,6 @@ namespace MyKPPLearn.Data
                 new SqlParameter("@ExcludeId", excludeLessonId));
 
             return Convert.ToInt32(result) > 0;
-        }
-
-        /// <summary>Active + inactive lessons (administrator management count).</summary>
-        public static int GetTotalLessonCount()
-        {
-            return Convert.ToInt32(DatabaseHelper.ExecuteScalar("SELECT COUNT(*) FROM Lessons"));
         }
 
         /// <summary>Lessons that are active inside an active chapter (learner-visible content).</summary>

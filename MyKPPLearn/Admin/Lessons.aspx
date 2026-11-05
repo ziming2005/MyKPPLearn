@@ -56,7 +56,7 @@
                                         <div class="row-actions">
                                             <asp:LinkButton runat="server" CommandName="view" CommandArgument='<%# Eval("LessonId") %>' CssClass="btn btn-secondary btn-small" CausesValidation="false">View</asp:LinkButton>
                                             <asp:LinkButton runat="server" CommandName="edit" CommandArgument='<%# Eval("LessonId") %>' CssClass="btn btn-secondary btn-small" CausesValidation="false">Edit</asp:LinkButton>
-                                            <asp:LinkButton runat="server" CommandName="delete" CommandArgument='<%# Eval("LessonId") %>' CssClass="btn btn-secondary btn-small btn-danger" CausesValidation="false" data-confirm="Are you sure you want to delete this lesson?">Delete</asp:LinkButton>
+                                            <asp:LinkButton runat="server" CommandName="delete" CommandArgument='<%# Eval("LessonId") %>' CssClass="btn btn-secondary btn-small btn-danger" CausesValidation="false" data-confirm='<%# DeleteConfirmText(Eval("LessonId")) %>'>Delete</asp:LinkButton>
                                         </div>
                                     </td>
                                 </tr>
@@ -64,6 +64,14 @@
                         </asp:Repeater>
                     </tbody>
                 </table>
+            </div>
+        </asp:Panel>
+
+        <asp:Panel ID="pnlPager" runat="server" CssClass="lr-footer" Visible="false">
+            <p class="lr-footer__summary"><asp:Literal ID="litPageInfo" runat="server" /></p>
+            <div class="lr-pager">
+                <asp:Button ID="btnPrev" runat="server" Text="Previous" CssClass="lr-pager__btn" CausesValidation="false" OnClick="btnPrev_Click" />
+                <asp:Button ID="btnNext" runat="server" Text="Next" CssClass="lr-pager__btn" CausesValidation="false" OnClick="btnNext_Click" />
             </div>
         </asp:Panel>
     </asp:Panel>

@@ -54,21 +54,6 @@
         </div>
     </section>
 
-    <!-- ================= ACTIVITY (learners only) ================= -->
-    <asp:Panel ID="pnlActivity" runat="server" CssClass="card profile-card" Visible="false">
-        <h2>Your Activity</h2>
-        <div class="profile-activity">
-            <div class="profile-activity__item">
-                <strong><asp:Literal ID="litActivityLessons" runat="server" /></strong>
-                <span>Lessons completed</span>
-            </div>
-            <div class="profile-activity__item">
-                <strong><asp:Literal ID="litActivityGames" runat="server" /></strong>
-                <span>Road Sign Games completed</span>
-            </div>
-        </div>
-    </asp:Panel>
-
     <!-- ================= CHANGE PASSWORD (modal; hidden until the button is clicked or a failed attempt reopens it) ================= -->
     <div id="pnlPasswordModal" runat="server" class="modal-overlay profile-password-modal" hidden>
         <div class="modal-panel card profile-modal" role="dialog" aria-modal="true" aria-labelledby="profilePasswordTitle">

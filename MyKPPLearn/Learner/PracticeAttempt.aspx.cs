@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Web;
+using System.Web.Script.Serialization;
 using System.Web.Services;
 using MyKPPLearn.Data;
 using MyKPPLearn.Security;
@@ -25,7 +27,21 @@ namespace MyKPPLearn.Learner
             { "kejara-safety", "KEJARA & Safety" }
         };
 
+        private bool _adminView;
+
+        protected override void OnPreInit(EventArgs e)
+        {
+            _adminView = AttemptViewer.UseAdminLayout(this);
+            base.OnPreInit(e);
+        }
+
         public string CategoryId { get; private set; }
+
+        /// <summary>For an administrator: the learner's record page, where "Back" leads. Empty for the learner.</summary>
+        public string BackUrl { get; private set; }
+
+        /// <summary>window.PracticeSavedAttempt: a finished attempt reopened from Progress ("?attempt="), or "null".</summary>
+        public string SavedJson { get; private set; }
         public int SetNumber { get; private set; }
 
         public string PracticeScriptVersion
@@ -39,8 +55,15 @@ namespace MyKPPLearn.Learner
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SessionHelper.RequireLearner(this);
-            ((LearnerMaster)Master).PageHeading = "Practice";
+            AttemptViewer.SetUp(this, _adminView, "Practice");
+            SavedJson = "null";
+            BackUrl = string.Empty;
+
+            if (Request.QueryString["attempt"] != null)
+            {
+                LoadSaved();
+                return;
+            }
 
             string requestedCategory = Request.QueryString["category"];
             string categoryTitle;
@@ -62,6 +85,60 @@ namespace MyKPPLearn.Learner
 
             CategoryId = requestedCategory;
             SetNumber = setNumber;
+        }
+
+        /// <summary>Reopens one of the learner's own saved attempts on its result screen; anything else goes back to Progress.</summary>
+        private void LoadSaved()
+        {
+            int attemptId;
+            DataTable rows = null;
+
+            if (int.TryParse(Request.QueryString["attempt"], NumberStyles.None, CultureInfo.InvariantCulture, out attemptId))
+            {
+                rows = PracticeAttemptRepository.GetSavedForUser(attemptId, AttemptViewer.OwnerFilter(this, _adminView));
+            }
+
+            if (rows == null || rows.Rows.Count == 0)
+            {
+                Response.Redirect(_adminView ? "~/Admin/LearnerRecords.aspx" : "~/Learner/Progress.aspx", true);
+                return;
+            }
+
+            if (_adminView) { BackUrl = AttemptViewer.LearnerRecordUrl(this, rows.Rows[0]["UserId"]); }
+
+            CategoryId = Convert.ToString(rows.Rows[0]["CategoryCode"]);
+            SetNumber = Convert.ToInt32(rows.Rows[0]["SetNumber"]);
+
+            var questions = new List<object>();
+            var answers = new List<int>();
+
+            foreach (DataRow row in rows.Rows)
+            {
+                string image = row.IsNull("ImagePathSnapshot") ? null : Convert.ToString(row["ImagePathSnapshot"]);
+
+                questions.Add(new
+                {
+                    id = Convert.ToInt32(row["QuestionId"]),
+                    text = Convert.ToString(row["QuestionTextSnapshot"]),
+                    options = new[] { Convert.ToString(row["OptionATextSnapshot"]), Convert.ToString(row["OptionBTextSnapshot"]), Convert.ToString(row["OptionCTextSnapshot"]) },
+                    correctIndex = LetterIndex(row["CorrectOptionSnapshot"]),
+                    explanation = Convert.ToString(row["ExplanationSnapshot"]),
+                    image = string.IsNullOrEmpty(image) ? "" : ResolveUrl("~/" + image)
+                });
+                answers.Add(LetterIndex(row["SelectedOptionSnapshot"]));
+            }
+
+            // "<" is escaped so question text can never close the inline <script> block.
+            SavedJson = new JavaScriptSerializer { MaxJsonLength = int.MaxValue }
+                .Serialize(new { questions = questions, answers = answers })
+                .Replace("<", "\\u003c");
+        }
+
+        /// <summary>"A"-"C" to 0-2; anything else (no answer) is -1.</summary>
+        internal static int LetterIndex(object letter)
+        {
+            string text = letter == null || letter == DBNull.Value ? "" : Convert.ToString(letter).Trim();
+            return text.Length == 1 && text[0] >= 'A' && text[0] <= 'C' ? text[0] - 'A' : -1;
         }
 
         /// <summary>

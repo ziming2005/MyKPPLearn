@@ -649,6 +649,9 @@
     // there is deliberately no delete action here.
     // ------------------------------------------------------------------
     var dragState = null;     // library drag in progress
+    var autoScrollFrame = null;
+    var AUTO_SCROLL_EDGE = 70;    // px from the top or bottom of the screen where carrying a sign scrolls the page
+    var AUTO_SCROLL_SPEED = 10;   // px per frame
     var ghost = null;
 
     function renderLibrary() {
@@ -686,6 +689,10 @@
             card.appendChild(name);
 
             card.addEventListener("pointerdown", function (e) { beginLibraryDrag(e, asset); });
+            // A long press carries the sign; the phone's own long-press menu would interrupt it.
+            card.addEventListener("contextmenu", function (e) {
+                if (dragState && dragState.touch) { e.preventDefault(); }
+            });
             card.addEventListener("keydown", function (e) {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
@@ -709,6 +716,31 @@
         ghost.style.left = clientX + "px";
         ghost.style.top = clientY + "px";
         stage.classList.toggle("is-drop-target", isOverScene(clientX, clientY));
+    }
+
+    // The page area that scrolls: the nearest scrollable parent of the scene, else the window.
+    function scrollParent() {
+        for (var el = stage.parentElement; el && el !== document.body; el = el.parentElement) {
+            var overflow = window.getComputedStyle(el).overflowY;
+            if ((overflow === "auto" || overflow === "scroll") && el.scrollHeight > el.clientHeight) { return el; }
+        }
+        return window;
+    }
+
+    // Carrying a sign near the top or bottom of the screen scrolls the page, so the scene can always be reached.
+    function autoScrollStep() {
+        if (!dragState || !dragState.active) { autoScrollFrame = null; return; }
+
+        var y = dragState.lastY;
+        var speed = y < AUTO_SCROLL_EDGE ? -AUTO_SCROLL_SPEED
+            : y > window.innerHeight - AUTO_SCROLL_EDGE ? AUTO_SCROLL_SPEED : 0;
+
+        if (speed !== 0) {
+            scrollParent().scrollBy(0, speed);
+            moveGhost(dragState.lastX, y);     // the scene moved under the sign
+        }
+
+        autoScrollFrame = window.requestAnimationFrame(autoScrollStep);
     }
 
     function startGhost(asset, clientX, clientY) {
@@ -744,7 +776,10 @@
     function activate(clientX, clientY) {
         if (!dragState || dragState.active) { return; }
         dragState.active = true;
+        dragState.lastX = clientX;
+        dragState.lastY = clientY;
         startGhost(dragState.asset, clientX, clientY);
+        if (autoScrollFrame === null) { autoScrollFrame = window.requestAnimationFrame(autoScrollStep); }
     }
 
     function onLibraryMove(e) {
@@ -762,6 +797,8 @@
             activate(e.clientX, e.clientY);
         }
 
+        dragState.lastX = e.clientX;
+        dragState.lastY = e.clientY;
         moveGhost(e.clientX, e.clientY);
     }
 

@@ -25,9 +25,6 @@ namespace MyKPPLearn.Controls
 
         private UserProfile _profile;
 
-        /// <summary>Learner pages turn this on to show a small activity summary (lessons and games completed).</summary>
-        public bool ShowActivity { get; set; }
-
         public bool HasPhoto
         {
             get { return _profile != null && ProfileImageStorage.ResolveForDisplay(_profile.ProfileImagePath) != null; }
@@ -97,33 +94,9 @@ namespace MyKPPLearn.Controls
             litHeadName.Text = HttpUtility.HtmlEncode(_profile.FullName);
             btnRemovePhoto.Visible = photo != null;
             txtFullName.Attributes["data-initial"] = _profile.FullName;
-            BindActivity();
             litEmail.Text = HttpUtility.HtmlEncode(_profile.Email);
             litCreated.Text = HttpUtility.HtmlEncode(
                 DateTime.SpecifyKind(_profile.CreatedAt, DateTimeKind.Utc).ToLocalTime().ToString("d MMMM yyyy", CultureInfo.InvariantCulture));
-        }
-
-        private void BindActivity()
-        {
-            if (!ShowActivity || !UserId.HasValue)
-            {
-                return;
-            }
-
-            try
-            {
-                int completed = LearningProgressRepository.GetCompletedLessonCount(UserId.Value);
-                int total = LessonRepository.GetTotalActiveLessonCount();
-                int games = HiddenRoadSignAttemptRepository.GetCompletedCount(UserId.Value);
-
-                litActivityLessons.Text = completed.ToString(CultureInfo.InvariantCulture) + " / " + total.ToString(CultureInfo.InvariantCulture);
-                litActivityGames.Text = games.ToString(CultureInfo.InvariantCulture);
-                pnlActivity.Visible = true;
-            }
-            catch (Exception)
-            {
-                // The summary is an extra; the profile works without it.
-            }
         }
 
         // ------------------------------------------------------------------

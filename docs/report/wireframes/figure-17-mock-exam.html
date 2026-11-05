@@ -1,0 +1,50 @@
+<!doctype html><html><head><meta charset="utf-8"><title>figure-17-mock-exam</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fff;overflow:hidden}
+body{font:15px/1.4 "Segoe UI",Arial,sans-serif;color:#111;width:1280px}
+h1{font-size:34px;line-height:1.15;font-weight:700}h2{font-size:24px;font-weight:700}h3{font-size:17px;font-weight:700}
+.line{height:10px;background:#ddd;margin:8px 0}.w90{width:90%}.w70{width:70%}.w50{width:50%}.w30{width:30%}
+.img{background:#e4e4e4;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;color:#666;font-size:12px;letter-spacing:.5px;text-align:center}
+.btn{display:inline-block;border:1px solid #111;padding:8px 16px;font-weight:600;font-size:14px;background:#fff;color:#111;white-space:nowrap}
+.btn.p{background:#111;color:#fff}.btn.s{padding:4px 10px;font-size:12px}.btn.grey{border-color:#bbb;color:#999}
+.card{border:1px solid #bbb;padding:16px;background:#fff}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.row{display:flex;align-items:center;gap:12px}.between{justify-content:space-between}
+.eyebrow{font-size:11px;letter-spacing:.8px;color:#555;text-transform:uppercase;font-weight:600}
+.icon{width:30px;height:30px;border:1px solid #999;background:#eee;margin-bottom:8px}
+.tag{display:inline-block;border:1px solid #999;background:#eee;padding:2px 8px;font-size:12px}
+.bar{height:8px;background:#ddd;margin:6px 0}.bar i{display:block;height:100%;background:#777}
+.sec{padding:40px 64px}.alt{background:#f3f3f3}.center{text-align:center}
+.app{display:flex}
+.side{width:208px;border-right:1px solid #bbb;display:flex;flex-direction:column;flex:none}
+.brand{font-weight:700;font-size:17px;padding:18px 16px;border-bottom:1px solid #ddd}
+.nav{flex:1;padding:8px 0}.nav div{padding:9px 16px;color:#333}.nav .on{background:#e8e8e8;font-weight:700;border-left:3px solid #111;padding-left:13px;color:#111}
+.nav .grp{font-size:11px;letter-spacing:.8px;color:#777;font-weight:600;padding:14px 16px 4px}
+.out{border-top:1px solid #ddd;padding:14px 16px;color:#333}
+.main{flex:1;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;border-bottom:1px solid #ddd;font-weight:700;font-size:16px}
+.who{display:flex;align-items:center;gap:8px}.av{width:30px;height:30px;border-radius:50%;background:#ccc}
+.body{padding:24px 28px}.body>*+*{margin-top:18px}
+.bc{color:#555;font-size:13px}
+.lab{font-size:12px;color:#555}.val{font-size:24px;font-weight:700}
+.opt{border:1px solid #bbb;padding:11px 14px;display:flex;align-items:center;gap:12px}.opt b{border:1px solid #888;width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:#eee;font-size:12px}.opt .line{flex:1;margin:0}.opt em{font-style:normal;font-weight:700}
+.opt.dark{border:2px solid #111;background:#eee}
+table{width:100%;border-collapse:collapse;font-size:13px}th{background:#efefef;text-align:left;padding:9px 12px;border-bottom:1px solid #bbb;font-size:12px}td{padding:10px 12px;border-bottom:1px solid #e5e5e5;vertical-align:middle}td .line{margin:0}
+.sw{display:inline-flex;align-items:center;gap:6px;font-size:12px}.sw i{width:30px;height:16px;border-radius:9px;background:#777;position:relative;display:inline-block}.sw i:after{content:"";position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff}
+.num{display:inline-flex;width:30px;height:26px;border:1px solid #bbb;align-items:center;justify-content:center;font-size:12px}.num.a{background:#ccc}.num.c{background:#111;color:#fff;border-color:#111}.num.f{border:2px solid #111;font-weight:700}
+.nums{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 12px}
+.act div.rowa{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #eee}.dot{width:8px;height:8px;border-radius:50%;background:#777;flex:none}.act .line{margin:0}
+.ring{width:38px;height:38px;border-radius:50%;border:3px solid #777;display:flex;align-items:center;justify-content:center;font-size:11px;flex:none}
+.hist{display:flex;align-items:center;gap:12px;padding:10px 0}.hist .grow{flex:1}.hist .line{margin:5px 0}
+.mark{position:absolute;width:40px;height:40px;border:2px solid #111;background:#d0d0d0;display:flex;align-items:center;justify-content:center;font-weight:700}
+.field{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#555}.inp{border:1px solid #bbb;padding:7px 10px;color:#777;font-size:13px;background:#fff}
+ul.chk{list-style:none}ul.chk li{padding:3px 0;color:#333}ul.chk li:before{content:"\2713  ";font-weight:700}
+</style></head><body><div class="app"><div class="side"><div class="brand">MyKPP Learn</div><div class="nav"><div class="">Dashboard</div><div class="">Learning</div><div class="">Practice</div><div class="">Road Sign Game</div><div class="on">Mock Exam</div><div class="">Progress</div><div class="">Profile</div></div><div class="out">Logout</div></div><div class="main"><div class="top"><span>Mock Exam</span><span class="who"><span class="av"></span><span style="font-weight:400;font-size:13px">[Learner Name]</span></span></div><div class="body">
+<div class="card row between"><div style="flex:1"><b>KPP Combined &mdash; Mock Exam Set 1</b><div class="lab">Question 16 of 78</div><div style="width:88%"><div class="bar"><i style="width:21%"></i></div></div></div><div style="background:#111;color:#fff;padding:8px 16px;text-align:right"><div style="font-size:10px;letter-spacing:.8px">TIME REMAINING</div><div style="font-size:24px;font-weight:700">38:42</div></div></div>
+<div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">
+<div><div class="card"><div class="row between"><span class="tag">Road Signs</span><span class="btn s">&#9873; Flag</span></div><div class="img" style="height:170px;width:210px;margin:12px auto">QUESTION IMAGE (OPTIONAL)</div><h3 style="margin-bottom:10px">Question text</h3>
+<div class="opt" style="margin-bottom:8px"><b>A</b><div class="line"></div></div><div class="opt dark" style="margin-bottom:8px"><b>B</b><div class="line"></div></div><div class="opt"><b>C</b><div class="line"></div></div></div>
+<div class="row between" style="margin-top:12px"><span class="btn">Previous</span><span class="btn p">Next</span></div></div>
+<div class="card" style="font-size:12px"><b>QUESTIONS</b><div class="lab" style="margin:4px 0 8px;font-size:11px">Dark: current. Grey: answered. White: unanswered. Outlined: flagged.</div>
+<b>COLOUR BLIND TEST</b><div class="nums"><span class="num a">1</span><span class="num a">2</span><span class="num a">3</span><span class="num a">4</span><span class="num a">5</span><span class="num a">6</span><span class="num a">7</span><span class="num a">8</span></div><b>ROAD SIGNS</b><div class="nums"><span class="num a">9</span><span class="num a">10</span><span class="num a">11</span><span class="num f">12</span><span class="num a">13</span><span class="num a">14</span><span class="num a">15</span><span class="num c">16</span><span class="num a">17</span><span class="num a">18</span><span class="num">19</span><span class="num f">20</span><span class="num">21</span><span class="num">22</span><span class="num">23</span><span class="num">24</span><span class="num">25</span><span class="num">26</span><span class="num">27</span><span class="num">28</span><span class="num">29</span></div><b>RULES OF THE ROAD</b><div class="nums"><span class="num">30</span><span class="num">31</span><span class="num">32</span><span class="num">33</span><span class="num">34</span><span class="num">35</span><span class="num">36</span><span class="num">37</span><span class="num">38</span><span class="num">39</span><span class="num">40</span><span class="num">41</span><span class="num">42</span><span class="num">43</span><span class="num">44</span><span class="num">45</span><span class="num">46</span><span class="num">47</span><span class="num">48</span><span class="num">49</span><span class="num">50</span><span class="num">51</span><span class="num">52</span><span class="num">53</span><span class="num">54</span><span class="num">55</span><span class="num">56</span><span class="num">57</span><span class="num">58</span><span class="num">59</span><span class="num">60</span><span class="num">61</span><span class="num">62</span><span class="num">63</span><span class="num">64</span></div><b>KEJARA &amp; SAFETY</b><div class="nums"><span class="num">65</span><span class="num">66</span><span class="num">67</span><span class="num">68</span><span class="num">69</span><span class="num">70</span><span class="num">71</span><span class="num">72</span><span class="num">73</span><span class="num">74</span><span class="num">75</span><span class="num">76</span><span class="num">77</span><span class="num">78</span></div><div class="btn p" style="display:block;text-align:center">Submit Exam</div></div></div>
+</div></div></div></body></html>

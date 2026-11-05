@@ -14,6 +14,14 @@
             toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
         });
 
+        // A link can jump to a section further down this page, which the open menu would cover.
+        nav.addEventListener("click", function (event) {
+            if (event.target.closest("a")) {
+                nav.classList.remove("is-open");
+                toggle.setAttribute("aria-expanded", "false");
+            }
+        });
+
         nav.addEventListener("keydown", function (event) {
             if (event.key === "Escape" && nav.classList.contains("is-open")) {
                 nav.classList.remove("is-open");

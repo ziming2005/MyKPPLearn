@@ -78,12 +78,12 @@ BEGIN
         (@QuestionId, N'35', 3, 1);
 
     INSERT INTO Questions (QuestionCategoryId, PracticeSetId, QuestionText, Explanation, ImagePath, IsActive, CreatedAt, UpdatedAt)
-    VALUES (@CategoryId, @SetId, N'What does this sign warn drivers about?', N'Watch for cyclists crossing or entering the road.', N'Content/images/questions/df2964df33f446359393aae406762817.jpg', 1, SYSUTCDATETIME(), SYSUTCDATETIME());
+    VALUES (@CategoryId, @SetId, N'What number do you see in the circle?', N'The coloured dots form the number 26.', N'Content/images/questions/607c95cc73fa4d85952c0f0c3c2fe428.png', 1, SYSUTCDATETIME(), SYSUTCDATETIME());
     SET @QuestionId = SCOPE_IDENTITY();
     INSERT INTO QuestionOptions (QuestionId, OptionText, OptionOrder, IsCorrect) VALUES
-        (@QuestionId, N'Bicycle crossing', 1, 1),
-        (@QuestionId, N'Motorcycle parking', 2, 0),
-        (@QuestionId, N'No bicycles', 3, 0);
+        (@QuestionId, N'28', 1, 0),
+        (@QuestionId, N'62', 2, 0),
+        (@QuestionId, N'26', 3, 1);
 
 END
 

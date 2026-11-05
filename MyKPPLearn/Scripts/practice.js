@@ -70,23 +70,12 @@
 
     var PracticeDemoData = {
         setLabel: setLabel,
-        /** Colour name used for a category on the learner cards (red / blue / green / purple), or "" if unknown. */
-        getCategoryColour: function (categoryId) {
-            return CATEGORY_COLOURS[categoryId] || "";
-        },
         getCategories: function () {
             return clone(CATEGORIES);
         },
         getCategoryById: function (categoryId) {
             var category = findCategory(categoryId);
             return category ? clone(category) : null;
-        },
-        isKnownCategory: function (categoryId) {
-            return findCategory(categoryId) !== null;
-        },
-        /** All sets for a category (both Active and Inactive) — admin use. */
-        getAllSets: function (categoryId) {
-            return clone(SETS.filter(function (s) { return !categoryId || s.categoryId === categoryId; }));
         },
         /** Active sets only for a category, in set-number order — learner use. */
         getActiveSets: function (categoryId) {
@@ -102,9 +91,6 @@
         /** All questions belonging to a set, in authored order. */
         getQuestions: function (setId) {
             return clone(QUESTIONS.filter(function (q) { return q.setId === setId; }));
-        },
-        getAllQuestions: function () {
-            return clone(QUESTIONS);
         }
     };
 
@@ -269,7 +255,9 @@
         var setNumber = root.getAttribute("data-set");
         var appRoot = root.getAttribute("data-app-root") || "";
         var category = PracticeDemoData.getCategoryById(categoryId);
-        var setInfo = PracticeDemoData.getSet(categoryId, setNumber);
+        // A finished attempt reopened from Progress: its own saved questions and answers, shown on the result screen.
+        var saved = global.PracticeSavedAttempt || null;
+        var setInfo = saved ? { number: Number(setNumber) } : PracticeDemoData.getSet(categoryId, setNumber);
 
         // The ASPX code-behind already validates the category slug and that "set" is a
         // positive integer; it cannot also validate against the frontend-only mock data,
@@ -281,7 +269,7 @@
             return;
         }
 
-        var questions = PracticeDemoData.getQuestions(setInfo.id);
+        var questions = saved ? saved.questions : PracticeDemoData.getQuestions(setInfo.id);
 
         // A set without questions cannot be practised (there is nothing to show): send the learner back to the set list.
         if (!questions.length) {
@@ -290,7 +278,10 @@
         }
 
         var total = questions.length;
-        var answers = questions.map(function () { return { selectedIndex: null }; });
+        var answers = questions.map(function (q, i) {
+            var given = saved ? saved.answers[i] : -1;
+            return { selectedIndex: given >= 0 ? given : null };
+        });
         var currentIndex = 0;
 
         var viewInstructions = document.getElementById("viewInstructions");
@@ -567,7 +558,7 @@
 
         function showResult() {
             var correct = 0;
-            saveAttempt();
+            if (!saved) { saveAttempt(); }
 
             questions.forEach(function (question, index) {
                 if (answers[index].selectedIndex === question.correctIndex) {
@@ -592,7 +583,7 @@
                 : "Keep practising. Review the answers to learn from your mistakes."));
 
             // "Next Set" is the main step when there is one; otherwise Review Answers is.
-            var nextSet = PracticeDemoData.getActiveSets(categoryId).filter(function (x) { return x.number > setInfo.number; })[0];
+            var nextSet = saved ? null : PracticeDemoData.getActiveSets(categoryId).filter(function (x) { return x.number > setInfo.number; })[0];
 
             if (nextSet) {
                 lnkNextSet.href = "PracticeAttempt.aspx?category=" + encodeURIComponent(categoryId) + "&set=" + encodeURIComponent(nextSet.number);
@@ -772,6 +763,12 @@
 
         btnTryAgain.addEventListener("click", function (event) {
             event.preventDefault();
+
+            if (saved) {
+                window.location.href = "PracticeAttempt.aspx?category=" + encodeURIComponent(categoryId) + "&set=" + encodeURIComponent(setInfo.number);
+                return;
+            }
+
             resetAttempt();
         });
         chkMistakesOnly.addEventListener("change", renderReview);
@@ -783,6 +780,19 @@
                 event.returnValue = "";
             }
         });
+
+        if (saved) {
+            // An administrator (data-back-url) only looks: back to the learner's record, and no Try Again.
+            var backUrl = root.getAttribute("data-back-url");
+
+            Array.prototype.forEach.call(document.querySelectorAll(".practice-back-link"), function (link) {
+                link.href = backUrl || appRoot + "Learner/Progress.aspx";
+                link.textContent = backUrl ? "Back to Learner Record" : "Back to Progress";
+            });
+            btnTryAgain.hidden = !!backUrl;
+            showResult();
+            return;
+        }
 
         renderQuestion();
         setView("instructions");

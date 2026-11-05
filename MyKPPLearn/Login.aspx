@@ -1,4 +1,5 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="MyKPPLearn.Login" %>
+<%@ Register Src="~/Controls/GoogleButton.ascx" TagPrefix="uc" TagName="GoogleButton" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">Login | MyKPP Learn</asp:Content>
 
@@ -12,6 +13,7 @@
                     <p>Login to continue learning.</p>
                 </div>
 
+                <asp:Label ID="lblFlash" runat="server" Visible="false" EnableViewState="false" role="status" />
                 <asp:Label ID="lblFormError" runat="server" CssClass="alert alert-error" Visible="false" EnableViewState="false" />
 
                 <asp:Panel ID="pnlForm" runat="server" DefaultButton="btnLogin">
@@ -26,10 +28,13 @@
                         <asp:Label ID="lblPassword" runat="server" AssociatedControlID="txtPassword" CssClass="form-label">Password</asp:Label>
                         <asp:TextBox ID="txtPassword" runat="server" CssClass="form-input" TextMode="Password" autocomplete="current-password" MaxLength="100" />
                         <asp:RequiredFieldValidator ID="rfvPassword" runat="server" ControlToValidate="txtPassword" CssClass="field-error" Display="Dynamic" ErrorMessage="Password is required." SetFocusOnError="true" />
+                        <a class="auth-forgot-link" href="ForgotPassword.aspx">Forgot password?</a>
                     </div>
 
                     <asp:Button ID="btnLogin" runat="server" CssClass="btn btn-primary btn-block" Text="Login" OnClick="btnLogin_Click" CausesValidation="true" />
                 </asp:Panel>
+
+                <uc:GoogleButton ID="googleButton" runat="server" ButtonText="signin_with" />
 
                 <div class="auth-card__footer">
                     New here? <a href="Register.aspx">Create Account</a>

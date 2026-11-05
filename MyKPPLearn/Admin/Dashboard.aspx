@@ -49,7 +49,7 @@
                 <h3>Learner Records</h3>
                 <p>View and manage registered learner accounts.</p>
                 <div class="management-card__footer">
-                    <a class="btn btn-secondary btn-block" href="~/Admin/LearnerRecords.aspx" runat="server">Manage Learner Records</a>
+                    <a class="btn btn-outline-primary btn-block" href="~/Admin/LearnerRecords.aspx" runat="server">Manage Learner Records</a>
                 </div>
             </div>
 
@@ -58,7 +58,7 @@
                 <h3>Learning</h3>
                 <p>Manage structured driving theory lessons.</p>
                 <div class="management-card__footer">
-                    <a class="btn btn-secondary btn-block" href="~/Admin/LearningChapters.aspx" runat="server">Manage Learning</a>
+                    <a class="btn btn-outline-primary btn-block" href="~/Admin/LearningChapters.aspx" runat="server">Manage Learning</a>
                 </div>
             </div>
 
@@ -67,7 +67,7 @@
                 <h3>Practice Management</h3>
                 <p>Manage practice sets, the Road Sign Game and road sign assets.</p>
                 <div class="management-card__footer">
-                    <a class="btn btn-secondary btn-block" href="~/Admin/PracticeSets.aspx" runat="server">Manage Practice</a>
+                    <a class="btn btn-outline-primary btn-block" href="~/Admin/PracticeSets.aspx" runat="server">Manage Practice</a>
                 </div>
             </div>
 
@@ -76,7 +76,7 @@
                 <h3>Mock Exam</h3>
                 <p>Manage mock exam types, sets and questions.</p>
                 <div class="management-card__footer">
-                    <a class="btn btn-secondary btn-block" href="~/Admin/MockExam.aspx" runat="server">Manage Mock Exam</a>
+                    <a class="btn btn-outline-primary btn-block" href="~/Admin/MockExam.aspx" runat="server">Manage Mock Exam</a>
                 </div>
             </div>
         </div>

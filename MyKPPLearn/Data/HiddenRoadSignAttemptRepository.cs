@@ -303,25 +303,25 @@ namespace MyKPPLearn.Data
                 new SqlParameter("@MaxRows", maxRows));
         }
 
-        /// <summary>The attempt, only if it belongs to <paramref name="userId"/>; otherwise null.</summary>
-        public static DataRow GetAttemptForUser(int attemptId, int userId)
+        /// <summary>The attempt, only if it belongs to <paramref name="userId"/> (null: any learner, for an administrator); otherwise null.</summary>
+        public static DataRow GetAttemptForUser(int attemptId, int? userId)
         {
             const string sql = @"
-                SELECT a.HiddenRoadSignAttemptId, a.HiddenRoadSignPracticeId, p.SetNumber,
+                SELECT a.HiddenRoadSignAttemptId, a.UserId, a.HiddenRoadSignPracticeId, p.SetNumber,
                        a.StartedAt, a.CompletedAt, a.CorrectCount, a.TotalItems
                 FROM HiddenRoadSignAttempts a
                 INNER JOIN HiddenRoadSignPractices p ON p.HiddenRoadSignPracticeId = a.HiddenRoadSignPracticeId
-                WHERE a.HiddenRoadSignAttemptId = @AttemptId AND a.UserId = @UserId";
+                WHERE a.HiddenRoadSignAttemptId = @AttemptId AND (@UserId IS NULL OR a.UserId = @UserId)";
 
             DataTable table = DatabaseHelper.ExecuteQuery(sql,
                 new SqlParameter("@AttemptId", attemptId),
-                new SqlParameter("@UserId", userId));
+                new SqlParameter("@UserId", SqlDbType.Int) { Value = userId.HasValue ? (object)userId.Value : DBNull.Value });
 
             return table.Rows.Count == 0 ? null : table.Rows[0];
         }
 
-        /// <summary>Review rows of the learner's own attempt, in the order the road signs were found.</summary>
-        public static DataTable GetReviewRows(int attemptId, int userId)
+        /// <summary>Review rows of the attempt (the learner's own, or any for userId null), in the order the road signs were found.</summary>
+        public static DataTable GetReviewRows(int attemptId, int? userId)
         {
             const string sql = @"
                 SELECT ans.FoundOrder, ans.IsCorrect,
@@ -335,12 +335,12 @@ namespace MyKPPLearn.Data
                 INNER JOIN HiddenRoadSignAssets r ON r.RoadSignAssetId = i.RoadSignAssetId
                 INNER JOIN HiddenRoadSignChoices sc ON sc.HiddenRoadSignChoiceId = ans.SelectedChoiceId
                 INNER JOIN HiddenRoadSignChoices cc ON cc.HiddenRoadSignItemId = i.HiddenRoadSignItemId AND cc.IsCorrect = 1
-                WHERE t.HiddenRoadSignAttemptId = @AttemptId AND t.UserId = @UserId
+                WHERE t.HiddenRoadSignAttemptId = @AttemptId AND (@UserId IS NULL OR t.UserId = @UserId)
                 ORDER BY ans.FoundOrder ASC";
 
             return DatabaseHelper.ExecuteQuery(sql,
                 new SqlParameter("@AttemptId", attemptId),
-                new SqlParameter("@UserId", userId));
+                new SqlParameter("@UserId", SqlDbType.Int) { Value = userId.HasValue ? (object)userId.Value : DBNull.Value });
         }
     }
 }

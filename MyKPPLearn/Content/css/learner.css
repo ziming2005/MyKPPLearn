@@ -63,10 +63,6 @@
 .continue-cta .mock-exam-cta__text { flex: 1; }
 .continue-cta__btn { margin-left: auto; }
 
-.progress-overview-card { border-top: 3px solid var(--dash-color, var(--color-primary)); }
-
-.progress-overview-card .progress-track__fill { background-color: var(--dash-color, var(--color-primary)); }
-
 /* Road Sign Game and Mock Exam sit side by side on wide screens, stacked on narrow ones. */
 .dash-pair {
   display: grid;
@@ -94,6 +90,20 @@
 .dash-pair .hrs-promo__scene {
   order: -1;
   min-height: 160px;
+  height: 180px;
+  overflow: hidden;
+}
+
+.hrs-promo__scene img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dash-pair .hrs-promo__scene img {
+  height: 100%;
+  object-fit: cover;
+  object-position: center 60%;
 }
 
 .dash-pair .hrs-promo__content {
@@ -173,36 +183,6 @@
 @media (max-width: 767px) {
   .continue-cta__btn { margin-left: 0; }
   .exam-banner { padding: 20px; }
-}
-
-.progress-overview-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-@media (max-width: 991px) {
-  .progress-overview-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.progress-overview-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  padding: 20px;
-  background-color: var(--color-surface);
-}
-
-.progress-overview-card__label {
-  font-weight: 600;
-  color: var(--color-navy);
-  margin-bottom: 12px;
-}
-
-.progress-overview-card__empty {
-  font-size: var(--fs-small);
-  color: var(--color-text-secondary);
 }
 
 .mock-exam-cta {
@@ -304,19 +284,6 @@
 
 .chapter-card {
   position: relative;
-}
-
-/* The whole card is the link: the button stretches over it. */
-.chapter-card__link::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-}
-
-.chapter-card:has(.chapter-card__link):hover {
-  border-color: var(--dash-color, var(--color-primary));
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
 }
 
 .chapter-card__done {
@@ -564,20 +531,6 @@ a.lesson-row--link:focus-visible {
 
 .practice-instructions h2 {
   margin: 0;
-}
-
-/* Same subtitle treatment as the Mock Exam instructions ("Mock Exam Set 1"). */
-.practice-instructions__set {
-  margin: 2px 0 0;
-  font-weight: 600;
-  color: var(--color-navy);
-}
-
-/* Two classes so it beats `.card p { margin-bottom: 0 }` from components.css. */
-.practice-instructions .practice-instructions__count {
-  margin: 4px 0 10px;   /* space between "N Questions" and the divider line below */
-  color: var(--color-text-secondary);
-  font-weight: 600;
 }
 
 /* The Instructions list uses the same block, heading, green tick icons and spacing as "Before You Start"
@@ -888,15 +841,6 @@ a.lesson-row--link:focus-visible {
 .practice-review__explanation {
   margin-bottom: 0;
   color: var(--color-text-secondary);
-}
-
-/* ====================================================================
-   Phase 6: Mock Examination (frontend prototype)
-   ==================================================================== */
-.mx-subtitle {
-  margin: 0 0 12px;
-  color: var(--color-text-secondary);
-  font-weight: 600;
 }
 
 .mx-sr-only {
@@ -1781,13 +1725,6 @@ a.lesson-row--link:focus-visible {
   margin-bottom: 12px;
 }
 
-/* ====================================================================
-   Hidden Road Sign Game (Learner)
-   ==================================================================== */
-.hrs-hub-card p {
-  margin-bottom: 14px;
-}
-
 /* ---- game screen ---- */
 .hrs-game {
   max-width: 1100px;
@@ -1975,12 +1912,6 @@ body.hrs-modal-open {
   display: none;
 }
 
-.hrs-feedback__title {
-  margin: 0;
-  font-weight: 800;
-  color: #991B1B;
-}
-
 .hrs-feedback__label {
   margin: 10px 0 2px;
   font-size: var(--fs-small);
@@ -2026,34 +1957,11 @@ body.hrs-modal-open {
   font-weight: 600;
 }
 
-.hrs-result__stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  max-width: 520px;
-  margin: 0 auto 28px;
-  text-align: left;
-}
-
 .hrs-result .form-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 16px;
-}
-
-@media (max-width: 479px) {
-  .hrs-result__stats {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* ---- review ---- */
-.hrs-review__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 24px;
 }
 
 .hrs-result .hrs-result__set {
@@ -2113,95 +2021,11 @@ body.hrs-modal-open {
   margin-bottom: 16px;
 }
 
-.history-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.history-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 10px 0;
-  border-top: 1px solid var(--color-border);
-}
-
-/* Older games stay hidden until the list is expanded. */
-.history-list:not(.is-expanded) .history-item--extra {
-  display: none;
-}
-
-.history-item:first-child {
-  padding-top: 0;
-  border-top: 0;
-}
-
-.history-item__title {
-  font-weight: 700;
-  color: var(--color-navy);
-}
-
-.history-item__score {
-  margin-top: 0;
-  color: var(--color-navy);
-}
-
-.history-item__date {
-  margin-top: 0;
-  font-size: var(--fs-small);
-  color: var(--color-text-secondary);
-}
-
-.history-more {
-  padding-top: 14px;
-  border-top: 1px solid var(--color-border);
-}
-
-@media (max-width: 479px) {
-  .history-item {
-    flex-wrap: wrap;
-  }
-}
-
 /* ---- Progress page icons ---- */
 .progress-stats .stat-card__label {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.stat-icon {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-}
-
-.heading-icon {
-  display: inline-flex;
-  margin-right: 8px;
-  vertical-align: -3px;
-  color: var(--color-primary);
-}
-
-/* "View Result" in the game history: green background, border and text. */
-.history-item .btn-result {
-  background-color: #F0FDF4;
-  border-color: var(--color-success);
-  color: #166534;
-}
-
-.history-item .btn-result:hover {
-  background-color: #DCFCE7;
-  border-color: #15803D;
-  color: #14532D;
 }
 
 /* Practice category card: the icon and the title sit side by side. */
@@ -2365,7 +2189,7 @@ body.hrs-modal-open {
 @media (max-width: 767px) {
   .mx-header {
     position: sticky;
-    top: 64px;                   /* just under the sticky app header */
+    top: 77px;                   /* just under the sticky app header */
     z-index: 10;
     padding: 10px 14px;
     margin-bottom: 10px;
@@ -2406,6 +2230,11 @@ body.hrs-modal-open {
     border-top: 1px solid var(--color-border);
   }
 
+  /* Scrolling to the feedback must stop above the pinned Previous / Next bar. */
+  .practice-attempt .question-feedback {
+    scroll-margin-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+
   .mx-question-nav .lesson-nav__center,
   .practice-attempt > .lesson-nav .lesson-nav__center {
     display: none;
@@ -2431,13 +2260,6 @@ body.hrs-modal-open {
     font-size: 1.05rem;
     margin-bottom: 14px;
   }
-}
-
-/* Dialogs on a phone: use the visible height, not the height under the browser bar. */
-.modal-panel {
-  max-height: calc(100vh - 40px);
-  max-height: calc(100dvh - 40px);
-  overflow-y: auto;
 }
 
 .lesson-actions {
@@ -2581,52 +2403,6 @@ body.hrs-modal-open {
   margin-top: 12px;
 }
 
-.history-summary {
-  margin-bottom: 14px;
-  font-size: var(--fs-small);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-/* ---- Road Sign Game: how-it-works strip, best score, tap ripple, review filter ---- */
-.game-howto {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 28px;
-  margin: 0 0 20px;
-  padding: 0;
-  list-style: none;
-  color: var(--color-text-secondary);
-  font-size: var(--fs-small);
-  font-weight: 600;
-}
-
-.game-howto li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.game-howto__num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: var(--color-primary);
-  color: #FFFFFF;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.game-best {
-  margin: 0;
-  font-size: var(--fs-small);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
 .hrs-result .hrs-result__best {
   margin: 0 0 20px;
   font-size: var(--fs-small);
@@ -2707,31 +2483,273 @@ body.hrs-modal-open {
   line-height: 1.25;
 }
 
-
-/* Result buttons (Practice and Mock Exam): coloured by role. Next Set (or Review Answers when it leads) stays
+/* Result buttons (Practice, Mock Exam and Road Sign Game): coloured by role. Next Set (or Review Answers when it leads) stays
    btn-primary; Review Answers is tinted blue, Try Again amber, and the Back link stays neutral. */
 #btnReviewAnswers.btn-secondary,
-#mxReviewBtn.btn-secondary {
+#mxReviewBtn.btn-secondary,
+.result-review.btn-secondary {
   background-color: var(--color-primary-light);
   border-color: #BFDBFE;
   color: var(--color-primary-dark);
 }
 
 #btnReviewAnswers.btn-secondary:hover,
-#mxReviewBtn.btn-secondary:hover {
+#mxReviewBtn.btn-secondary:hover,
+.result-review.btn-secondary:hover {
   background-color: #DBEAFE;
   border-color: var(--color-primary);
 }
 
 #btnTryAgain,
-#mxTryAgainBtn {
+#mxTryAgainBtn,
+.result-try-again {
   background-color: #FFFBEB;
   border-color: #FDE68A;
   color: #B45309;
 }
 
 #btnTryAgain:hover,
-#mxTryAgainBtn:hover {
+#mxTryAgainBtn:hover,
+.result-try-again:hover {
   background-color: #FEF3C7;
   border-color: var(--color-warning);
+}
+
+/* Overall Learning Progress: a tinted panel with a bigger figure, so it never reads as one more chapter. */
+.progress-block--overall {
+  padding: 20px 22px;
+  border-radius: 12px;
+  background-color: var(--color-primary-light);
+}
+
+.progress-block--overall .progress-block__title {
+  font-size: 1.125rem;
+}
+
+.progress-block--overall .progress-block__percent {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-primary);
+}
+
+.progress-block--overall .progress-track {
+  height: 12px;
+  background-color: #FFFFFF;
+}
+
+.progress-block--overall + .progress-block--chapter {
+  margin-top: 26px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Lesson page: after "Complete Lesson" the page reloads at #lessonActions. Jump there at once instead of the
+   site-wide smooth scroll, which visibly slid the whole lesson from top to bottom. */
+html:has(#lessonActions) {
+  scroll-behavior: auto;
+}
+
+/* Learning: shown once every lesson is completed, pointing to a Mock Exam. */
+.learn-finished {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  border-color: #BBF7D0;
+  background-color: #F0FDF4;
+}
+
+.learn-finished__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+  color: #FFFFFF;
+}
+
+.learn-finished__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.learn-finished__text h3 {
+  margin: 0 0 2px;
+  color: #166534;
+}
+
+.learn-finished__text p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.learn-finished__btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 599px) {
+  .learn-finished {
+    flex-wrap: wrap;
+  }
+
+  .learn-finished__btn {
+    width: 100%;
+  }
+}
+
+/* Learner dashboard: room between a practice card's description and its Start Practice button. */
+.practice-grid--dashboard .practice-card__footer {
+  padding-top: 20px;
+}
+
+/* ---- Road Sign Game: full screen ---- */
+.hrs-game__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.hrs-fullscreen-btn {
+  gap: 6px;
+}
+
+/* The game block fills the screen; the scene keeps its shape and is as large as fits under the title bar.
+   --scene-ratio (width / height) is set by the script from the scene image. */
+.hrs-game:fullscreen {
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  background-color: var(--color-bg-page);
+  overflow: auto;
+}
+
+.hrs-game:-webkit-full-screen {
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  background-color: var(--color-bg-page);
+  overflow: auto;
+}
+
+.hrs-game:fullscreen .hrs-game__hint {
+  margin-bottom: 10px;
+}
+
+.hrs-game:fullscreen .hrs-scene {
+  width: min(100%, calc((100vh - 120px) * var(--scene-ratio, 1.78)));
+  margin: 0 auto;
+}
+
+.hrs-game:-webkit-full-screen .hrs-scene {
+  width: min(100%, calc((100vh - 120px) * var(--scene-ratio, 1.78)));
+  margin: 0 auto;
+}
+
+/* Full screen on a short screen (a phone turned to landscape): the scene gets the whole height. The title and
+   hint are dropped, and the Found count and Exit button float over the scene's top-right corner. */
+@media (max-height: 500px) {
+  .hrs-game:fullscreen {
+    position: relative;
+    padding: 0;
+    justify-content: center;
+    background-color: #000000;
+  }
+
+  .hrs-game:-webkit-full-screen {
+    position: relative;
+    padding: 0;
+    justify-content: center;
+    background-color: #000000;
+  }
+
+  .hrs-game:fullscreen .hrs-game__title,
+  .hrs-game:fullscreen .hrs-game__hint,
+  .hrs-game:-webkit-full-screen .hrs-game__title,
+  .hrs-game:-webkit-full-screen .hrs-game__hint {
+    display: none;
+  }
+
+  .hrs-game:fullscreen .hrs-game__bar,
+  .hrs-game:-webkit-full-screen .hrs-game__bar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    margin: 0;
+  }
+
+  .hrs-game:fullscreen .hrs-game__tools,
+  .hrs-game:-webkit-full-screen .hrs-game__tools {
+    gap: 6px;
+  }
+
+  .hrs-game:fullscreen .hrs-progress,
+  .hrs-game:-webkit-full-screen .hrs-progress {
+    gap: 4px;
+    padding: 2px 10px;
+  }
+
+  .hrs-game:fullscreen .hrs-progress__count,
+  .hrs-game:-webkit-full-screen .hrs-progress__count {
+    font-size: 0.875rem;
+  }
+
+  .hrs-game:fullscreen .hrs-progress__label,
+  .hrs-game:-webkit-full-screen .hrs-progress__label {
+    font-size: 0.6875rem;
+  }
+
+  /* Exit Full Screen as an icon-only button; its name stays for screen readers. */
+  .hrs-game:fullscreen .hrs-fullscreen-btn,
+  .hrs-game:-webkit-full-screen .hrs-fullscreen-btn {
+    width: 26px;
+    height: 26px;
+    min-height: 0;
+    padding: 0;
+    border-radius: 6px;
+    justify-content: center;
+  }
+
+  .hrs-game:fullscreen .hrs-fullscreen-btn svg,
+  .hrs-game:-webkit-full-screen .hrs-fullscreen-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .hrs-game:fullscreen .hrs-fullscreen-btn__text,
+  .hrs-game:-webkit-full-screen .hrs-fullscreen-btn__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .hrs-game:fullscreen .hrs-scene,
+  .hrs-game:-webkit-full-screen .hrs-scene {
+    width: min(100%, calc(100vh * var(--scene-ratio, 1.78)));
+  }
+
+  .hrs-game:fullscreen .hrs-scene > img,
+  .hrs-game:-webkit-full-screen .hrs-scene > img {
+    border: 0;
+    border-radius: 0;
+  }
+}
+
+/* Progress: chapters after the first few stay hidden until "View All". */
+.chapter-card-list:not(.is-expanded) .progress-block--extra {
+  display: none;
+}
+
+.chapter-more {
+  margin-top: 20px;
 }

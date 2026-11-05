@@ -1,0 +1,14 @@
+flowchart TD
+    G([Guest]):::main --> H[Home Page]:::main
+    H --> S["Home page sections: Topics, Road Sign Game, Mock Exam, FAQ"]:::page
+    H --> R[Register]:::page
+    H --> L[Login]:::page
+    S -->|Section buttons| L
+    L --> F[Forgot Password]:::page
+    F -->|After reset| L
+    R --> LD[Learner Dashboard]:::page
+    L -->|Learner| LD
+    L -->|Administrator| AD[Administrator Dashboard]:::page
+    classDef main fill:#FFF2CC,stroke:#D6B656,color:#111111
+    classDef page fill:#E6E6FA,stroke:#9370DB,color:#111111
+    classDef group fill:#EEEEEE,stroke:#888888,color:#111111

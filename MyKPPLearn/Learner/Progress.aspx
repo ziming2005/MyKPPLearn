@@ -43,8 +43,8 @@
     <section class="panel-section" aria-labelledby="progLearningTitle">
         <div class="panel-section__header"><h2 id="progLearningTitle">Learning Progress</h2></div>
 
-        <div class="card progress-card">
-            <div class="progress-block">
+        <div id="chapterCard" class="card progress-card chapter-card-list">
+            <div class="progress-block progress-block--overall">
                 <div class="progress-block__head">
                     <span class="progress-block__title">Overall Learning Progress</span>
                     <span class="progress-block__percent"><%= OverallPercent %>%</span>
@@ -59,10 +59,10 @@
 
             <asp:Repeater ID="rptChapters" runat="server">
                 <ItemTemplate>
-                    <div class='<%# "progress-block progress-block--chapter progress-block--" + ChapterState(Eval("CompletedCount"), Eval("LessonCount")) %>'>
+                    <div class='<%# "progress-block progress-block--chapter progress-block--" + ChapterState(Eval("CompletedCount"), Eval("LessonCount")) + (Container.ItemIndex >= RecentGames ? " progress-block--extra" : "") %>'>
                         <div class="progress-block__head">
                             <a class="progress-block__title progress-block__link" href='<%# ResolveUrl("~/Learner/Chapter.aspx?id=" + Eval("ChapterId")) %>'>Chapter <%# Eval("DisplayOrder") %> &mdash; <%# Server.HtmlEncode(Convert.ToString(Eval("Title"))) %></a>
-                            <span class="progress-block__percent"><%# ChapterState(Eval("CompletedCount"), Eval("LessonCount")) == "done" ? "&#10003; " : "" %><%# ChapterPercent(Eval("CompletedCount"), Eval("LessonCount")) %>%</span>
+                            <span class="progress-block__percent"><%# ChapterPercent(Eval("CompletedCount"), Eval("LessonCount")) %>%</span>
                         </div>
                         <div class="progress-block__meta"><%# ChapterState(Eval("CompletedCount"), Eval("LessonCount")) == "empty" ? "No lessons yet" : (Eval("CompletedCount") + " / " + Eval("LessonCount") + " Lessons Completed") %></div>
                         <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%# ChapterPercent(Eval("CompletedCount"), Eval("LessonCount")) %>" aria-label="Chapter progress">
@@ -71,6 +71,11 @@
                     </div>
                 </ItemTemplate>
             </asp:Repeater>
+
+            <%-- The first chapters are always shown; the rest stay hidden until "View All" (same as the history lists). --%>
+            <asp:Panel ID="pnlChapterToggle" runat="server" CssClass="history-more chapter-more" Visible="false">
+                <button type="button" class="btn btn-secondary" data-history-toggle="chapterCard" aria-expanded="false" aria-controls="chapterCard" data-more="View All" data-less="Show Less">View All</button>
+            </asp:Panel>
 
             <a id="lnkContinue" runat="server" class="btn btn-primary progress-card__continue" visible="false">Continue Learning</a>
         </div>
@@ -86,16 +91,16 @@
                 <div class="progress-note__action"><a class="btn btn-primary btn-small" href="~/Learner/Game.aspx" runat="server">Play Road Sign Game</a></div>
             </asp:Panel>
 
-            <asp:Panel ID="pnlGameSummary" runat="server" CssClass="history-summary" Visible="false"><asp:Literal ID="litGameSummary" runat="server" /></asp:Panel>
+            <asp:Panel ID="pnlGameSummary" runat="server" CssClass="history-stats" Visible="false"><asp:Literal ID="litGameSummary" runat="server" /></asp:Panel>
 
             <ul id="gameHistoryList" class="history-list">
                 <asp:Repeater ID="rptGames" runat="server">
                     <ItemTemplate>
                         <li class="history-item<%# Container.ItemIndex >= RecentGames ? " history-item--extra" : "" %>">
+                            <%# ScoreBadge(Eval("CorrectCount"), Eval("TotalItems")) %>
                             <div class="history-item__main">
                                 <div class="history-item__title"><%# MyKPPLearn.Data.HiddenRoadSignPracticeRepository.FormatSetName(Eval("SetNumber")) %></div>
-                                <div class="history-item__score"><%# Eval("CorrectCount") %> / <%# Eval("TotalItems") %> Questions Correct</div>
-                                <div class="history-item__date"><%# FormatDate(Eval("CompletedAt")) %></div>
+                                <div class="history-item__meta"><%# Eval("CorrectCount") %> / <%# Eval("TotalItems") %> correct &middot; <%# FormatDate(Eval("CompletedAt")) %></div>
                             </div>
                             <a class="btn btn-secondary btn-small btn-result" href='<%# ResolveUrl("~/Learner/HiddenRoadSignResult.aspx?attempt=" + Eval("HiddenRoadSignAttemptId")) %>'>View Result</a>
                         </li>
@@ -120,17 +125,18 @@
                 <div class="progress-note__action"><a class="btn btn-primary btn-small" href="~/Learner/Practice.aspx" runat="server">Start Practice</a></div>
             </asp:Panel>
 
-            <asp:Panel ID="pnlPracticeSummary" runat="server" CssClass="history-summary" Visible="false"><asp:Literal ID="litPracticeSummary" runat="server" /></asp:Panel>
+            <asp:Panel ID="pnlPracticeSummary" runat="server" CssClass="history-stats" Visible="false"><asp:Literal ID="litPracticeSummary" runat="server" /></asp:Panel>
 
             <ul id="practiceHistoryList" class="history-list">
                 <asp:Repeater ID="rptPractice" runat="server">
                     <ItemTemplate>
                         <li class="history-item<%# Container.ItemIndex >= RecentGames ? " history-item--extra" : "" %>">
+                            <%# ScoreBadge(Eval("CorrectCount"), Eval("TotalQuestions")) %>
                             <div class="history-item__main">
                                 <div class="history-item__title"><%# Server.HtmlEncode(Convert.ToString(Eval("CategoryTitle"))) %> &mdash; Practice Set <%# Eval("SetNumber") %></div>
-                                <div class="history-item__score"><%# Eval("CorrectCount") %> / <%# Eval("TotalQuestions") %> Questions Correct</div>
-                                <div class="history-item__date"><%# FormatDate(Eval("CompletedAt")) %></div>
+                                <div class="history-item__meta"><%# Eval("CorrectCount") %> / <%# Eval("TotalQuestions") %> correct &middot; <%# FormatDate(Eval("CompletedAt")) %></div>
                             </div>
+                            <a class="btn btn-secondary btn-small btn-result" href='<%# ResolveUrl("~/Learner/PracticeAttempt.aspx?attempt=" + Eval("PracticeAttemptId")) %>'>View Result</a>
                         </li>
                     </ItemTemplate>
                 </asp:Repeater>
@@ -152,17 +158,19 @@
                 <div class="progress-note__action"><a class="btn btn-primary btn-small" href="~/Learner/MockExam.aspx" runat="server">Take a Mock Exam</a></div>
             </asp:Panel>
 
-            <asp:Panel ID="pnlMockSummary" runat="server" CssClass="history-summary" Visible="false"><asp:Literal ID="litMockSummary" runat="server" /></asp:Panel>
+            <asp:Panel ID="pnlMockSummary" runat="server" CssClass="history-stats" Visible="false"><asp:Literal ID="litMockSummary" runat="server" /></asp:Panel>
 
             <ul id="mockHistoryList" class="history-list">
                 <asp:Repeater ID="rptMock" runat="server">
                     <ItemTemplate>
                         <li class="history-item<%# Container.ItemIndex >= RecentGames ? " history-item--extra" : "" %>">
+                            <%# ScoreBadge(Convert.ToInt32(Eval("ColourBlindCorrect")) + Convert.ToInt32(Eval("TheoryCorrect")), Convert.ToInt32(Eval("ColourBlindTotal")) + Convert.ToInt32(Eval("TheoryTotal"))) %>
                             <div class="history-item__main">
-                                <div class="history-item__title"><%# MockTitle(Eval("ExamTypeCode"), Eval("SetNumber")) %> <span class='<%# (bool)Eval("IsPassed") ? "status-badge status-badge--active" : "status-badge status-badge--inactive" %>'><%# (bool)Eval("IsPassed") ? "Pass" : "Fail" %></span></div>
-                                <div class="history-item__score">Colour Blind <%# Eval("ColourBlindCorrect") %> / <%# Eval("ColourBlindTotal") %> &middot; Theory <%# Eval("TheoryCorrect") %> / <%# Eval("TheoryTotal") %></div>
-                                <div class="history-item__date"><%# FormatDate(Eval("CompletedAt")) %></div>
+                                <div class="history-item__title"><%# MockTitle(Eval("ExamTypeCode"), Eval("SetNumber")) %></div>
+                                <div class="history-item__meta">Colour Blind <%# Eval("ColourBlindCorrect") %> / <%# Eval("ColourBlindTotal") %> &middot; Theory <%# Eval("TheoryCorrect") %> / <%# Eval("TheoryTotal") %> &middot; <%# FormatDate(Eval("CompletedAt")) %></div>
                             </div>
+                            <span class='<%# (bool)Eval("IsPassed") ? "history-result history-result--pass" : "history-result history-result--fail" %>'><%# (bool)Eval("IsPassed") ? "Passed" : "Not Passed" %></span>
+                            <a class="btn btn-secondary btn-small btn-result" href='<%# ResolveUrl("~/Learner/MockExamAttempt.aspx?attempt=" + Eval("MockExamAttemptId")) %>'>View Result</a>
                         </li>
                     </ItemTemplate>
                 </asp:Repeater>

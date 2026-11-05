@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using System.Web;
 using System.Web.UI.WebControls;
 using MyKPPLearn.Common;
@@ -46,6 +47,23 @@ namespace MyKPPLearn.Admin
             }
         }
 
+        private const int PageSize = 10;
+
+        // Kept across the redirect after Save / Delete so the admin comes back to the same page of the list.
+        private const string PageSessionKey = "Lessons.Page";
+
+        private int CurrentPage
+        {
+            get { return ViewState["CurrentPage"] == null ? 1 : (int)ViewState["CurrentPage"]; }
+            set { ViewState["CurrentPage"] = value; }
+        }
+
+        private void RedirectToList()
+        {
+            Session[PageSessionKey] = CurrentPage;
+            Response.Redirect(Request.RawUrl, true);
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             SessionHelper.RequireAdministrator(this);
@@ -54,6 +72,12 @@ namespace MyKPPLearn.Admin
             if (!IsPostBack)
             {
                 FlashMessage.ShowPending(Session, lblMessage);
+
+                if (Session[PageSessionKey] is int)
+                {
+                    CurrentPage = (int)Session[PageSessionKey];
+                    Session.Remove(PageSessionKey);
+                }
 
                 try
                 {
@@ -128,6 +152,23 @@ namespace MyKPPLearn.Admin
             }
         }
 
+        // Learners who completed each lesson, for the Delete warning (filled by ShowList).
+        private System.Collections.Generic.Dictionary<int, int> _completions = new System.Collections.Generic.Dictionary<int, int>();
+
+        /// <summary>Delete confirmation text: says how many learners' progress goes with the lesson.</summary>
+        protected string DeleteConfirmText(object lessonId)
+        {
+            int learners;
+
+            if (!_completions.TryGetValue(Convert.ToInt32(lessonId), out learners) || learners == 0)
+            {
+                return "Are you sure you want to delete this lesson?";
+            }
+
+            return learners.ToString(CultureInfo.InvariantCulture) + (learners == 1 ? " learner has" : " learners have")
+                + " completed this lesson. Deleting it also removes their progress. This cannot be undone.";
+        }
+
         private void ShowList()
         {
             pnlList.Visible = true;
@@ -163,10 +204,30 @@ namespace MyKPPLearn.Admin
                 ? "No lessons match your filters."
                 : "No lessons have been created yet.";
 
+            _completions = LearningProgressRepository.GetLearnerCountsByLesson();
             rptLessons.DataSource = lessons;
+            // One page of the (filtered) lessons; a page past the end (after a delete) falls back to the last page.
+            int total = lessons.Rows.Count;
+            int pages = Math.Max(1, (int)Math.Ceiling(total / (double)PageSize));
+            CurrentPage = Math.Min(Math.Max(1, CurrentPage), pages);
+
+            DataTable page = lessons.Clone();
+            foreach (DataRow row in lessons.Rows.Cast<DataRow>().Skip((CurrentPage - 1) * PageSize).Take(PageSize))
+            {
+                page.ImportRow(row);
+            }
+
+            rptLessons.DataSource = page;
             rptLessons.DataBind();
-            pnlTable.Visible = lessons.Rows.Count > 0;
-            pnlEmpty.Visible = lessons.Rows.Count == 0;
+            pnlTable.Visible = total > 0;
+            pnlEmpty.Visible = total == 0;
+
+            pnlPager.Visible = total > PageSize;
+            btnPrev.Enabled = CurrentPage > 1;
+            btnNext.Enabled = CurrentPage < pages;
+            int first = total == 0 ? 0 : (CurrentPage - 1) * PageSize + 1;
+            litPageInfo.Text = "Showing " + first + "–" + Math.Min(CurrentPage * PageSize, total) + " of " + total
+                + (total == 1 ? " lesson" : " lessons");
 
             btnClearFilters.Visible = filtering;
             btnEmptyClear.Visible = filtering;
@@ -177,6 +238,19 @@ namespace MyKPPLearn.Admin
         {
             ddlFilterChapter.SelectedIndex = 0;
             txtSearch.Text = string.Empty;
+            CurrentPage = 1;
+            ShowList();
+        }
+
+        protected void btnPrev_Click(object sender, EventArgs e)
+        {
+            CurrentPage--;
+            ShowList();
+        }
+
+        protected void btnNext_Click(object sender, EventArgs e)
+        {
+            CurrentPage++;
             ShowList();
         }
 
@@ -352,11 +426,13 @@ namespace MyKPPLearn.Admin
 
         protected void ddlFilterChapter_SelectedIndexChanged(object sender, EventArgs e)
         {
+            CurrentPage = 1;
             ShowList();
         }
 
         protected void btnSearch_Click(object sender, EventArgs e)
         {
+            CurrentPage = 1;
             ShowList();
         }
 
@@ -428,18 +504,17 @@ namespace MyKPPLearn.Admin
 
         private void DeleteLesson(int lessonId, DataRow lesson)
         {
-            const string blocked = "This lesson cannot be deleted because learner progress has already been recorded. Deactivate the lesson instead.";
-
-            if (LearningProgressRepository.LessonHasProgress(lessonId) || !LessonRepository.DeleteLesson(lessonId))
+            // Learners' completions of the lesson go with it (the confirmation said how many).
+            if (!LessonRepository.DeleteLesson(lessonId))
             {
-                FlashMessage.Show(lblMessage, blocked, true);
+                FlashMessage.Show(lblMessage, GenericError, true);
                 ShowList();
                 return;
             }
 
             LessonImageStorage.Delete(lesson["ImagePath"] as string);
             FlashMessage.Set(Session, "Lesson deleted.");
-            Response.Redirect(Request.RawUrl, true);
+            RedirectToList();
         }
 
         // The duplicate-number error sits under the Lesson Number field, where the admin is looking.
@@ -557,7 +632,7 @@ namespace MyKPPLearn.Admin
                     FlashMessage.Set(Session, "Lesson updated.");
                 }
 
-                Response.Redirect(Request.RawUrl, true);
+                RedirectToList();
             }
             catch (System.Threading.ThreadAbortException)
             {

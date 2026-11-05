@@ -21,6 +21,11 @@ namespace MyKPPLearn
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblFlash;
+
+        /// <summary>
+        /// lblFormError control.
+        /// </summary>
         protected global::System.Web.UI.WebControls.Label lblFormError;
 
         /// <summary>

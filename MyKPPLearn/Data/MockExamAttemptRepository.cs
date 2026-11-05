@@ -41,6 +41,28 @@ namespace MyKPPLearn.Data
     /// </summary>
     public static class MockExamAttemptRepository
     {
+        /// <summary>
+        /// One saved attempt, one row per question in paper order: the learner, exam type, set number, time and
+        /// auto-submit flag plus the question snapshots. userId limits it to that learner's own attempts (null: any
+        /// learner, for an administrator). Empty when there is no such attempt.
+        /// </summary>
+        public static DataTable GetSavedForUser(int attemptId, int? userId)
+        {
+            return DatabaseHelper.ExecuteQuery(@"
+                SELECT a.UserId, s.ExamTypeCode, s.SetNumber, a.TimeTakenSeconds, a.AutoSubmitted, a.IsPassed,
+                       q.QuestionId, q.QuestionNumber, q.QuestionTextSnapshot, q.ExplanationSnapshot,
+                       q.OptionATextSnapshot, q.OptionBTextSnapshot, q.OptionCTextSnapshot,
+                       q.CorrectOptionSnapshot, q.SelectedOptionSnapshot, q.ImagePathSnapshot,
+                       q.QuestionCategoryCodeSnapshot, q.IsFlagged, q.IsCorrect
+                FROM MockExamAttempts a
+                INNER JOIN MockExamSets s ON s.MockExamSetId = a.MockExamSetId
+                INNER JOIN MockExamAttemptQuestions q ON q.MockExamAttemptId = a.MockExamAttemptId
+                WHERE a.MockExamAttemptId = @AttemptId AND (@UserId IS NULL OR a.UserId = @UserId)
+                ORDER BY q.QuestionNumber",
+                new SqlParameter("@AttemptId", attemptId),
+                new SqlParameter("@UserId", SqlDbType.Int) { Value = userId.HasValue ? (object)userId.Value : DBNull.Value });
+        }
+
         /// <summary>The set's questions in exam order (empty when the set has none).</summary>
         public static List<MockExamPaperQuestion> GetPaper(int setId, MockExamType type)
         {

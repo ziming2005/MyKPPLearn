@@ -4,7 +4,7 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div id="practiceAttemptRoot" data-category='<%= CategoryId %>' data-set='<%= SetNumber %>' data-app-root='<%= ResolveUrl("~/") %>'>
+    <div id="practiceAttemptRoot" data-category='<%= CategoryId %>' data-set='<%= SetNumber %>' data-back-url='<%= BackUrl %>' data-app-root='<%= ResolveUrl("~/") %>'>
 
         <nav id="practiceCrumb" class="breadcrumb" aria-label="Breadcrumb"></nav>
 
@@ -98,7 +98,7 @@
                 <a id="lnkNextSet" class="btn btn-primary" href="#" hidden>Next Set</a>
                 <button type="button" id="btnReviewAnswers" class="btn btn-secondary">Review Answers</button>
                 <button type="button" id="btnTryAgain" class="btn btn-secondary">Try Again</button>
-                <a class="btn btn-secondary" href="~/Learner/Practice.aspx" runat="server">Back to Practice</a>
+                <a class="btn btn-secondary practice-back-link" href="~/Learner/Practice.aspx" runat="server">Back to Practice</a>
             </div>
         </section>
 
@@ -117,7 +117,7 @@
 
             <div class="form-actions">
                 <button type="button" id="btnBackToResult" class="btn btn-secondary">Back to Result</button>
-                <a class="btn btn-primary" href="~/Learner/Practice.aspx" runat="server">Back to Practice</a>
+                <a class="btn btn-primary practice-back-link" href="~/Learner/Practice.aspx" runat="server">Back to Practice</a>
             </div>
         </section>
 
@@ -126,5 +126,6 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
+    <script>window.PracticeSavedAttempt = <%= SavedJson %>;</script>
     <script src="<%= ResolveUrl("~/Scripts/practice.js") + "?v=" + PracticeScriptVersion %>"></script>
 </asp:Content>

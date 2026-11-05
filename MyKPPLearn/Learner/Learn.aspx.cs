@@ -65,6 +65,7 @@ namespace MyKPPLearn.Learner
             else
             {
                 pnlAllDone.Visible = true;
+                pnlFinished.Visible = true;
             }
         }
 

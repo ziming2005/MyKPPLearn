@@ -4,7 +4,7 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <asp:Panel ID="pnlSuccess" runat="server" CssClass="alert alert-success" Visible="false" EnableViewState="false" style="margin-bottom: 24px;">
+    <asp:Panel ID="pnlSuccess" runat="server" CssClass="alert alert-success alert--flash" Visible="false" EnableViewState="false" style="margin-bottom: 24px;">
         Account created successfully. You are now signed in.
     </asp:Panel>
 
@@ -76,7 +76,7 @@
                 <h3>Colour Recognition</h3>
                 <p>Practice identifying the meaning of key road and signal colours.</p>
                 <div class="practice-card__footer">
-                    <a class="btn btn-secondary btn-block" href="~/Learner/PracticeSets.aspx?category=colour-recognition" runat="server" aria-label="Start Colour Recognition practice">Start Practice</a>
+                    <a class="btn btn-outline-primary btn-block" href="~/Learner/PracticeSets.aspx?category=colour-recognition" runat="server" aria-label="Start Colour Recognition practice">Start Practice</a>
                 </div>
             </div>
 
@@ -87,7 +87,7 @@
                 <h3>Road Signs</h3>
                 <p>Test your knowledge of warning, regulatory and information signs.</p>
                 <div class="practice-card__footer">
-                    <a class="btn btn-secondary btn-block" href="~/Learner/PracticeSets.aspx?category=road-signs" runat="server" aria-label="Start Road Signs practice">Start Practice</a>
+                    <a class="btn btn-outline-primary btn-block" href="~/Learner/PracticeSets.aspx?category=road-signs" runat="server" aria-label="Start Road Signs practice">Start Practice</a>
                 </div>
             </div>
 
@@ -98,7 +98,7 @@
                 <h3>Rules of the Road</h3>
                 <p>Review common driving scenarios and correct road behaviour.</p>
                 <div class="practice-card__footer">
-                    <a class="btn btn-secondary btn-block" href="~/Learner/PracticeSets.aspx?category=rules-of-the-road" runat="server" aria-label="Start Rules of the Road practice">Start Practice</a>
+                    <a class="btn btn-outline-primary btn-block" href="~/Learner/PracticeSets.aspx?category=rules-of-the-road" runat="server" aria-label="Start Rules of the Road practice">Start Practice</a>
                 </div>
             </div>
 
@@ -109,7 +109,7 @@
                 <h3>KEJARA &amp; Safety</h3>
                 <p>Practice questions on the demerit points system and road safety.</p>
                 <div class="practice-card__footer">
-                    <a class="btn btn-secondary btn-block" href="~/Learner/PracticeSets.aspx?category=kejara-safety" runat="server" aria-label="Start KEJARA &amp; Safety practice">Start Practice</a>
+                    <a class="btn btn-outline-primary btn-block" href="~/Learner/PracticeSets.aspx?category=kejara-safety" runat="server" aria-label="Start KEJARA &amp; Safety practice">Start Practice</a>
                 </div>
             </div>
         </div>
@@ -128,26 +128,12 @@
             <div class="hrs-promo__content">
                 <span class="badge badge-accent">Interactive Game</span>
                 <h3>Can you spot every sign?</h3>
-                <p>Explore a real road scene, find the road signs hidden inside it, then answer a question about each one you discover.</p>
+                <p>Explore a detailed scene, find the road signs hidden inside it, then answer a question about each one you discover.</p>
                 <a class="btn btn-primary" href="~/Learner/Game.aspx" runat="server">Start Road Sign Game</a>
             </div>
 
             <div class="hrs-promo__scene" aria-hidden="true">
-                <svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" focusable="false">
-                    <rect width="320" height="200" fill="#DBEAFE" />
-                    <circle cx="262" cy="42" r="20" fill="#FDE68A" />
-                    <path d="M0 120 L70 80 L130 112 L200 70 L320 125 V200 H0 Z" fill="#BFDBFE" />
-                    <rect y="130" width="320" height="70" fill="#94A3B8" />
-                    <path d="M0 170 H320" stroke="#F8FAFC" stroke-width="3" stroke-dasharray="22 16" />
-                    <rect x="38" y="104" width="6" height="40" fill="#64748B" />
-                    <circle cx="41" cy="96" r="16" fill="#16A34A" />
-                    <rect x="248" y="86" width="5" height="50" fill="#64748B" />
-                    <path d="M250 60 L270 82 H230 Z" fill="#F59E0B" stroke="#B45309" stroke-width="2" stroke-linejoin="round" />
-                    <rect x="150" y="100" width="5" height="34" fill="#64748B" />
-                    <circle cx="152" cy="92" r="14" fill="#DC2626" />
-                    <rect x="144" y="90" width="16" height="4" rx="1" fill="#FFFFFF" />
-                    <circle cx="152" cy="92" r="23" fill="none" stroke="#FACC15" stroke-width="3" stroke-dasharray="5 4" />
-                </svg>
+                <img src="../Content/images/illustrations/road-sign-game-workshop.webp" alt="" width="1200" height="751" loading="lazy" />
                 <asp:Panel ID="pnlGameCount" runat="server" CssClass="hrs-promo__scene-tag" Visible="false"><asp:Literal ID="litGameCount" runat="server" /></asp:Panel>
             </div>
         </div>

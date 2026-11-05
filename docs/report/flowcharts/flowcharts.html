@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MyKPP Learn Flow Charts</title>
+<style>
+body{margin:0;background:#fff;color:#111;font:16px/1.5 Arial,sans-serif;padding:16px}
+h1{font-size:22px;margin:0 0 6px}p{margin:0 0 20px}
+section{border:1px solid #ccc;padding:16px;margin:0 0 24px;overflow-x:auto}
+h2{font-size:17px;margin:0 0 10px}
+button{font:inherit;padding:6px 14px;margin:0 0 12px;cursor:pointer}
+.err{color:#b00020}
+</style></head><body>
+<h1>MyKPP Learn Flow Charts</h1>
+<p>Click Download PNG under a chart's title, then replace that figure in the report (right-click, Change Picture, From a File).</p>
+<div id="out"></div>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs';
+const charts = [["figure-3-login-and-registration", "Figure 3: Login and Registration Flow Chart", "flowchart TD\n    S([Start]) --> O[Open MyKPP Learn website]\n    O --> H{Already have an account?}\n    H -->|No| R[Register with email or Google]\n    R --> RV{Details valid?}\n    RV -->|No| RX[/Display error message/]\n    RX --> R\n    RV -->|Yes| RC[Create learner account and sign in]\n    RC --> LD[/Display Learner Dashboard/]\n    H -->|Yes| F{Forgot password?}\n    F -->|Yes| RP[Reset password with emailed code]\n    RP --> L[Log in with email or Google]\n    F -->|No| L\n    L --> VA{Valid user and account active?}\n    VA -->|No| VX[/Display error message/]\n    VX --> L\n    VA -->|Yes| RO{Role?}\n    RO -->|Learner| LD\n    RO -->|Administrator| AD[/Display Administrator Dashboard/]\n    LD --> E([End])\n    AD --> E\n"], ["figure-4-learning-module", "Figure 4: Learning Module Flow Chart", "flowchart TD\n    S([Start]) --> O[Open Learning page]\n    O --> C[Select chapter]\n    C --> L[Select lesson]\n    L --> R[Read lesson]\n    R --> A{Learner action?}\n    A -->|Complete lesson| SV[Save completion to database]\n    SV --> LAST{Last lesson?}\n    LAST -->|No| NX[Open next lesson or chapter]\n    NX --> R\n    LAST -->|Yes| BK[/Display Learning page with updated progress/]\n    BK --> E([End])\n    A -->|Next or Previous Lesson| NP[Open that lesson]\n    NP --> R\n    A -->|Back to Chapter| L\n    A -->|Leave Learning| E\n"], ["figure-5-practice-set", "Figure 5: Practice Set Flow Chart", "flowchart TD\n    S([Start]) --> O[Open Practice page]\n    O --> C[\"Select category: Colour Recognition, Road Signs, Rules of the Road, or KEJARA & Safety\"]\n    C --> P[Select practice set]\n    P --> I[/Display instructions/]\n    I --> ST[Click Start Practice]\n    ST --> A1((A))\n\n    A2((A)) --> Q[/Display question/]\n    Q --> AN{Answer this question?}\n    AN -->|Yes| SA[Select answer A, B or C]\n    SA --> FB[/Display feedback and explanation/]\n    FB --> N{Learner action?}\n    AN -->|No| N\n    N -->|Next or Previous| Q\n    N -->|Submit Practice| U{Unanswered questions?}\n    U -->|Yes| CF{Submit anyway?}\n    CF -->|No| Q\n    CF -->|Yes| CS[Calculate score]\n    U -->|No| CS\n    CS --> SV[Save attempt to database]\n    SV --> RS[/Display result/]\n    RS --> RA{Result action?}\n    RA -->|Review Answers| RV[/Display answer review/]\n    RV --> E([End])\n    RA -->|Try Again| Q\n    RA -->|Next Set or Back to Practice| E\n"], ["figure-6-road-sign-game", "Figure 6: Road Sign Game Flow Chart", "flowchart TD\n    S([Start]) --> O[Open Road Sign Game page]\n    O --> G[Select game set]\n    G --> I[/Display instructions/]\n    I --> ST[Click Start Game]\n    ST --> A1((A))\n\n    A2((A)) --> SC[/Display road scene/]\n    SC --> CK[Click a road sign in the scene]\n    CK --> Q[/Display question with options A, B and C/]\n    Q --> SA[Select an answer]\n    SA --> FB[/Display feedback and explanation/]\n    FB --> AL{All signs found?}\n    AL -->|No| SC\n    AL -->|Yes| CS[Calculate score]\n    CS --> SV[Save attempt to database]\n    SV --> RS[/Display result/]\n    RS --> RA{Result action?}\n    RA -->|Review Answers| RV[/Display answer review/]\n    RV --> E([End])\n    RA -->|Try Again| SC\n    RA -->|Next Set or Back to Game| E\n"], ["figure-7-mock-examination", "Figure 7: Mock Examination Flow Chart", "flowchart TD\n    S([Start]) --> O[Open Mock Exam page]\n    O --> T[Select exam type: KPP Combined or KPP Standard]\n    T --> SE[Select exam set]\n    SE --> I[/Display instructions/]\n    I --> ST[Click Start Mock Exam and start timer]\n    ST --> Q[/Display question/]\n    Q --> SA[Select or change answer]\n    SA --> F{Flag question?}\n    F -->|Yes| MF[Mark question as flagged]\n    MF --> TE{Time expired?}\n    F -->|No| TE\n    TE -->|Yes| AS[Submit exam automatically]\n    AS --> CS[Calculate result]\n    TE -->|No| N{Learner action?}\n    N -->|Go to another question| Q\n    N -->|Submit Exam| U{Unanswered questions?}\n    U -->|Yes| CF{Submit anyway?}\n    CF -->|No| Q\n    CF -->|Yes| CS\n    U -->|No| CS\n    CS --> SV[Save attempt to database]\n    SV --> RS[/Display pass or fail result/]\n    RS --> RA{Result action?}\n    RA -->|Review Answers| RV[/Display answer review/]\n    RV --> E([End])\n    RA -->|Try Again| I\n    RA -->|Back to Progress| E\n"], ["figure-8-administrator-management", "Figure 8: Administrator Management Flow Chart", "flowchart TD\n    S([Start]) --> D[/Display Administrator Dashboard/]\n    D --> M{Select module}\n    M -->|Learner records| M1[Open Learner Records]\n    M -->|Learning content| M2[Open Chapters and Lessons]\n    M -->|Question Bank| M3[Open Question Bank]\n    M -->|Practice sets| M4[Open Practice Sets]\n    M -->|Mock exam sets| M5[Open Mock Exam Sets]\n    M -->|Road Sign Game| M6[Open Game Sets and Road Sign Assets]\n    M1 --> A{Select action}\n    M2 --> A\n    M3 --> A\n    M4 --> A\n    M5 --> A\n    M6 --> A\n    A -->|View| V[/Display records/]\n    A -->|Add| AD[Enter details]\n    A -->|Edit| ED[Update details]\n    A -->|Activate or deactivate| ST[Change status]\n    A -->|Delete| CF{Confirm delete?}\n    AD --> VL{Details valid?}\n    ED --> VL\n    VL -->|No| VX[/Display error message/]\n    VX --> A\n    VL -->|Yes| SV[Save to database]\n    ST --> SV\n    SV --> OK[/Display success message/]\n    CF -->|No| A\n    CF -->|Yes| PR{Record protected from deletion?}\n    PR -->|Yes| NO[/Display cannot delete message/]\n    PR -->|No| DL[Delete from database]\n    DL --> OK\n    V --> MORE{Another action?}\n    OK --> MORE\n    NO --> MORE\n    MORE -->|Yes| A\n    MORE -->|No| E([End])\n"]];
+mermaid.initialize({startOnLoad:false, securityLevel:'loose', theme:'base',
+  themeVariables:{primaryColor:'#ffffff',primaryBorderColor:'#111111',primaryTextColor:'#111111',lineColor:'#111111',fontFamily:'Arial, sans-serif',fontSize:'15px',tertiaryColor:'#ffffff',edgeLabelBackground:'#eeeeee'},
+  flowchart:{htmlLabels:false,curve:'basis',wrappingWidth:190,nodeSpacing:35,rankSpacing:38}});
+window.__status = {};
+function toPng(svgEl, name){
+  const box = svgEl.viewBox.baseVal, s = 3, c = document.createElement('canvas');
+  c.width = Math.ceil(box.width*s); c.height = Math.ceil(box.height*s);
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute('width', box.width); clone.setAttribute('height', box.height); clone.removeAttribute('style');
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+  return new Promise((res, rej) => { const img = new Image(); img.onload = () => {
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL('image/png')); }; img.onerror = rej; img.src = url; });
+}
+const out = document.getElementById('out');
+let i = 0;
+for (const [name, cap, src] of charts) {
+  const sec = document.createElement('section');
+  sec.innerHTML = '<h2></h2><button type="button">Download PNG</button><div class="c"></div>';
+  sec.querySelector('h2').textContent = cap; out.appendChild(sec);
+  try {
+    const {svg} = await mermaid.render('m' + (i++), src);
+    sec.querySelector('.c').innerHTML = svg;
+    const el = sec.querySelector('svg');
+    const size = el.viewBox.baseVal;
+    window.__status[name] = {ok:true, w:Math.round(size.width), h:Math.round(size.height)};
+    sec.querySelector('button').onclick = async () => { const a = document.createElement('a'); a.href = await toPng(el, name); a.download = name + '.png'; a.click(); };
+    window.__toPng = window.__toPng || {}; window.__toPng[name] = () => toPng(el, name);
+  } catch (e) {
+    sec.querySelector('.c').innerHTML = '<p class="err"></p>'; sec.querySelector('.err').textContent = String(e);
+    window.__status[name] = {ok:false, error:String(e)};
+  }
+}
+window.__done = true;
+</script></body></html>

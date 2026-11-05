@@ -19,5 +19,14 @@ namespace MyKPPLearn.Learner
         protected global::System.Web.UI.WebControls.Panel pnlAllDone;
         protected global::System.Web.UI.WebControls.Panel pnlEmpty;
         protected global::System.Web.UI.WebControls.Repeater rptChapters;
+
+        /// <summary>
+        /// pnlFinished control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlFinished;
     }
 }

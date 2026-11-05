@@ -12,18 +12,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="~/Content/css/site.css?v=20261018-footer" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/components.css?v=20261103-grid3" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/public.css?v=20261018-cta" runat="server" />
-    <link rel="stylesheet" href="~/Content/css/forms.css?v=20261102-hidden" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/site.css?v=20261105-mobile-fixes" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/components.css?v=20261105-modal-scroll" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/public.css?v=20261105-game-image" runat="server" />
+    <link rel="stylesheet" href="~/Content/css/forms.css?v=20261104-gbtn2" runat="server" />
 
+    <link rel="stylesheet" href="~/Content/css/branding.css?v=20261104-logo-v4" runat="server" />
     <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
 </head>
 <body>
     <form id="form1" runat="server">
         <header class="site-header">
             <div class="container site-header__inner">
-                <a class="site-logo" href="~/Default.aspx" runat="server">My<span>KPP</span> Learn</a>
+                <a class="site-logo site-logo--image" href="~/Default.aspx" runat="server"><img src="~/Content/images/branding/mykpp-learn-logo-v1.png" alt="MyKPP Learn" width="2172" height="724" runat="server" /></a>
 
                 <button type="button" id="navToggle" class="nav-toggle" aria-expanded="false" aria-controls="mainNav" aria-label="Toggle navigation menu">
                     <span class="nav-toggle__bar"></span>
@@ -36,6 +37,12 @@
                         <li><asp:HyperLink ID="NavGame" runat="server" CssClass="main-nav__link">Road Sign Game</asp:HyperLink></li>
                         <li><asp:HyperLink ID="NavMockExam" runat="server" CssClass="main-nav__link">Mock Exam</asp:HyperLink></li>
                         <li><asp:HyperLink ID="NavFaq" runat="server" CssClass="main-nav__link">FAQ</asp:HyperLink></li>
+                        <%-- Phones only: the header has no room for its buttons there, so the menu carries them. --%>
+                        <asp:PlaceHolder ID="phMenuGuest" runat="server">
+                            <li class="main-nav__account"><a class="btn btn-secondary btn-block" href="~/Login.aspx" runat="server">Login</a></li>
+                            <li class="main-nav__account"><a class="btn btn-primary btn-block" href="~/Register.aspx" runat="server">Register</a></li>
+                        </asp:PlaceHolder>
+                        <li id="liMenuDashboard" runat="server" class="main-nav__account" visible="false"><a id="lnkMenuDashboard" runat="server" class="btn btn-primary btn-block">Go to Dashboard</a></li>
                     </ul>
                 </nav>
 
@@ -57,7 +64,7 @@
             <div class="container">
                 <div id="footerTop" runat="server" class="site-footer__top">
                     <div class="site-footer__brand">
-                        <div class="site-logo">My<span>KPP</span> Learn</div>
+                        <div class="site-logo site-logo--image site-logo--light"><img src="~/Content/images/branding/mykpp-learn-logo-footer-v5.png" alt="MyKPP Learn" width="2172" height="724" runat="server" /></div>
                         <p>Study driving theory, practise by topic and prepare for your mock exams.</p>
                     </div>
 
@@ -95,6 +102,6 @@
 
         <asp:ContentPlaceHolder ID="ScriptsContent" runat="server" />
     </form>
-    <script src="<%= ResolveUrl("~/Scripts/site.js") %>?v=20261018-auth"></script>
+    <script src="<%= ResolveUrl("~/Scripts/site.js") %>?v=20261105-mobile-fixes"></script>
 </body>
 </html>

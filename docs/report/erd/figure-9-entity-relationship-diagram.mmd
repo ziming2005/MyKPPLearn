@@ -1,0 +1,238 @@
+erDiagram
+    Users {
+        int UserId PK
+        nvarchar FullName
+        nvarchar Email UK
+        nvarchar PasswordHash
+        nvarchar Role
+        nvarchar ProfileImagePath
+        nvarchar Status
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+        nvarchar GoogleSubjectId UK
+    }
+    PasswordResetTokens {
+        int TokenId PK
+        int UserId FK
+        char TokenHash
+        datetime2 ExpiresAt
+        datetime2 UsedAt
+        datetime2 CreatedAt
+        int FailedAttempts
+        datetime2 VerifiedAt
+    }
+    LearningChapters {
+        int ChapterId PK
+        nvarchar Title
+        nvarchar Description
+        int DisplayOrder UK
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
+    Lessons {
+        int LessonId PK
+        int ChapterId FK
+        nvarchar Title
+        nvarchar Content
+        nvarchar ImagePath
+        int DisplayOrder
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+        nvarchar ImagePosition
+    }
+    LearningProgress {
+        int LearningProgressId PK
+        int UserId FK
+        int LessonId FK
+        datetime2 CompletedAt
+    }
+    QuestionCategories {
+        int QuestionCategoryId PK
+        nvarchar Code UK
+        nvarchar Title
+        nvarchar Description
+        int DisplayOrder UK
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
+    PracticeSets {
+        int PracticeSetId PK
+        int QuestionCategoryId FK
+        int SetNumber
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
+    Questions {
+        int QuestionId PK
+        int QuestionCategoryId FK
+        int PracticeSetId FK
+        nvarchar QuestionText
+        nvarchar Explanation
+        nvarchar ImagePath
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
+    QuestionOptions {
+        int QuestionOptionId PK
+        int QuestionId FK
+        nvarchar OptionText
+        int OptionOrder
+        bit IsCorrect
+    }
+    PracticeAttempts {
+        int PracticeAttemptId PK
+        int UserId FK
+        int PracticeSetId FK
+        datetime2 StartedAt
+        datetime2 CompletedAt
+        int TotalQuestions
+        int CorrectCount
+        int UnansweredCount
+    }
+    PracticeAttemptQuestions {
+        int PracticeAttemptQuestionId PK
+        int PracticeAttemptId FK
+        int QuestionId
+        int QuestionNumber
+        int SelectedOptionId
+        bit IsCorrect
+        nvarchar QuestionTextSnapshot
+        nvarchar ExplanationSnapshot
+        nvarchar OptionATextSnapshot
+        nvarchar OptionBTextSnapshot
+        nvarchar OptionCTextSnapshot
+        char CorrectOptionSnapshot
+        char SelectedOptionSnapshot
+        nvarchar SelectedOptionTextSnapshot
+        nvarchar ImagePathSnapshot
+    }
+    MockExamSets {
+        int MockExamSetId PK
+        nvarchar ExamTypeCode
+        int SetNumber
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
+    MockExamSetQuestions {
+        int MockExamSetQuestionId PK
+        int MockExamSetId FK
+        int QuestionId FK
+        int DisplayOrder
+    }
+    MockExamAttempts {
+        int MockExamAttemptId PK
+        int UserId FK
+        int MockExamSetId FK
+        datetime2 StartedAt
+        datetime2 CompletedAt
+        int ColourBlindCorrect
+        int ColourBlindTotal
+        int TheoryCorrect
+        int TheoryTotal
+        bit IsPassed
+        int TimeTakenSeconds
+        bit AutoSubmitted
+    }
+    MockExamAttemptQuestions {
+        int MockExamAttemptQuestionId PK
+        int MockExamAttemptId FK
+        int QuestionId
+        int QuestionNumber
+        int SelectedOptionId
+        bit IsCorrect
+        bit IsFlagged
+        nvarchar QuestionTextSnapshot
+        nvarchar ExplanationSnapshot
+        nvarchar OptionATextSnapshot
+        nvarchar OptionBTextSnapshot
+        nvarchar OptionCTextSnapshot
+        char CorrectOptionSnapshot
+        char SelectedOptionSnapshot
+        nvarchar SelectedOptionTextSnapshot
+        nvarchar ImagePathSnapshot
+        nvarchar QuestionCategoryCodeSnapshot
+    }
+    HiddenRoadSignAssets {
+        int RoadSignAssetId PK
+        nvarchar Name
+        nvarchar ImagePath
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
+    HiddenRoadSignPractices {
+        int HiddenRoadSignPracticeId PK
+        int SetNumber UK
+        nvarchar SceneImagePath
+        bit IsActive
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
+    HiddenRoadSignItems {
+        int HiddenRoadSignItemId PK
+        int HiddenRoadSignPracticeId FK
+        int RoadSignAssetId FK
+        nvarchar QuestionText
+        nvarchar Explanation
+        decimal HotspotXPercent
+        decimal HotspotYPercent
+        decimal HotspotWidthPercent
+        decimal HotspotHeightPercent
+        bit IsConfigured
+        datetime2 CreatedAt
+        datetime2 UpdatedAt
+    }
+    HiddenRoadSignChoices {
+        int HiddenRoadSignChoiceId PK
+        int HiddenRoadSignItemId FK
+        nvarchar ChoiceText
+        int DisplayOrder
+        bit IsCorrect
+    }
+    HiddenRoadSignAttempts {
+        int HiddenRoadSignAttemptId PK
+        int UserId FK
+        int HiddenRoadSignPracticeId FK
+        datetime2 StartedAt
+        datetime2 CompletedAt
+        int CorrectCount
+        int TotalItems
+    }
+    HiddenRoadSignAttemptAnswers {
+        int HiddenRoadSignAttemptAnswerId PK
+        int HiddenRoadSignAttemptId FK
+        int HiddenRoadSignItemId FK
+        int SelectedChoiceId FK
+        bit IsCorrect
+        int FoundOrder
+    }
+    Users ||--o{ PasswordResetTokens : requests
+    LearningChapters ||--o{ Lessons : contains
+    Users ||--o{ LearningProgress : completes
+    Lessons ||--o{ LearningProgress : tracked_by
+    QuestionCategories ||--o{ PracticeSets : groups
+    QuestionCategories ||--o{ Questions : categorises
+    PracticeSets |o--o{ Questions : contains
+    Questions ||--|{ QuestionOptions : has
+    Users ||--o{ PracticeAttempts : performs
+    PracticeSets ||--o{ PracticeAttempts : attempted_as
+    PracticeAttempts ||--|{ PracticeAttemptQuestions : contains
+    MockExamSets ||--o{ MockExamSetQuestions : contains
+    Questions ||--o{ MockExamSetQuestions : selected_for
+    Users ||--o{ MockExamAttempts : performs
+    MockExamSets ||--o{ MockExamAttempts : attempted_as
+    MockExamAttempts ||--|{ MockExamAttemptQuestions : contains
+    HiddenRoadSignPractices ||--o{ HiddenRoadSignItems : contains
+    HiddenRoadSignAssets ||--o{ HiddenRoadSignItems : used_by
+    HiddenRoadSignItems ||--o{ HiddenRoadSignChoices : has
+    Users ||--o{ HiddenRoadSignAttempts : performs
+    HiddenRoadSignPractices ||--o{ HiddenRoadSignAttempts : attempted_as
+    HiddenRoadSignAttempts ||--|{ HiddenRoadSignAttemptAnswers : contains
+    HiddenRoadSignItems ||--o{ HiddenRoadSignAttemptAnswers : answered
+    HiddenRoadSignChoices ||--o{ HiddenRoadSignAttemptAnswers : selected

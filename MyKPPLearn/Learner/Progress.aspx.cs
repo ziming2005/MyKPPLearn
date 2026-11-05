@@ -65,6 +65,7 @@ namespace MyKPPLearn.Learner
             rptChapters.DataSource = chapters;
             rptChapters.DataBind();
             pnlNoChapters.Visible = chapters.Rows.Count == 0;
+            pnlChapterToggle.Visible = chapters.Rows.Count > RecentGames;
 
             DataRow next = LessonRepository.GetFirstIncompleteLesson(userId);
 
@@ -87,33 +88,18 @@ namespace MyKPPLearn.Learner
 
             if (history.Rows.Count > 0)
             {
-                int bestCorrect = 0;
-                int bestTotal = 0;
-                double bestRatio = -1;
                 double ratioSum = 0;
 
                 foreach (DataRow row in history.Rows)
                 {
-                    int correct = Convert.ToInt32(row["CorrectCount"]);
                     int totalItems = Convert.ToInt32(row["TotalItems"]);
-                    double ratio = totalItems <= 0 ? 0 : (double)correct / totalItems;
-
-                    ratioSum += ratio;
-
-                    if (ratio > bestRatio)
-                    {
-                        bestRatio = ratio;
-                        bestCorrect = correct;
-                        bestTotal = totalItems;
-                    }
+                    ratioSum += totalItems <= 0 ? 0 : (double)Convert.ToInt32(row["CorrectCount"]) / totalItems;
                 }
 
                 int games = history.Rows.Count;
                 int average = (int)Math.Round(ratioSum / games * 100, MidpointRounding.AwayFromZero);
 
-                litGameSummary.Text = games.ToString(CultureInfo.InvariantCulture) + (games == 1 ? " game played" : " games played") +
-                    " &middot; Best: " + bestCorrect.ToString(CultureInfo.InvariantCulture) + " / " + bestTotal.ToString(CultureInfo.InvariantCulture) +
-                    " &middot; Average: " + average.ToString(CultureInfo.InvariantCulture) + "%";
+                litGameSummary.Text = Stat(games.ToString(CultureInfo.InvariantCulture), games == 1 ? "Game Played" : "Games Played")                    + Stat(average.ToString(CultureInfo.InvariantCulture) + "%", "Average");
                 pnlGameSummary.Visible = true;
             }
 
@@ -141,8 +127,8 @@ namespace MyKPPLearn.Learner
                 }
 
                 int average = (int)Math.Round(ratioSum / count * 100, MidpointRounding.AwayFromZero);
-                litPracticeSummary.Text = count.ToString(CultureInfo.InvariantCulture) + (count == 1 ? " practice set completed" : " practice sets completed")
-                    + " &middot; Average: " + average.ToString(CultureInfo.InvariantCulture) + "%";
+                litPracticeSummary.Text = Stat(count.ToString(CultureInfo.InvariantCulture), count == 1 ? "Set Completed" : "Sets Completed")
+                    + Stat(average.ToString(CultureInfo.InvariantCulture) + "%", "Average");
                 pnlPracticeSummary.Visible = true;
             }
 
@@ -162,8 +148,8 @@ namespace MyKPPLearn.Learner
             if (count > 0)
             {
                 int passed = history.Rows.Cast<DataRow>().Count(r => Convert.ToBoolean(r["IsPassed"]));
-                litMockSummary.Text = count.ToString(CultureInfo.InvariantCulture) + (count == 1 ? " mock exam taken" : " mock exams taken")
-                    + " &middot; Passed: " + passed.ToString(CultureInfo.InvariantCulture);
+                litMockSummary.Text = Stat(count.ToString(CultureInfo.InvariantCulture), count == 1 ? "Exam Taken" : "Exams Taken")
+                    + Stat(passed.ToString(CultureInfo.InvariantCulture), "Passed");
                 pnlMockSummary.Visible = true;
             }
 
@@ -193,6 +179,23 @@ namespace MyKPPLearn.Learner
         protected int ChapterPercent(object completed, object total)
         {
             return LearningDisplay.Percent(Convert.ToInt32(completed), Convert.ToInt32(total));
+        }
+
+        /// <summary>One summary figure above a history list: a big value with a small label under it.</summary>
+        private static string Stat(string value, string label)
+        {
+            return "<div class=\"history-stat\"><span class=\"history-stat__value\">" + HttpUtility.HtmlEncode(value)
+                + "</span><span class=\"history-stat__label\">" + HttpUtility.HtmlEncode(label) + "</span></div>";
+        }
+
+        /// <summary>The round percentage badge at the start of a history row: green from 80%, amber from 50%, red below.</summary>
+        protected string ScoreBadge(object correct, object total)
+        {
+            int count = Convert.ToInt32(total);
+            int percent = count <= 0 ? 0 : (int)Math.Round(Convert.ToInt32(correct) * 100.0 / count, MidpointRounding.AwayFromZero);
+            string tier = percent >= 80 ? "good" : percent >= 50 ? "fair" : "low";
+            return "<span class=\"history-score history-score--" + tier + "\" aria-label=\"Score " + percent.ToString(CultureInfo.InvariantCulture)
+                + " percent\">" + percent.ToString(CultureInfo.InvariantCulture) + "%</span>";
         }
 
         protected string FormatDate(object completedAtUtc)

@@ -273,19 +273,23 @@ namespace MyKPPLearn.Admin
             string imagePath = existing == null || existing.IsNull("ImagePath") ? null : Convert.ToString(existing["ImagePath"]);
             int? setId = existing == null || existing.IsNull("PracticeSetId") ? (int?)null : Convert.ToInt32(existing["PracticeSetId"]);
 
-            switch (QuestionRepository.Delete(id))
+            List<string> mockSets;
+
+            if (QuestionRepository.Delete(id, out mockSets) != QuestionDeleteResult.Deleted)
             {
-                case QuestionDeleteResult.Deleted:
-                    QuestionImageStorage.DeleteIfUnreferenced(imagePath);
-                    string notice = setId.HasValue ? DeactivatedNotice(setId.Value) : null;
-                    return notice == null ? "Deleted" : "Deleted " + notice;
-                case QuestionDeleteResult.HasAttempts:
-                    return "This question is protected because it appears in completed learner attempts.";
-                case QuestionDeleteResult.UsedByMockExam:
-                    return "Remove this question from its Mock Exam Sets before deleting it.";
-                default:
-                    return "Question not found.";
+                return "Question not found.";
             }
+
+            QuestionImageStorage.DeleteIfUnreferenced(imagePath);
+            string notice = setId.HasValue ? DeactivatedNotice(setId.Value) : null;
+            return "Deleted" + (notice == null ? "" : " " + notice) + MockSetsNotice(mockSets);
+        }
+
+        /// <summary>" Mock Exam Set 1 (KPP Standard) is now Inactive …" for the delete message, or "" when none changed.</summary>
+        internal static string MockSetsNotice(List<string> mockSets)
+        {
+            return mockSets.Count == 0 ? "" : " " + string.Join(", ", mockSets) + (mockSets.Count == 1 ? " is" : " are")
+                + " now Inactive because a question was removed from it. Add a replacement question to activate it again.";
         }
 
         /// <summary>Deactivates the set if it has no active question left, and says so; otherwise null.</summary>

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace MyKPPLearn.Data
 {
@@ -17,7 +19,7 @@ namespace MyKPPLearn.Data
         public int CorrectOption;
     }
 
-    public enum QuestionDeleteResult { Deleted, NotFound, HasAttempts, UsedByMockExam }
+    public enum QuestionDeleteResult { Deleted, NotFound }
 
     /// <summary>
     /// Data access for the shared Question Bank (Standard Practice and Mock Exam) and each question's three options.
@@ -243,11 +245,14 @@ namespace MyKPPLearn.Data
         }
 
         /// <summary>
-        /// Deletes a question and its options only when no learner attempt or Mock Exam Set uses it.
-        /// The checks and the delete run in one transaction so nothing can start using it in between.
+        /// Deletes a question and its options. Learners' saved results keep their own copy of it and stay as they are.
+        /// It is taken out of every Mock Exam Set using it; an Active one becomes Inactive (it is now incomplete) and is
+        /// named in <paramref name="deactivatedMockSets"/>.
         /// </summary>
-        public static QuestionDeleteResult Delete(int id)
+        public static QuestionDeleteResult Delete(int id, out List<string> deactivatedMockSets)
         {
+            deactivatedMockSets = new List<string>();
+
             using (SqlConnection connection = DatabaseHelper.GetConnection())
             {
                 connection.Open();
@@ -262,25 +267,7 @@ namespace MyKPPLearn.Data
                             return QuestionDeleteResult.NotFound;
                         }
 
-                        if (Count(connection, transaction, "SELECT COUNT(*) FROM PracticeAttemptQuestions WITH (UPDLOCK, HOLDLOCK) WHERE QuestionId = @Id", id) > 0
-                            || Count(connection, transaction, "SELECT COUNT(*) FROM MockExamAttemptQuestions WITH (UPDLOCK, HOLDLOCK) WHERE QuestionId = @Id", id) > 0)
-                        {
-                            transaction.Rollback();
-                            return QuestionDeleteResult.HasAttempts;
-                        }
-
-                        if (Count(connection, transaction, "SELECT COUNT(*) FROM MockExamSetQuestions WITH (UPDLOCK, HOLDLOCK) WHERE QuestionId = @Id", id) > 0)
-                        {
-                            transaction.Rollback();
-                            return QuestionDeleteResult.UsedByMockExam;
-                        }
-
-                        using (SqlCommand command = new SqlCommand("DELETE FROM QuestionOptions WHERE QuestionId = @Id; DELETE FROM Questions WHERE QuestionId = @Id;", connection, transaction))
-                        {
-                            command.Parameters.AddWithValue("@Id", id);
-                            command.ExecuteNonQuery();
-                        }
-
+                        deactivatedMockSets = DeleteWhere(connection, transaction, "q.QuestionId = @Id", id);
                         transaction.Commit();
                         return QuestionDeleteResult.Deleted;
                     }
@@ -291,6 +278,41 @@ namespace MyKPPLearn.Data
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Deletes the questions matching <paramref name="filter"/> (on alias q, with @Id) inside the caller's transaction:
+        /// takes them out of Mock Exam Sets (deactivating the Active ones), then deletes their options and the questions.
+        /// Returns the names of the Mock Exam Sets that became Inactive.
+        /// </summary>
+        internal static List<string> DeleteWhere(SqlConnection connection, SqlTransaction transaction, string filter, int id)
+        {
+            DataTable changed = new DataTable();
+
+            using (SqlCommand command = new SqlCommand(@"
+                UPDATE s SET IsActive = 0, UpdatedAt = SYSUTCDATETIME()
+                OUTPUT INSERTED.ExamTypeCode, INSERTED.SetNumber
+                FROM MockExamSets s
+                WHERE s.IsActive = 1 AND EXISTS (
+                    SELECT 1 FROM MockExamSetQuestions sq INNER JOIN Questions q ON q.QuestionId = sq.QuestionId
+                    WHERE sq.MockExamSetId = s.MockExamSetId AND " + filter + @");", connection, transaction))
+            {
+                command.Parameters.AddWithValue("@Id", id);
+                new SqlDataAdapter(command).Fill(changed);
+            }
+
+            using (SqlCommand command = new SqlCommand(@"
+                DELETE sq FROM MockExamSetQuestions sq INNER JOIN Questions q ON q.QuestionId = sq.QuestionId WHERE " + filter + @";
+                DELETE o FROM QuestionOptions o INNER JOIN Questions q ON q.QuestionId = o.QuestionId WHERE " + filter + @";
+                DELETE q FROM Questions q WHERE " + filter + ";", connection, transaction))
+            {
+                command.Parameters.AddWithValue("@Id", id);
+                command.ExecuteNonQuery();
+            }
+
+            return changed.Rows.Cast<DataRow>()
+                .Select(r => "Mock Exam Set " + r["SetNumber"] + " (" + MockExamSetRepository.TypeName(Convert.ToString(r["ExamTypeCode"])) + ")")
+                .ToList();
         }
 
         private static void AddQuestionParameters(SqlCommand command, QuestionInput input)

@@ -60,6 +60,12 @@
             <div class="card lr-card" id="lrLearning"></div>
         </section>
 
+        <!-- ================= ROAD SIGN GAME HISTORY ================= -->
+        <section class="panel-section" aria-labelledby="lrGamesTitle">
+            <div class="panel-section__header"><h2 id="lrGamesTitle">Road Sign Game History</h2></div>
+            <div class="card lr-card" id="lrGames"></div>
+        </section>
+
         <!-- ================= PRACTICE HISTORY ================= -->
         <section class="panel-section" aria-labelledby="lrPracticeTitle">
             <div class="panel-section__header"><h2 id="lrPracticeTitle">Practice History</h2></div>
@@ -70,12 +76,6 @@
         <section class="panel-section" aria-labelledby="lrMockTitle">
             <div class="panel-section__header"><h2 id="lrMockTitle">Mock Exam History</h2></div>
             <div class="card lr-card" id="lrMock"></div>
-        </section>
-
-        <!-- ================= ROAD SIGN GAME HISTORY ================= -->
-        <section class="panel-section" aria-labelledby="lrGamesTitle">
-            <div class="panel-section__header"><h2 id="lrGamesTitle">Road Sign Game History</h2></div>
-            <div class="card lr-card" id="lrGames"></div>
         </section>
 
         <div class="form-actions lr-back">
@@ -89,5 +89,5 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script src="<%= ResolveUrl("~/Scripts/learner-records-data.js") + "?v=20261102-db" %>"></script>
-    <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261102-db" %>"></script>
+    <script src="<%= ResolveUrl("~/Scripts/learner-records-admin.js") + "?v=20261103-chapters" %>"></script>
 </asp:Content>

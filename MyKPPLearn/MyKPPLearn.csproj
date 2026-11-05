@@ -72,6 +72,7 @@
     <Content Include="Global.asax" />
     <Content Include="Site.Master" />
     <Content Include="Default.aspx" />
+    <Content Include="ForgotPassword.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Logout.aspx" />
@@ -111,7 +112,8 @@
     <Content Include="Content\css\app-shell.css" />
     <Content Include="Content\css\learner.css" />
     <Content Include="Content\css\admin.css" />
-    <Content Include="Content\images\illustrations\driving-theory.svg" />
+    <Content Include="Content\images\illustrations\driving-theory-hero.webp" />
+    <Content Include="Content\images\illustrations\road-sign-game-workshop.webp" />
     <Content Include="Scripts\site.js" />
     <Content Include="Scripts\app-shell.js" />
     <Content Include="Scripts\practice.js" />
@@ -129,6 +131,7 @@
     <Content Include="Scripts\learner-records-admin.js" />
     <Content Include="Admin\LearnerRecordDetails.aspx" />
     <Content Include="Scripts\profile.js" />
+    <Content Include="Controls\GoogleButton.ascx" />
     <Content Include="Controls\ProfileEditor.ascx" />
     <Content Include="Controls\QuestionFields.ascx" />
     <Content Include="Scripts\hidden-road-sign-view.js" />
@@ -136,6 +139,13 @@
     <Content Include="App_Data\SeedPracticeQuestions.sql" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\GoogleButton.ascx.cs">
+      <DependentUpon>GoogleButton.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Controls\GoogleButton.ascx.designer.cs">
+      <DependentUpon>GoogleButton.ascx</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ProfileEditor.ascx.cs">
       <DependentUpon>ProfileEditor.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -359,6 +369,16 @@
     <Compile Include="Admin\Profile.aspx.designer.cs">
       <DependentUpon>Profile.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Security\GoogleSignIn.cs" />
+    <Compile Include="Common\EmailSender.cs" />
+    <Compile Include="Data\PasswordResetRepository.cs" />
+    <Compile Include="ForgotPassword.aspx.cs">
+      <DependentUpon>ForgotPassword.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ForgotPassword.aspx.designer.cs">
+      <DependentUpon>ForgotPassword.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Security\PasswordHasher.cs" />
     <Compile Include="Security\SessionHelper.cs" />
     <Compile Include="Security\PasswordPolicy.cs" />
@@ -366,6 +386,7 @@
     <Compile Include="Data\AppUser.cs" />
     <Compile Include="Data\UserRepository.cs" />
     <Compile Include="Data\ActivityRepository.cs" />
+    <Compile Include="Learner\AttemptViewer.cs" />
     <Compile Include="Data\AdminDashboardRepository.cs" />
     <Compile Include="Data\DatabaseInitializer.cs" />
     <Compile Include="Data\LearningChapterRepository.cs" />
@@ -445,6 +466,17 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Content Include="App_Data\KppCurriculum.json" />
+    <Content Include="App_Data\SeedKppCurriculum.sql" />
+    <Content Include="Content\images\learning\kpp-2025\*-illustration*.png" />
+    <Content Include="App_Data\UpdateKppLessonImages.sql" />
+    <Content Include="App_Data\UpdateKppLessonContent.sql" />
+    <Content Include="Content\css\branding.css" />
+    <Content Include="Content\images\branding\mykpp-learn-logo-v1.png" />
+    <Content Include="Content\images\branding\mykpp-learn-logo-footer-v5.png" />
+    <Content Include="Content\images\branding\mykpp-learn-logo-white-book-v6.png" />
+  </ItemGroup>
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using MyKPPLearn.Common;
 using MyKPPLearn.Data;
 using MyKPPLearn.Security;
 
@@ -18,6 +19,7 @@ namespace MyKPPLearn
 
             if (!IsPostBack)
             {
+                FlashMessage.ShowPending(Session, lblFlash);
                 txtEmail.Focus();
             }
         }

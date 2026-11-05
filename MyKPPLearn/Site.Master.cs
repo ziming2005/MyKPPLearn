@@ -36,6 +36,9 @@ namespace MyKPPLearn
             if (dashboard != null)
             {
                 phHeaderGuest.Visible = false;
+                phMenuGuest.Visible = false;
+                liMenuDashboard.Visible = true;
+                lnkMenuDashboard.HRef = ResolveUrl(dashboard);
                 lnkHeaderDashboard.Visible = true;
                 lnkHeaderDashboard.HRef = ResolveUrl(dashboard);
                 phFooterGuest.Visible = false;
